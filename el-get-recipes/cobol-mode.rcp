@@ -1,0 +1,6 @@
+(:name cobol-mode
+       :description "A major mode for editing COBOL sources"
+       :type git
+       :url "https://gist.github.com/651ec8cc540792f1e528.git"
+       :load "cobol-mode.el"
+       :website "https://gist.github.com/Edward-H/6768e7dc53ea3dd2adca")

@@ -1,0 +1,5 @@
+(:name "rscope"
+       :description "Another cscope interface"
+       :type github
+       :pkgname "rjarzmik/rscope"
+       :load "rscope.el")
