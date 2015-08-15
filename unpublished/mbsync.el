@@ -362,4 +362,6 @@ syncs."
   (dolist (chan mbsync-sync-objects)
     (mbsync-cancel-sync (car chan))))
 
+
+(provide 'mbsync)
 ;; mbsync.el ends here. (just kidding, it actually ends here)
