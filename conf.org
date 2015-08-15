@@ -1290,8 +1290,8 @@ Use magit for git, with support for github pull requests.
   (require 'magit)
   (setq magit-last-seen-setup-instructions "1.4.0"
         magit-revert-buffers 'silent)
-  (require 'magit-gh-pulls)
-  (add-hook 'magit-mode-hook 'turn-on-magit-gh-pulls)
+  ;; (require 'magit-gh-pulls)
+  ;; (add-hook 'magit-mode-hook 'turn-on-magit-gh-pulls)
   (global-set-key (kbd "H-g") 'magit-status)
 #+END_SRC
 
