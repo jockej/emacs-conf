@@ -118,6 +118,7 @@ The name I give my home server in my =.ssh/config=.
                           sx
                           undo-tree
                           xkcd
+                          w3m
                           weechat
                           ztree
                           ))
@@ -168,6 +169,7 @@ This make sure all the packages listed in the above list get installed upon star
     
 ** General
 This is stuff that is relatively general and applies to no particular modes.
+
 
 *** Startup
 
@@ -365,7 +367,7 @@ Smex is a good replacement for M-x.
   (global-set-key (kbd "M-X") 'smex-major-mode-commands)
 #+END_SRC
 
-*** TODO Editing
+*** Editing
 
 General Editing settings.
 
@@ -587,6 +589,8 @@ like switching buffers.
 
 *** Terminal
 
+**** Ansi-term
+
 Use =zsh= if available, otherwise default to a regular bourne shell.
 #+BEGIN_SRC emacs-lisp
   (require 'multi-term)
@@ -618,6 +622,27 @@ Use =zsh= if available, otherwise default to a regular bourne shell.
   (global-set-key (kbd "H-t 4 n") 'jj-next-term-other-window)
   (global-set-key (kbd "H-t p") 'multi-term-prev)
   (global-set-key (kbd "H-t 4 p") 'jj-prev-term-other-window)
+#+END_SRC
+
+**** Eshell
+
+The Emacs shell.
+#+BEGIN_SRC emacs-lisp
+  (require 'eshell)
+  (global-set-key (kbd "H-t e") 'eshell)
+#+END_SRC
+
+I don't know why this has to be done this way...
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'eshell-mode-hook
+            (lambda ()
+              (define-key eshell-mode-map (kbd "C-d")
+                'eshell-life-is-too-much)))
+#+END_SRC
+
+Better to use Emacs.
+#+BEGIN_SRC emacs-lisp
+  (setenv "PAGER" (executable-find "cat"))
 #+END_SRC
 
 *** Help
@@ -757,10 +782,11 @@ Control the Emacs backups.
 
 ** Internet stuff
 
-*** NNTP
+*** The mighty gnus
 
-I use the mighty =gnus= to read some mailing lists. Real men also use it to read
-their mail, but I'm not there quite yet. 
+I use the mighty =gnus= to read some mailing lists. I'm also starting to use it
+to read my mail and rss feeds, but I'm not quite satisfied with my setup, so I'm
+keeping my old =mu4e= and =elfeed= setups for now.
 #+BEGIN_SRC emacs-lisp
   (require 'gnus)
   (setq gnus-select-method '(nntp "gmane"
@@ -809,6 +835,8 @@ Also read news from eternal september.
                (nntp-port-number 443)
                (nntp-address "news.eternal-september.org"))
         gnus-secondary-select-methods)
+  (push '(nntp "gwene" (nntp-address "news.gwene.org"))
+        gnus-secondary-select-methods)
 
 #+END_SRC
 
@@ -835,7 +863,12 @@ This is from EmacsWiki.
         gnus-auto-select-first nil
         gnus-treat-from-picon nil
         gnus-treat-mail-picon nil
+        gnus-treat-from-gravatar nil
+        gnus-treat-mail-gravatar nil
         gnus-treat-newsgroups-picon nil
+        gnus-treat-display-smileys nil
+        gnus-treat-display-face nil
+        gnus-treat-display-x-face nil
         )
 
   (add-hook 'gnus-summary-prepared-hook 'gnus-summary-hide-all-threads)
@@ -850,11 +883,6 @@ This is from EmacsWiki.
 #+END_SRC
 
 *** Mail
-
-How often we should sync our mail.
-#+BEGIN_SRC emacs-lisp
-  (defvar jj-mail-update-interval nil "Number of seconds between email checks")
-#+END_SRC
 
 #+BEGIN_SRC emacs-lisp
   (setq user-mail-address "joakim.jalap@fastmail.com")
@@ -955,6 +983,10 @@ And my old gmail.
 #+END_SRC
 
 
+#+BEGIN_SRC emacs-lisp
+  (setq gnus-permanently-visible-groups "*Inbox*")
+#+END_SRC
+
 *** Browsing
 
 =Eww= is the built in browser in Emacs, well on of them anyway, and it's really
@@ -985,6 +1017,7 @@ the bees knees.
             (define-key eww-mode-map "F" 'eww-lnum-universal)))
 #+END_SRC
 
+
 When it comes to graphical browsers, I really like =conkeror=, it's the =Emacs=
 of browsers. It seems to have a special place in the heart of Emacs hackers, so
 much that there is actually a minor mode for editing its config files!
@@ -995,7 +1028,32 @@ much that there is actually a minor mode for editing its config files!
                               (conkeror-minor-mode 1))))
 #+END_SRC
 
+This is an Emacs interface to =w3m=. 
+#+BEGIN_SRC emacs-lisp
+  (require 'w3m)
+#+END_SRC
+
+Download to the same place as every other program.
+#+BEGIN_SRC emacs-lisp
+  (setq w3m-default-save-directory (expand-file-name "~/Downloads"))
+#+END_SRC
+
+Use the page title as the buffer name.
+#+BEGIN_SRC emacs-lisp
+  (setq w3m-use-title-buffer-name t)
+#+END_SRC
+
+This mode associates a =w3m= window with the frame it is in, so that a =w3m= window
+only has tabs for the buffers in the same frame.
+#+BEGIN_SRC emacs-lisp
+  (w3m-fb-mode 1)
+#+END_SRC
+
+
+
 *** IRC
+
+**** Weechat
 
 Weechat for IRC. Turn of auto fill mode in weechat, since it chops up messages.
 #+BEGIN_SRC emacs-lisp
@@ -1004,6 +1062,12 @@ Weechat for IRC. Turn of auto fill mode in weechat, since it chops up messages.
         weechat-port-default 20023
         weechat-mode-default 'ssl)
   (add-hook 'weechat-mode-hook 'auto-fill-mode)
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+  (require 'gnutls)
+  (push (expand-file-name "~/.emacsconf/jockej-weechat.crt")
+        gnutls-trustfiles)
 #+END_SRC
 
 I use a self signed certificate which I'm too lazy to copy to my computers...
@@ -1020,8 +1084,58 @@ If we have the ability, show notifications.
     (push 'weechat-nottifications weechat-modules))
 #+END_SRC
 
+**** ERC
+
+#+BEGIN_SRC emacs-lisp
+  (require 'erc)
+  (require 'erc-track)
+
+
+  (erc-track-mode t)
+  (setq-default erc-track-exclude-types '("JOIN" "NICK" "PART" "QUIT" "MODE"
+                                          "324" "329" "332" "333" "353" "477"))
+  (setq-default erc-hide-list '("JOIN" "PART" "QUIT" "NICK"))
+  (setq erc-format-query-as-channel-p t
+        erc-track-priority-faces-only 'all
+        erc-track-faces-priority-list '(erc-error-face
+                                        erc-current-nick-face
+                                        erc-keyword-face
+                                        erc-nick-msg-face
+                                        erc-direct-msg-face
+                                        erc-dangerous-host-face
+                                        erc-notice-face
+                                        erc-prompt-face))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+  (push 'notifications erc-modules)
+  (erc-update-modules)
+#+END_SRC
+
+
+#+BEGIN_SRC emacs-lisp
+  (setq erc-default-server jj-home-host
+        erc-default-port 20026
+        erc-nick '("jalle" "jockej")
+        erc-nick-uniquifier "_"
+        )
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+  (setq erc-prompt-for-password nil)
+#+END_SRC
+
+**** RCIRC
+
+#+BEGIN_SRC emacs-lisp
+  (require 'rcirc)
+  (setq rcirc-server-alist
+        `((,jj-home-host :port 20026 :encryption tls)))
+#+END_SRC
+
 *** RSS
 
+I've got all of these from gwene as well, so this might be gone soon.
 #+BEGIN_SRC emacs-lisp
   (require 'elfeed)
   (setq elfeed-feeds
