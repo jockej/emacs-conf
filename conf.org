@@ -1589,8 +1589,9 @@ font and stuff.
 No useless stuff. I sorta like the menu though, for discovering new stuff, so I
 leave that enabled.
 #+BEGIN_SRC emacs-lisp
-  (toggle-scroll-bar -1)
-  (tool-bar-mode -1)
+  (when (display-graphic-p)
+    (toggle-scroll-bar -1)
+    (tool-bar-mode -1))
 #+END_SRC
 
 Fixing the mode line so that it's not too long, since I usually split windows so
