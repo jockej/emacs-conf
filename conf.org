@@ -2,6 +2,10 @@
 
 * My Emacs conf
 
+#+BEGIN_SRC emacs-lisp
+  ;; -*- lexical-binding: t -*-
+#+END_SRC
+
 ** Personal
 <<babel-init>>
 
@@ -663,6 +667,13 @@ Better to use Emacs.
   (setenv "PAGER" (executable-find "cat"))
 #+END_SRC
 
+#+BEGIN_SRC emacs-lisp
+  (require 'em-smart)
+  (setq eshell-where-to-jump 'begin)
+  (setq eshell-review-quick-commands nil)
+  (setq eshell-smart-space-goes-to-end t)
+#+END_SRC
+
 *** Help
 
 I need somebody..
@@ -807,15 +818,39 @@ to read my mail and rss feeds, but I'm not quite satisfied with my setup, so I'm
 keeping my old =mu4e= and =elfeed= setups for now.
 #+BEGIN_SRC emacs-lisp
   (require 'gnus)
-  (setq gnus-select-method '(nntp "gmane"
+  (setq gnus-select-method `(nntp "gmane"
                                   (nntp-open-connection-function
                                    nntp-open-tls-stream)
-                                  (nntp-port-number 563)
-                                  (nntp-address "news.gmane.org"))
+                                  (nntp-port-number
+                                   ,(if (jj-is-work-comp-p) 20027 563))
+                                   (nntp-address
+                                    ,(if (jj-is-work-comp-p) "localhost" "news.gmane.org")))
         gnus-nntp-server nil
         gnus-large-newsgroup 1000
         mm-text-html-renderer 'shr
         gnus-home-directory "~/.gnus/")
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+  (defvar jj-gmane-tunnel-running nil
+    "A closure to check if the ssh tunnel I need to access gmane from work is
+    running.")
+
+  (when (jj-is-work-comp-p)
+    (let ((proc (start-process "gmane-tunnel"
+                               nil
+                               (executable-find "ssh")
+                               "-f" "-N" "-L" "20027:news.gmane.org:563"
+                               jj-home-host-ssh-name)))
+      (setq jj-gmane-tunnel-running
+            (lambda ()
+              (eq (process-status proc) 'run)))))
+
+  (defun jj-can-connect-to-gmane ()
+    "Is it ok to connect to gmane?"
+    (when (jj-is-work-comp-p)
+      (unless (and jj-gmane-tunnel-running (funcall jj-gmane-tunnel-running))
+        (user-error "No ssh tunnel to gmane"))))
 #+END_SRC
 
 This is bound to 'read manual' in gnus. That's for losers!
@@ -853,9 +888,6 @@ Also read news from eternal september.
                (nntp-port-number 443)
                (nntp-address "news.eternal-september.org"))
         gnus-secondary-select-methods)
-  (push '(nntp "gwene" (nntp-address "news.gwene.org"))
-        gnus-secondary-select-methods)
-
 #+END_SRC
 
 Use topics.
@@ -1066,7 +1098,6 @@ only has tabs for the buffers in the same frame.
 #+BEGIN_SRC emacs-lisp
   (w3m-fb-mode 1)
 #+END_SRC
-
 
 
 *** IRC
