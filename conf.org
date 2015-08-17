@@ -1086,9 +1086,20 @@ much that there is actually a minor mode for editing its config files!
                               (conkeror-minor-mode 1))))
 #+END_SRC
 
-This is an Emacs interface to =w3m=. 
+This is an Emacs interface to =w3m=, it's maybe a little better than =eww= actually.
 #+BEGIN_SRC emacs-lisp
   (require 'w3m)
+  (setq w3m-home-page "https://duckduckgo.com")
+  (require 'w3m-search)
+  (add-to-list 'w3m-search-engine-alist
+               '("ddg" "https://duckduckgo.com/?q=%s"))
+  (setq w3m-search-default-engine "ddg")
+#+END_SRC
+
+For that awesome conkerorlikeness.
+#+BEGIN_SRC emacs-lisp
+  (require 'w3m-lnum)
+  (w3m-lnum-mode 1)
 #+END_SRC
 
 Download to the same place as every other program.
@@ -1099,6 +1110,10 @@ Download to the same place as every other program.
 Use the page title as the buffer name.
 #+BEGIN_SRC emacs-lisp
   (setq w3m-use-title-buffer-name t)
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+  (define-key w3m-mode-map (kbd "C-c C-t") 'w3m-view-this-url-new-session)
 #+END_SRC
 
 This mode associates a =w3m= window with the frame it is in, so that a =w3m= window
@@ -1218,6 +1233,39 @@ Why would I leave Emacs just to transate something?
           ("sv" . "en")))
   (defalias 'jj-translate 'google-translate-smooth-translate
     "Translate using google translate.")
+#+END_SRC
+
+*** Torrents
+
+This lets me control =rtorrent= via =xmlrpc= from =Emacs=. I have the matching
+=.rtorrent.rc= file in my dotfiles repo.
+#+BEGIN_SRC emacs-lisp
+  (require 'mentor)
+  (setq mentor-rtorrent-url "scgi://localhost:5000")
+#+END_SRC
+
+This lets me browse and start torrents on my headless server with ease!
+#+BEGIN_SRC emacs-lisp
+  (defun jj-queue-torrent (&optional no-start)
+    "A little hack to load a torrent into rtorrent directly from w3m, provided
+    there is a mentor buffer active. Point must be on a magnet link in w3m.
+
+  With prefix argument, load the torrent but do not start it, otherwise start it
+  right away."
+    (interactive "P")
+    (unless (get-buffer "*mentor*")
+      (user-error "Mentor doesn't seem to be running"))
+    (let ((cmd (if no-start "load" "load_start")))
+      ;; Need `t' in order to actually kill the url
+      (w3m-print-this-url t)
+      ;; clear echo area
+      (message nil)
+      (let ((url (pop kill-ring)))
+        (set-text-properties 0 (length url) nil url)
+        (mentor-call-command (concat cmd " " url)))))
+
+  (define-key w3m-mode-map (kbd "H-w") 'jj-queue-torrent)
+  
 #+END_SRC
 
 ** Programming
