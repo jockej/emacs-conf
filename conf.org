@@ -651,7 +651,15 @@ Use =zsh= if available, otherwise default to a regular bourne shell.
 The Emacs shell.
 #+BEGIN_SRC emacs-lisp
   (require 'eshell)
+
+  (defun jj-eshell-other-window ()
+    "Open eshell in other window."
+    (interactive)
+    (jj-other-window)
+    (eshell))
+
   (global-set-key (kbd "H-t e") 'eshell)
+  (global-set-key (kbd "H-t 4 e") 'jj-eshell-other-window)
 #+END_SRC
 
 I don't know why this has to be done this way...
