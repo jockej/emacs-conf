@@ -155,17 +155,12 @@ This make sure all the packages listed in the above list get installed upon star
 
 #+BEGIN_SRC emacs-lisp
   (setq jj-el-get-packages
-        '(mu4e
+        '(
+          ;; mu4e
           rscope
           cobol-mode
           ;; mu4e-multi
           ))
-
-
-
-
-
-
 
   (add-to-list 'load-path "~/.emacs.d/el-get/el-get")
 
@@ -179,7 +174,6 @@ This make sure all the packages listed in the above list get installed upon star
   (add-to-list 'el-get-recipe-path "~/.emacs.d/el-get-user/recipes")
   (add-to-list 'el-get-recipe-path "~/.emacs.d/el-get/el-get/recipes")
   (add-to-list 'el-get-recipe-path "~/.emacsconf/el-get-recipes")
-
 
 
   (el-get 'sync jj-el-get-packages)
