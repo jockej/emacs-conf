@@ -2,6 +2,10 @@
 
 * My Emacs conf
 
+#+BEGIN_SRC emacs-lisp
+  ;; -*- lexical-binding: t -*-
+#+END_SRC
+
 ** Personal
 <<babel-init>>
 
@@ -641,7 +645,15 @@ Use =zsh= if available, otherwise default to a regular bourne shell.
 The Emacs shell.
 #+BEGIN_SRC emacs-lisp
   (require 'eshell)
+
+  (defun jj-eshell-other-window ()
+    "Open eshell in other window."
+    (interactive)
+    (jj-other-window)
+    (eshell))
+
   (global-set-key (kbd "H-t e") 'eshell)
+  (global-set-key (kbd "H-t 4 e") 'jj-eshell-other-window)
 #+END_SRC
 
 I don't know why this has to be done this way...
@@ -655,6 +667,13 @@ I don't know why this has to be done this way...
 Better to use Emacs.
 #+BEGIN_SRC emacs-lisp
   (setenv "PAGER" (executable-find "cat"))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+  (require 'em-smart)
+  (setq eshell-where-to-jump 'begin)
+  (setq eshell-review-quick-commands nil)
+  (setq eshell-smart-space-goes-to-end t)
 #+END_SRC
 
 *** Help
@@ -801,15 +820,39 @@ to read my mail and rss feeds, but I'm not quite satisfied with my setup, so I'm
 keeping my old =mu4e= and =elfeed= setups for now.
 #+BEGIN_SRC emacs-lisp
   (require 'gnus)
-  (setq gnus-select-method '(nntp "gmane"
+  (setq gnus-select-method `(nntp "gmane"
                                   (nntp-open-connection-function
                                    nntp-open-tls-stream)
-                                  (nntp-port-number 563)
-                                  (nntp-address "news.gmane.org"))
+                                  (nntp-port-number
+                                   ,(if (jj-is-work-comp-p) 20027 563))
+                                   (nntp-address
+                                    ,(if (jj-is-work-comp-p) "localhost" "news.gmane.org")))
         gnus-nntp-server nil
         gnus-large-newsgroup 1000
         mm-text-html-renderer 'shr
         gnus-home-directory "~/.gnus/")
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+  (defvar jj-gmane-tunnel-running nil
+    "A closure to check if the ssh tunnel I need to access gmane from work is
+    running.")
+
+  (when (jj-is-work-comp-p)
+    (let ((proc (start-process "gmane-tunnel"
+                               nil
+                               (executable-find "ssh")
+                               "-f" "-N" "-L" "20027:news.gmane.org:563"
+                               jj-home-host-ssh-name)))
+      (setq jj-gmane-tunnel-running
+            (lambda ()
+              (eq (process-status proc) 'run)))))
+
+  (defun jj-can-connect-to-gmane ()
+    "Is it ok to connect to gmane?"
+    (when (jj-is-work-comp-p)
+      (unless (and jj-gmane-tunnel-running (funcall jj-gmane-tunnel-running))
+        (user-error "No ssh tunnel to gmane"))))
 #+END_SRC
 
 This is bound to 'read manual' in gnus. That's for losers!
@@ -847,9 +890,6 @@ Also read news from eternal september.
                (nntp-port-number 443)
                (nntp-address "news.eternal-september.org"))
         gnus-secondary-select-methods)
-  (push '(nntp "gwene" (nntp-address "news.gwene.org"))
-        gnus-secondary-select-methods)
-
 #+END_SRC
 
 Use topics.
@@ -1040,9 +1080,20 @@ much that there is actually a minor mode for editing its config files!
                               (conkeror-minor-mode 1))))
 #+END_SRC
 
-This is an Emacs interface to =w3m=. 
+This is an Emacs interface to =w3m=, it's maybe a little better than =eww= actually.
 #+BEGIN_SRC emacs-lisp
   (require 'w3m)
+  (setq w3m-home-page "https://duckduckgo.com")
+  (require 'w3m-search)
+  (add-to-list 'w3m-search-engine-alist
+               '("ddg" "https://duckduckgo.com/?q=%s"))
+  (setq w3m-search-default-engine "ddg")
+#+END_SRC
+
+For that awesome conkerorlikeness.
+#+BEGIN_SRC emacs-lisp
+  (require 'w3m-lnum)
+  (w3m-lnum-mode 1)
 #+END_SRC
 
 Download to the same place as every other program.
@@ -1055,12 +1106,15 @@ Use the page title as the buffer name.
   (setq w3m-use-title-buffer-name t)
 #+END_SRC
 
+#+BEGIN_SRC emacs-lisp
+  (define-key w3m-mode-map (kbd "C-c C-t") 'w3m-view-this-url-new-session)
+#+END_SRC
+
 This mode associates a =w3m= window with the frame it is in, so that a =w3m= window
 only has tabs for the buffers in the same frame.
 #+BEGIN_SRC emacs-lisp
   (w3m-fb-mode 1)
 #+END_SRC
-
 
 
 *** IRC
@@ -1173,6 +1227,39 @@ Why would I leave Emacs just to transate something?
           ("sv" . "en")))
   (defalias 'jj-translate 'google-translate-smooth-translate
     "Translate using google translate.")
+#+END_SRC
+
+*** Torrents
+
+This lets me control =rtorrent= via =xmlrpc= from =Emacs=. I have the matching
+=.rtorrent.rc= file in my dotfiles repo.
+#+BEGIN_SRC emacs-lisp
+  (require 'mentor)
+  (setq mentor-rtorrent-url "scgi://localhost:5000")
+#+END_SRC
+
+This lets me browse and start torrents on my headless server with ease!
+#+BEGIN_SRC emacs-lisp
+  (defun jj-queue-torrent (&optional no-start)
+    "A little hack to load a torrent into rtorrent directly from w3m, provided
+    there is a mentor buffer active. Point must be on a magnet link in w3m.
+
+  With prefix argument, load the torrent but do not start it, otherwise start it
+  right away."
+    (interactive "P")
+    (unless (get-buffer "*mentor*")
+      (user-error "Mentor doesn't seem to be running"))
+    (let ((cmd (if no-start "load" "load_start")))
+      ;; Need `t' in order to actually kill the url
+      (w3m-print-this-url t)
+      ;; clear echo area
+      (message nil)
+      (let ((url (pop kill-ring)))
+        (set-text-properties 0 (length url) nil url)
+        (mentor-call-command (concat cmd " " url)))))
+
+  (define-key w3m-mode-map (kbd "H-w") 'jj-queue-torrent)
+  
 #+END_SRC
 
 ** Programming
