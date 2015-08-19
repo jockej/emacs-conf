@@ -357,7 +357,7 @@ Add switches for human readable sizes and to hide dotfiles.
   (setq dired-listing-switches "-lh")
 #+END_SRC
 
-*** Keybindings
+*** Keyboard
 
 These are just some bindings I find more comfortable than the defaults, which I
 honestly find quite horrible.
@@ -383,11 +383,12 @@ Unfortunately I can't use the menu key in the terminal, so I also add this:
 Actually what I do is I make the menu key send 'F9', so I can use when I ssh
 from, say, xterm.
 
-Smex is a good replacement for M-x.
+I have written an input method for the programmers dvorak layout. MAybe one day
+I'll put it on Melpa. 
 #+BEGIN_SRC emacs-lisp
-  (global-set-key (kbd "M-x") 'smex)
-  (global-set-key (kbd "M-X") 'smex-major-mode-commands)
+  (require 'programmers-dvorak)
 #+END_SRC
+
 
 *** Editing
 
@@ -580,10 +581,9 @@ A function to clean up buffers in general.
   (defun jj-clean-buffer ()
     "A function to make sure a buffer is nicely formatted"
     (interactive)
-    (progn
-      (indent-region (point-min) (point-max))
-      (untabify (point-min) (point-max))
-      (delete-trailing-whitespace)))
+    (indent-region (point-min) (point-max))
+    (untabify (point-min) (point-max))
+    (delete-trailing-whitespace))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp
@@ -597,6 +597,26 @@ A function to clean up buffers in general.
   (global-set-key (kbd "M-Z") 'avy-zap-to-char)
 #+END_SRC
 
+A couple of functions for opening temp buffers. Comes in handy sometimes.
+#+BEGIN_SRC emacs-lisp
+  (defun jj-tmp-file (ending)
+    "Opens as new buffer with major-mode set according to ending."
+    (interactive "Mending: ")
+    (let ((name (concat "jjtmp." ending)))
+      (pop-to-buffer (generate-new-buffer name))
+      (let ((buffer-file-name name))
+        (set-auto-mode))))
+
+  (defun jj-kill-tmps (ending)
+    "Kill all jjtmp buffer ending in 'ending', which can be the empy string, which
+    means kill all jjtmp buffers."
+    (interactive "Mending: ")
+    (let ((name (concat "jjtmp." ending)))
+      (dolist (buf (buffer-list))
+        (when (string-prefix-p name (buffer-name buf))
+          (kill-buffer buf)))))
+#+END_SRC
+
 *** Completion
 I use ido for most completion, I find it less intrusive than helm for things
 like switching buffers.
@@ -607,6 +627,12 @@ like switching buffers.
   (flx-ido-mode 1)
   (setq ido-enable-flex-matching t
         ido-use-faces nil)
+#+END_SRC
+
+Smex is a good replacement for M-x.
+#+BEGIN_SRC emacs-lisp
+  (global-set-key (kbd "M-x") 'smex)
+  (global-set-key (kbd "M-X") 'smex-major-mode-commands)
 #+END_SRC
 
 *** Terminal
@@ -845,14 +871,15 @@ keeping my old =mu4e= and =elfeed= setups for now.
     running.")
 
   (when (jj-is-work-comp-p)
-    (let ((proc (start-process "gmane-tunnel"
-                               nil
-                               (executable-find "ssh")
-                               "-f" "-N" "-L" "20027:news.gmane.org:563"
-                               jj-home-host-ssh-name)))
-      (setq jj-gmane-tunnel-running
-            (lambda ()
-              (eq (process-status proc) 'run)))))
+    (unless (and jj-gmane-tunnel-running (funcall jj-gmane-tunnel-running))
+      (let ((proc (start-process "gmane-tunnel"
+                                 nil
+                                 (executable-find "ssh")
+                                 "-f" "-N" "-L" "20027:news.gmane.org:563"
+                                 jj-home-host-ssh-name)))
+        (setq jj-gmane-tunnel-running
+              (lambda ()
+                (eq (process-status proc) 'run))))))
 
   (defun jj-can-connect-to-gmane ()
     "Is it ok to connect to gmane?"
@@ -967,6 +994,22 @@ Kill the message buffer after sending.
   (setq message-kill-buffer-on-exit t)
 #+END_SRC
 
+#+BEGIN_SRC emacs-lisp
+  (require 'mbsync)
+  (setq mbsync-sync-objects
+        '(("fastmail" . "mail.messagingengine.com")
+          ("gmail" . "imap.gmail.com")))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+  (setq mbsync-top-maildir (expand-file-name "~/mail"))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'mbsync-after-fetch-hooks 'mbsync-notmuch-new)
+  (add-hook 'mbsync-after-fetch-hooks 'mbsync-mu-index)
+#+END_SRC
+
 My configuration for mu4e.
 #+BEGIN_SRC emacs-lisp
   (if (display-graphic-p)
@@ -1066,7 +1109,7 @@ environment.
   ;;(browse-url-dwim-mode 1)
 #+END_SRC
 
-This package implements conkeror like functionality for eww, and it really is
+This package implements =conkeror= like functionality for =eww=, and it really is
 the bees knees.
 #+BEGIN_SRC emacs-lisp
   (require 'eww-lnum)
@@ -1184,6 +1227,9 @@ If we have the ability, show notifications.
   (erc-update-modules)
 #+END_SRC
 
+#+BEGIN_SRC emacs-lisp
+
+#+END_SRC
 
 #+BEGIN_SRC emacs-lisp
   (setq erc-default-server jj-home-host
