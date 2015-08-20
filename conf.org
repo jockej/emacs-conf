@@ -101,6 +101,7 @@ The name I give my home server in my =.ssh/config=.
                           magit-gh-pulls
                           magit-svn
                           markdown-mode
+                          mentor
                           move-text
                           multi-term
                           multiple-cursors
