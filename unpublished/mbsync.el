@@ -33,16 +33,15 @@
 (defcustom mbsync-rc-file "~/.mbsyncrc"
   "The mbsync rc-file")
 
-(defcustom mbsync-update-interval 30
+(defcustom mbsync-update-interval 180
   "Time between syncs. Setting this too low might cause trouble with multiple
   instances running at the same time, so don't do that...")
 
 
-(defcustom mbsync-sync-objects '(("fastmail" . "mail.messagingengine.com")
-                                       ("gmail" . "imap.gmail.com"))
+(defcustom mbsync-sync-objects nil
   "An alist of objects to sync, associated with their respective hosts.")
 
-(defcustom mbsync-max-fail 10
+(defcustom mbsync-max-fail nil
   "The number of consecutive failed attempts to retrieve mail. After this,
   unregister the timed process. If nil, never give up.")
 
@@ -193,9 +192,9 @@ Each cell has the form (channel . timer).")
               cmd
               (- (float-time) (cdr (assoc chan mbsync--start-times))))
              ;; if repeat, start the next one if it doesn't have a non nil entry
-             ;; in `mbsync--inhibit-new'.:o
+             ;; in `mbsync--inhibit-new'.
              (let ((inhb (assoc chan mbsync--inhibit-new)))
-               (when (and repeat (and inhb (not (cdr inhb))))
+               (when (and repeat (not (cdr inhb)))
                  (mbsync--schedule-new chan)))
              (run-hook-with-args 'mbsync-after-fetch-hooks chan)))
           ((string-prefix-p "ex" event)
