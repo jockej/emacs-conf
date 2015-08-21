@@ -1378,6 +1378,10 @@ tiling wm so the default setup with a separate frame is a no go.
         ediff-split-window-function 'split-window-horizontally)
 #+END_SRC
 
+#+BEGIN_SRC emacs-lisp
+  (setq ediff-make-buffers-readonly-at-startup t)
+#+END_SRC
+
 *** Folding
 
 I use origami for folding
