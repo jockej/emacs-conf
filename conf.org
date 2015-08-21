@@ -101,6 +101,7 @@ The name I give my home server in my =.ssh/config=.
                           magit-gh-pulls
                           magit-svn
                           markdown-mode
+                          mentor
                           move-text
                           multi-term
                           multiple-cursors
@@ -159,17 +160,12 @@ This make sure all the packages listed in the above list get installed upon star
 
 #+BEGIN_SRC emacs-lisp
   (setq jj-el-get-packages
-        '(mu4e
+        '(
+          ;; mu4e
           rscope
           cobol-mode
           ;; mu4e-multi
           ))
-
-
-
-
-
-
 
   (add-to-list 'load-path "~/.emacs.d/el-get/el-get")
 
@@ -183,7 +179,6 @@ This make sure all the packages listed in the above list get installed upon star
   (add-to-list 'el-get-recipe-path "~/.emacs.d/el-get-user/recipes")
   (add-to-list 'el-get-recipe-path "~/.emacs.d/el-get/el-get/recipes")
   (add-to-list 'el-get-recipe-path "~/.emacsconf/el-get-recipes")
-
 
 
   (el-get 'sync jj-el-get-packages)
@@ -1726,8 +1721,9 @@ font and stuff.
 No useless stuff. I sorta like the menu though, for discovering new stuff, so I
 leave that enabled.
 #+BEGIN_SRC emacs-lisp
-  (toggle-scroll-bar -1)
-  (tool-bar-mode -1)
+  (when (display-graphic-p)
+    (toggle-scroll-bar -1)
+    (tool-bar-mode -1))
 #+END_SRC
 
 Fixing the mode line so that it's not too long, since I usually split windows so
