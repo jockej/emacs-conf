@@ -82,24 +82,11 @@ the system, by this same user."
 ;;;; Secrets
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defcustom mbsync-cache-secrets t
-  "If non nil, cache secrets in memory")
-
-
-(defvar mbsync--cached-secrets nil
-  "An alist of cached secrets")
-
-
 (defun mbsync--get-secret (channel)
-  "Get secret for channel."
   (let ((machine (cdr (assoc channel mbsync-sync-objects))))
-    (if mbsync-cache-secrets
-        (let ((secret (assoc channel mbsync--cached-secrets)))
-          (or (cdr secret)
-              (let ((secr (mbsync--get-secret-from-file machine)))
-                (push (cons channel secr) mbsync--cached-secrets)
-                secr)))
-      (mbsync--get-secret-from-file machine))))
+    (unless machine (error "Couldn't find machine for %s" channel))
+    (or (mbsync--get-secret-from-file machine)
+        (read-passwd (format "Password for %s: " channel)))))
 
 
 (defun mbsync--get-secret-from-file (machine)
@@ -107,7 +94,8 @@ the system, by this same user."
   (let ((secret
          (auth-source-search :max 1 :host machine
                              :require '(:secret) :create nil)))
-    (funcall (plist-get (car secret) :secret))))
+    (when secret
+      (funcall (plist-get (car secret) :secret)))))
 
    
 (defvar mbsync--start-times nil
@@ -196,7 +184,7 @@ Each cell has the form (channel . timer).")
              (let ((inhb (assoc chan mbsync--inhibit-new)))
                (when (and repeat (not (cdr inhb)))
                  (mbsync--schedule-new chan)))
-             (run-hook-with-args 'mbsync-after-fetch-hooks chan)))
+             (run-hook-with-args 'mbsync-after-fetch-hook chan)))
           ((string-prefix-p "ex" event)
            ;; mbsync exited abnormally, probably because there is no internet
            ;; connection. Anyway, increment the consecutive fails.
@@ -273,7 +261,7 @@ sync to run after `mbsync-update-interval' seconds. Both
 ;;;; This section deals with indexing of the fetched mail.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defvar mbsync-after-fetch-hooks nil
+(defvar mbsync-after-fetch-hook nil
   "This hook is called after each succesfull exit of a mbsync process.
   Each hook is given the argument 'channel'.")
 
