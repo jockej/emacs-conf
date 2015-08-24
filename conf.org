@@ -47,87 +47,88 @@
 
     First we make sure all the packages we want are get isntalled.
     #+BEGIN_SRC emacs-lisp
-  (require 'cl)
-  (setq package-archives
-        '(("melpa" . "http://melpa.milkbox.net/packages/")
-          ("gnu" . "http://elpa.gnu.org/packages/")
-          ;; ("marmalade" . "http://marmalade-repo.org/packages/")
-          ))
+      (require 'cl)
+      (setq package-archives
+            '(("melpa" . "http://melpa.milkbox.net/packages/")
+              ("gnu" . "http://elpa.gnu.org/packages/")
+              ;; ("marmalade" . "http://marmalade-repo.org/packages/")
+              ))
 
-  (defvar ensure-packages
-    nil
-    "A list of packages to ensure are installed at launch.")
+      (defvar ensure-packages
+        nil
+        "A list of packages to ensure are installed at launch.")
 
-  (setq ensure-packages '(
-                          ace-link
-                          ace-window
-                          ada-mode
-                          anaconda-mode
-                          avy
-                          avy-zap
-                          company-anaconda
-                          auctex
-                          browse-url-dwim
-                          comment-dwim-2
-                          company
-                          company-auctex
-                          company-c-headers
-                          company-irony
-                          company-math
-                          conkeror-minor-mode
-                          dired+
-                          dsvn
-                          elfeed
-                          emms
-                          eww-lnum
-                          expand-region
-                          flx-ido
-                          fold-dwim
-                          function-args
-                          ggtags
-                          gitconfig-mode
-                          gitignore-mode
-                          gnuplot
-                          google-translate
-                          helm
-                          helm-ag
-                          hydra
-                          idomenu
-                          ignoramus
-                          irony
-                          lice
-                          linum-off
-                          magit
-                          magit-gh-pulls
-                          magit-svn
-                          markdown-mode
-                          mentor
-                          move-text
-                          multi-term
-                          multiple-cursors
-                          org-caldav
-                          origami
-                          pandoc-mode
-                          pdf-tools
-                          popup           ;required by rtags, wtf?
-                          projectile
-                          py-autopep8
-                          pyenv-mode
-                          rich-minority
-                          rtags
-                          smex
-                          solarized-theme
-                          srefactor
-                          spotify
-                          swiper
-                          sx
-                          undo-tree
-                          xkcd
-                          w3m
-                          weechat
-                          ztree
-                          ))
-  (setq url-http-attempt-keepalives nil)
+      (setq ensure-packages '(
+                              ace-link
+                              ace-window
+                              ada-mode
+                              anaconda-mode
+                              avy
+                              avy-zap
+                              company-anaconda
+                              auctex
+                              browse-url-dwim
+                              comment-dwim-2
+                              company
+                              company-auctex
+                              company-c-headers
+                              company-irony
+                              company-math
+                              conkeror-minor-mode
+                              dired+
+                              dsvn
+                              elfeed
+                              emms
+                              eww-lnum
+                              expand-region
+                              flx-ido
+                              fold-dwim
+                              function-args
+                              ggtags
+                              gitconfig-mode
+                              gitignore-mode
+                              gnuplot
+                              google-translate
+                              helm
+                              helm-ag
+                              hydra
+                              idomenu
+                              ignoramus
+                              irony
+                              lice
+                              linum-off
+                              magit
+                              magit-gh-pulls
+                              magit-svn
+                              markdown-mode
+                              mentor
+                              move-text
+                              multi-term
+                              multiple-cursors
+                              org-caldav
+                              origami
+                              pandoc-mode
+                              pinentry
+                              pdf-tools
+                              popup           ;required by rtags, wtf?
+                              projectile
+                              py-autopep8
+                              pyenv-mode
+                              rich-minority
+                              rtags
+                              smex
+                              solarized-theme
+                              srefactor
+                              spotify
+                              swiper
+                              sx
+                              undo-tree
+                              xkcd
+                              w3m
+                              weechat
+                              ztree
+                              ))
+      (setq url-http-attempt-keepalives nil)
     #+END_SRC
 
 *** Install all packages
@@ -301,6 +302,19 @@
 
     (add-hook 'focus-in-hook 'jj-move-pointer))
     #+END_SRC
+
+**** GPG
+
+     So, this was a bit of a pain to get working, but now it works. For some
+     inexplicable reason, pinentry-emacs isn't built by default on either FreeBSD or
+     Arch, so one has to build it from source, and add
+     =--enable-pinentry-emacs=. Then add "allow-pinentry-emacs" to
+     =~/.gnupg/gpg-agent.conf=.
+     Then one simply does:
+#+BEGIN_SRC emacs-lisp
+  (pinentry-start)
+  (setenv "INSIDE_EMACS" "YES")
+#+END_SRC
 
 **** Helper fuctions
 
@@ -857,7 +871,6 @@
     #+END_SRC
 
 ** Internet stuff
-
 *** The mighty gnus
 
     I use the mighty =gnus= to read some mailing lists. I'm also starting to use it
@@ -1182,7 +1195,6 @@
     #+BEGIN_SRC emacs-lisp
   (w3m-fb-mode 1)
     #+END_SRC
-
 
 *** IRC
 
