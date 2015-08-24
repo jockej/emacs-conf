@@ -187,7 +187,6 @@
 ** General
    This is stuff that is relatively general and applies to no particular modes.
 
-
 *** Startup
 
     Start in my home directory by default, why not?
@@ -369,6 +368,16 @@
     Add switches for human readable sizes and to hide dotfiles.
     #+BEGIN_SRC emacs-lisp
   (setq dired-listing-switches "-lh")
+    #+END_SRC
+
+    Async mode for dired. This launches a separate =Emacs= instance as a slave to do
+    the copying or moving. Now, obviously =Emacs= is a bit... heavy compared to =cp=
+    or =mv=, but I tried starting it with =-q= and it actually starts up pretty
+    fast, so I figure it'll be ok. I might write a package some day to run =mv= and
+    =cp= as asynchronous processes. On FreeBSD I could make use of the awesome =SIGINFO=!
+    #+BEGIN_SRC emacs-lisp
+  (require 'dired-async)
+  (dired-async-mode 1)
     #+END_SRC
 
 *** Keyboard
