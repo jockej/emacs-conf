@@ -312,6 +312,7 @@
      =~/.gnupg/gpg-agent.conf=.
      Then one simply does:
 #+BEGIN_SRC emacs-lisp
+  (require 'pinentry)
   (pinentry-start)
   (setenv "INSIDE_EMACS" "YES")
 #+END_SRC
