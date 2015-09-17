@@ -1857,6 +1857,7 @@
     #+BEGIN_SRC emacs-lisp
   (require 'emms-setup)
   (require 'emms-player-mpd)
+  (require 'emms-browser)
   (emms-standard)
   (emms-default-players)
   (require 'emms-mode-line)
