@@ -1053,7 +1053,7 @@
           mu4e-use-fancy-chars nil))
 
   (setq mu4e-maildir (expand-file-name "~/mail/fastmail")
-        mu4e-sent-folder "/Sent Items"
+        mu4e-sent-folder "/Sent"
         mu4e-drafts-folder "/Drafts"
         mu4e-html2text-command 'html2text
         mu4e-sent-messages-behavior 'delete)
@@ -1096,29 +1096,49 @@
         gnus-secondary-select-methods)
     #+END_SRC
 
+#+BEGIN_SRC emacs-lisp
+  (push '(nnimap "tritech" (nnimap-address "localhost")
+                 (nnimap-server-port 1143)
+                 (nnimap-stream network))
+        gnus-secondary-select-methods)
+#+END_SRC
+
+
     Setup the different posting styles.
     #+BEGIN_SRC emacs-lisp
-  (setq gnus-parameters
-        '(("^nnmaildir.*fastmail*"
-           (posting-style
-            (name "Joakim Jalap")
-            (address "joakim.jalap@fastmail.com")
-            (gcc "nnmaildir+fastmail:Sent Items")
-            ("X-Message-SMTP-Method" "smtp mail.messagingengine.com 465")
-            ))
-          ("^nnmaildir.*gmail:.*"
-           (posting-style
-            (name "Joakim Jalap")
-            (address "joakim.jalap@gmail.com")
-            (gcc "nnmaildir+gmail:Sent")
-            ("X-Message-SMTP-Method" "smtp smtp.gmail.com 465")
-            ))))
+      (setq gnus-parameters
+            '(("^nnmaildir.*fastmail*"
+               (posting-style
+                (name "Joakim Jalap")
+                (address "joakim.jalap@fastmail.com")
+                (gcc "nnmaildir+fastmail:Sent")
+                ("X-Message-SMTP-Method" "smtp mail.messagingengine.com 465")
+                ))
+              ("^nnmaildir.*gmail:.*"
+               (posting-style
+                (name "Joakim Jalap")
+                (address "joakim.jalap@gmail.com")
+                (gcc "nnmaildir+gmail:Sent")
+                ("X-Message-SMTP-Method" "smtp smtp.gmail.com 465")
+                ))
+              ("^nnimap.*tritech:.*"
+               (posting-style
+                (name "Joakim Jalap")
+                (address "joakim.jalap@tritech.se")
+                ("X-Message-SMTP-Method" "smtp localhost 1025")
+                ))
+              ))
     #+END_SRC
 
 
     #+BEGIN_SRC emacs-lisp
-  (setq gnus-permanently-visible-groups ".*Inbox.*")
+  (setq gnus-permanently-visible-groups ".*\\(Inbox\\|INBOX\\).*")
     #+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+  (setq gnus-message-archive-group
+        '(("^nnmaildir.*fastmail.*" . "nnmaildir+fastmail:Sent")))
+#+END_SRC
 
 *** Browsing
 
