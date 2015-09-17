@@ -385,6 +385,23 @@
   (setq dired-listing-switches "-lh")
     #+END_SRC
 
+Bind =C-j= to a command which executes the script under the cursor. Quite handy.
+#+BEGIN_SRC emacs-lisp
+  (defun jj-this-script ()
+    "Run the file under cursor, hopefully it is a script"
+    (interactive)
+    (when (eq major-mode 'dired-mode)
+      (let ((script (dired-get-filename)))
+        (if (and (file-regular-p script)
+                 (file-executable-p script))
+            (shell-command script
+                           "*jj-dired-script*"
+                           "*jj-dired-script-error*")
+          (user-error "Can't run that file")))))
+
+  (define-key dired-mode-map (kbd "C-j") 'jj-this-script)
+#+END_SRC
+
 *** Keyboard
 
     These are just some bindings I find more comfortable than the defaults, which I
