@@ -1527,24 +1527,24 @@ Bind =C-j= to a command which executes the script under the cursor. Quite handy.
 
      A little function to insert an include guard.
      #+BEGIN_SRC emacs-lisp
-  (defun jj-insert-include-guard ()
-    "Inserts an include guard based on the current files name and extension."
-    (interactive)
-    (save-excursion
-      (delete-trailing-whitespace)
-      (goto-char (point-min))
-      (let ((include-guard
-             (upcase (concat (file-name-base)
-                             "_"
-                             (file-name-extension (buffer-file-name))))))
-        (progn
-          (jj-open-line-above)
-          (insert "#ifndef " include-guard)
-          (jj-open-line-below)
-          (insert "#define " include-guard)
-          (goto-char (point-max))
-          (jj-open-line-below)
-          (insert "#endif /* ifndef " include-guard " */")))))
+       (defun jj-insert-include-guard ()
+         "Inserts an include guard based on the current files name and extension."
+         (interactive)
+         (save-excursion
+           (delete-trailing-whitespace)
+           (goto-char (point-min))
+           (let ((include-guard
+                  (upcase (concat (file-name-base)
+                                  "_"
+                                  (file-name-extension (buffer-file-name))))))
+             (progn
+               (jj-open-line-above nil)
+               (insert "#ifndef " include-guard)
+               (jj-open-line-below)
+               (insert "#define " include-guard)
+               (goto-char (point-max))
+               (jj-open-line-below)
+               (insert "#endif /* ifndef " include-guard " */")))))
      #+END_SRC
 
      Srefactor is a refactoring framework.
@@ -1566,8 +1566,8 @@ Bind =C-j= to a command which executes the script under the cursor. Quite handy.
      #+END_SRC
 
      #+BEGIN_SRC emacs-lisp
-  (require 'rtags)
-  (rtags-enable-standard-keybindings)
+       (require 'rtags)
+       (rtags-enable-standard-keybindings)
      #+END_SRC
 
      This warns for suspicious constructs.
