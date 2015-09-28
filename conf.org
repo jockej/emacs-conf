@@ -386,6 +386,23 @@
   (setq dired-listing-switches "-lh")
     #+END_SRC
 
+Bind =C-j= to a command which executes the script under the cursor. Quite handy.
+#+BEGIN_SRC emacs-lisp
+  (defun jj-this-script ()
+    "Run the file under cursor, hopefully it is a script"
+    (interactive)
+    (when (eq major-mode 'dired-mode)
+      (let ((script (dired-get-filename)))
+        (if (and (file-regular-p script)
+                 (file-executable-p script))
+            (shell-command script
+                           "*jj-dired-script*"
+                           "*jj-dired-script-error*")
+          (user-error "Can't run that file")))))
+
+  (define-key dired-mode-map (kbd "C-j") 'jj-this-script)
+#+END_SRC
+
 *** Keyboard
 
     These are just some bindings I find more comfortable than the defaults, which I
@@ -1537,24 +1554,24 @@ There is probably some better way to do this, but well, this sorta works.
 
      A little function to insert an include guard.
      #+BEGIN_SRC emacs-lisp
-  (defun jj-insert-include-guard ()
-    "Inserts an include guard based on the current files name and extension."
-    (interactive)
-    (save-excursion
-      (delete-trailing-whitespace)
-      (goto-char (point-min))
-      (let ((include-guard
-             (upcase (concat (file-name-base)
-                             "_"
-                             (file-name-extension (buffer-file-name))))))
-        (progn
-          (jj-open-line-above)
-          (insert "#ifndef " include-guard)
-          (jj-open-line-below)
-          (insert "#define " include-guard)
-          (goto-char (point-max))
-          (jj-open-line-below)
-          (insert "#endif /* ifndef " include-guard " */")))))
+       (defun jj-insert-include-guard ()
+         "Inserts an include guard based on the current files name and extension."
+         (interactive)
+         (save-excursion
+           (delete-trailing-whitespace)
+           (goto-char (point-min))
+           (let ((include-guard
+                  (upcase (concat (file-name-base)
+                                  "_"
+                                  (file-name-extension (buffer-file-name))))))
+             (progn
+               (jj-open-line-above nil)
+               (insert "#ifndef " include-guard)
+               (jj-open-line-below)
+               (insert "#define " include-guard)
+               (goto-char (point-max))
+               (jj-open-line-below)
+               (insert "#endif /* ifndef " include-guard " */")))))
      #+END_SRC
 
      Srefactor is a refactoring framework.
@@ -1576,8 +1593,8 @@ There is probably some better way to do this, but well, this sorta works.
      #+END_SRC
 
      #+BEGIN_SRC emacs-lisp
-  (require 'rtags)
-  (rtags-enable-standard-keybindings)
+       (require 'rtags)
+       (rtags-enable-standard-keybindings)
      #+END_SRC
 
      This warns for suspicious constructs.
