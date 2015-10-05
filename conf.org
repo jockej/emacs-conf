@@ -1386,7 +1386,6 @@ There is probably some better way to do this, but well, this sorta works.
        (setq erc-prompt-for-password t)
      #+END_SRC
 
-
 ** Programming
 *** General
 
@@ -2022,17 +2021,12 @@ There is probably some better way to do this, but well, this sorta works.
       (setq org-agenda-files '("~/org/calendars/")) ;
       (setq org-agenda-include-diary t)
 
-      ;; (setq org-caldav-url "https://caldav.messagingengine.com/dav/calendars/user")
-      ;; (setq org-caldav-calendar-id "joakimjalap@fastmail.com")
-      ;; (setq org-caldav-inbox "~/org/calendars/fastmail.org")
-      ;; (setq org-icalendar-timezone "Europe/Stockholm")
-      ;; (setq org-caldav-files '("~/org/calendars/fastmail.org"))
-
-      (setq org-caldav-url "http://localhost:1080/users/joakim.jalap@tritech.se/")
-      (setq org-caldav-calendar-id "calendar") ;
-      (setq org-caldav-inbox "~/org/calendars/tritech.org")
-      (setq org-icalendar-timezone "Europe/Stockholm")
-      (setq org-caldav-files '("~/org/calendars/tritech.org"))
+      (setq org-caldav-url "http://localhost:1080/users/joakim.jalap@tritech.se"
+            org-caldav-calendar-id "calendar"
+            org-caldav-inbox "~/org/calendars/tritech.org"
+            org-icalendar-timezone "Europe/Stockholm"
+            org-caldav-files '("~/org/calendars/tritech.org")
+            org-caldav-uuid-extension ".EML")
     #+END_SRC
 
 ** Needed External Programs
