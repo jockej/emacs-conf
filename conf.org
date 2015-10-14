@@ -896,6 +896,8 @@
     #+END_SRC
 
 ** Internet stuff
+
+
 *** The mighty gnus
 
     I use =gnus= to read mail. It is really awesome. At my work there is a big
@@ -947,6 +949,7 @@
     something wrong with some setup, this sync can really fuck things up if it gets
     written to the server.
     #+BEGIN_SRC emacs-lisp
+<<<<<<< HEAD
       (require 'gnus)
       (require 'gnus-sync)
       (setq gnus-sync-backend (concat "/ssh:" jj-home-host-ssh-name
@@ -957,6 +960,17 @@
                                     gnus-newsrc-alist)
             gnus-sync-newsrc-groups '("nntp")
             gnus-sync-newsrc-offsets '(2 3))
+=======
+  (require 'gnus-sync)
+  (setq gnus-sync-backend (concat "/ssh:" jj-home-host-ssh-name
+                                  ":gnus-sync/gnus")
+        gnus-sync-global-vars '(gnus-newsrc-last-checked-date
+                                gnus-topic-topology
+                                gnu-topic-alist
+                                gnus-newsrc-alist)
+        gnus-sync-newsrc-groups '("nntp")
+        gnus-sync-newsrc-offsets '(2 3))
+>>>>>>> 763f18d96dbf47dcee22b995181aa230e85bdee2
 
       (defun jj-maybe-read-sync (&rest ignored)
         (when (y-or-n-p "Sync the gnus? ")
@@ -1014,15 +1028,19 @@
       (add-hook 'gnus-summary-prepared-hook 'gnus-summary-hide-all-threads)
     #+END_SRC
 
+<<<<<<< HEAD
     This is needed to send my login info to eternal-september.
+=======
+>>>>>>> 763f18d96dbf47dcee22b995181aa230e85bdee2
     #+BEGIN_SRC emacs-lisp
       (defun jj-nntp-send-auth ()
         (nntp-send-authinfo t))
       (add-hook 'nntp-server-opened-hook 'jj-nntp-send-auth)
     #+END_SRC
 
-*** Mail
+*** BBDB
 
+<<<<<<< HEAD
     My primary mail address.
     #+BEGIN_SRC emacs-lisp
       (setq user-mail-address "joakim.jalap@fastmail.com")
@@ -1142,33 +1160,105 @@
                      (nnimap-stream network))
             gnus-secondary-select-methods)
     #+END_SRC
+=======
+#+BEGIN_SRC emacs-lisp
+  (require 'bbdb)
+  (bbdb-initialize 'gnus 'message)
+  (bbdb-mua-auto-update-init 'message)
+#+END_SRC
 
-    Setup the different posting styles.
-    #+BEGIN_SRC emacs-lisp
-      (setq gnus-parameters
-            '(("^nnmaildir.*fastmail*"
-               (posting-style
-                (name "Joakim Jalap")
-                (address "joakim.jalap@fastmail.com")
-                (gcc "nnmaildir+fastmail:Sent")
-                ("X-Message-SMTP-Method" "smtp mail.messagingengine.com 465")
-                ))
-              ("^nnmaildir.*gmail:.*"
-               (posting-style
-                (name "Joakim Jalap")
-                (address "joakim.jalap@gmail.com")
-                (gcc "nnmaildir+gmail:Sent")
-                ("X-Message-SMTP-Method" "smtp smtp.gmail.com 465")
-                ))
-              ("^nnimap.*tritech:.*"
-               (posting-style
-                (name "Joakim Jalap")
-                (address "joakim.jalap@tritech.se")
-                ("X-Message-SMTP-Method" "smtp localhost 1025")
-                ))
-              ))
-    #+END_SRC
+I don't live in North America.
+#+BEGIN_SRC emacs-lisp
+(setq bbdb-north-american-phone-numbers-p nil)
+#+END_SRC
 
+
+#+BEGIN_SRC emacs-lisp
+  (setq bbdb-user-mail-names
+        (regexp-opt '("joakim.jalap@fastmail.com"
+                      "joakim.jalap@gmail.com"
+                      "joakim.jalap@tritech.se")))
+#+END_SRC
+
+
+#+BEGIN_SRC emacs-lisp
+  (setq bbdb-complete-mail t
+        bbdb-complete-mail-allow-cycling t
+        bbdb-mua-auto-update-p 'query)
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+
+#+END_SRC
+    
+*** Mail
+
+
+     #+BEGIN_SRC emacs-lisp
+   (setq user-mail-address "joakim.jalap@fastmail.com")
+     #+END_SRC
+
+     This is where I store my mail.
+     #+BEGIN_SRC emacs-lisp
+   (setq message-directory "~/mail")
+     #+END_SRC
+
+     Basic settings for sending mail.
+     #+BEGIN_SRC emacs-lisp
+   (setq smtpmail-default-smtp-server "mail.messagingengine.com")
+   (require 'smtpmail)
+   (setq send-mail-function 'smtpmail-send-it
+         message-send-mail-function 'smtpmail-send-it
+         smtpmail-stream-type 'ssl
+         smtpmail-smtp-server "mail.messagingengine.com"
+         smtpmail-smtp-service 465)
+     #+END_SRC
+
+     Kill the message buffer after sending.
+     #+BEGIN_SRC emacs-lisp
+   (setq message-kill-buffer-on-exit t)
+     #+END_SRC
+
+     #+BEGIN_SRC emacs-lisp
+   (require 'mbsync)
+   (setq mbsync-sync-objects
+         '(("fastmail" . "mail.messagingengine.com")
+           ("gmail" . "imap.gmail.com")))
+     #+END_SRC
+
+     #+BEGIN_SRC emacs-lisp
+   (setq mbsync-top-maildir (expand-file-name "~/mail"))
+     #+END_SRC
+
+     #+BEGIN_SRC emacs-lisp
+   (add-hook 'mbsync-after-fetch-hook 'mbsync-notmuch-new)
+   (add-hook 'mbsync-after-fetch-hook 'mbsync-mu-index)
+     #+END_SRC
+>>>>>>> 763f18d96dbf47dcee22b995181aa230e85bdee2
+
+     My configuration for mu4e.
+     #+BEGIN_SRC emacs-lisp
+   (if (display-graphic-p)
+       (setq mu4e-view-show-images t
+             mu4e-view-prefer-html t
+             mu4e-use-fancy-chars t)
+     (setq mu4e-view-show-images nil
+           mu4e-view-prefer-html nil
+           mu4e-use-fancy-chars nil))
+
+   (setq mu4e-maildir (expand-file-name "~/mail/fastmail")
+         mu4e-sent-folder "/Sent"
+         mu4e-drafts-folder "/Drafts"
+         mu4e-html2text-command 'html2text
+         mu4e-sent-messages-behavior 'delete)
+
+   (defun jj-setup-for-mu4e ()
+     "Setup for using mu4e."
+     (interactive)
+     (setq mail-user-agent 'mu4e-user-agent))
+     #+END_SRC
+
+<<<<<<< HEAD
     I want to see my mail inboxes even when they are empty, mainly so that I can
     use =C-u m= to send mail with the correct parameters.
     #+BEGIN_SRC emacs-lisp
@@ -1180,9 +1270,49 @@
       (setq gnus-message-archive-group
             '(("^nnmaildir.*fastmail.*" . "nnmaildir+fastmail:Sent")))
     #+END_SRC
+=======
+     A little function to show a notification when I've got mail.
+     #+BEGIN_SRC emacs-lisp
+   (when (display-graphic-p)
+     (require 'notifications)
+     (defun jj-new-mail-notification (sender)
+       "Notify me that there is new mail"
+       (notifications-notify
+        :title "You've got mail!"
+        :body sender
+        :urgency 'normal)))
+     #+END_SRC
 
-*** Browsing
+     Add my mail as a selection method in gnus.
+     #+BEGIN_SRC emacs-lisp
+   (require 'nnir)
+   (push `(nnmaildir "fastmail" (directory ,(expand-file-name "~/mail/fastmail"))
+                     (get-new-mail nil)
+                     (nnir-search-engine notmuch))
+         gnus-secondary-select-methods)
+   (setq mail-sources nil)
 
+   (setq nnir-notmuch-remove-prefix (expand-file-name "~/mail"))
+     #+END_SRC
+
+     And my old gmail.
+     #+BEGIN_SRC emacs-lisp
+   (push `(nnmaildir "gmail" (directory ,(expand-file-name "~/mail/gmail"))
+                     (get-new-mail nil)
+                     (nnir-search-engine notmuch))
+         gnus-secondary-select-methods)
+     #+END_SRC
+>>>>>>> 763f18d96dbf47dcee22b995181aa230e85bdee2
+
+ #+BEGIN_SRC emacs-lisp
+   (push '(nnimap "tritech" (nnimap-address "localhost")
+                  (nnimap-server-port 1143)
+                  (nnimap-stream network)
+                  (nnir-search-engine imap))
+         gnus-secondary-select-methods)
+ #+END_SRC
+
+<<<<<<< HEAD
     =Eww= is the built in browser in Emacs, well on of them anyway, and it's really
     good, so I use it by default. Then I set an external browser depending on the
     environment.
@@ -1210,8 +1340,60 @@
         '(progn (define-key eww-mode-map "f" 'eww-lnum-follow)
                 (define-key eww-mode-map "F" 'eww-lnum-universal)))
     #+END_SRC
+=======
+     Setup the different posting styles.
+     #+BEGIN_SRC emacs-lisp
+       (setq gnus-parameters
+             '(("^nnmaildir.*fastmail*"
+                (posting-style
+                 (name "Joakim Jalap")
+                 (address "joakim.jalap@fastmail.com")
+                 (gcc "nnmaildir+fastmail:Sent")
+                 ("X-Message-SMTP-Method" "smtp mail.messagingengine.com 465")
+                 ))
+               ("^nnmaildir.*gmail:.*"
+                (posting-style
+                 (name "Joakim Jalap")
+                 (address "joakim.jalap@gmail.com")
+                 (gcc "nnmaildir+gmail:Sent")
+                 ("X-Message-SMTP-Method" "smtp smtp.gmail.com 465")
+                 ))
+               ("^nnimap.*tritech:.*"
+                (posting-style
+                 (name "Joakim Jalap")
+                 (address "joakim.jalap@tritech.se")
+                 ("X-Message-SMTP-Method" "smtp localhost 1025")
+                 ))
+               ))
+     #+END_SRC
+
+This sets up the stream type for connecting to smtp servers. On locahost
+(davmail) it has to be plain, otherwise let it be ssl. There is probably a
+better way to do this, but what the hell.
+#+BEGIN_SRC emacs-lisp
+  (defun jj-setup-smtp-stream-type (orig-fun &rest args)
+    (let ((smtpmail-stream-type
+           (if (string= smtpmail-smtp-server "localhost")
+               'plain
+             'ssl)))
+      (apply orig-fun args)))
+
+  (advice-add 'smtpmail-via-smtp :around 'jj-setup-smtp-stream-type)
+#+END_SRC
 
 
+>>>>>>> 763f18d96dbf47dcee22b995181aa230e85bdee2
+
+     #+BEGIN_SRC emacs-lisp
+   (setq gnus-permanently-visible-groups ".*\\(Inbox\\|INBOX\\).*")
+     #+END_SRC
+
+ #+BEGIN_SRC emacs-lisp
+   (setq gnus-message-archive-group
+         '(("^nnmaildir.*fastmail.*" . "nnmaildir+fastmail:Sent")))
+ #+END_SRC
+
+<<<<<<< HEAD
     When it comes to graphical browsers, I really like =conkeror=, it's the =Emacs=
     of browsers. It seems to have a special place in the heart of Emacs hackers, so
     much that there is actually a minor mode for editing its config files!
@@ -1221,6 +1403,9 @@
                                 (when (string= ".conkerorrc" (buffer-name))
                                   (conkeror-minor-mode 1))))
     #+END_SRC
+=======
+*** Browsing
+>>>>>>> 763f18d96dbf47dcee22b995181aa230e85bdee2
 
     This is an Emacs interface to =w3m=, it's maybe a little better than =eww= actually.
     #+BEGIN_SRC emacs-lisp
@@ -1258,7 +1443,68 @@
       (w3m-fb-mode 1)
     #+END_SRC
 
+    Use the =w3m= browser by default. It's really good.
+    #+BEGIN_SRC emacs-lisp
+      (setq browse-url-browser-function 'w3m-browse-url
+            shr-external-browser 'browse-url-generic)
+
+      (setq browse-url-generic-program
+            (cond ((eq system-type 'windows-nt)
+                   (executable-find "Chrome"))
+                  (t (setq browse-url-generic-program
+                           (if (display-graphic-p)
+                               (executable-find "conkeror")
+                             (executable-find "w3m"))))))
+
+      ;;(require 'browse-url-dwim)
+      ;;(browse-url-dwim-mode 1)
+    #+END_SRC
+
+    This package implements =conkeror= like functionality for =eww=, and it really is
+    the bees knees.
+    #+BEGIN_SRC emacs-lisp
+  (require 'eww-lnum)
+  (eval-after-load "eww"
+    '(progn (define-key eww-mode-map "f" 'eww-lnum-follow)
+            (define-key eww-mode-map "F" 'eww-lnum-universal)))
+    #+END_SRC
+
+
+    When it comes to graphical browsers, I really like =conkeror=, it's the =Emacs=
+    of browsers. It seems to have a special place in the heart of Emacs hackers, so
+    much that there is actually a minor mode for editing its config files!
+    #+BEGIN_SRC emacs-lisp
+  (require 'conkeror-minor-mode)
+  (add-hook 'js-mode-hook (lambda ()
+                            (when (string= ".conkerorrc" (buffer-name))
+                              (conkeror-minor-mode 1))))
+    #+END_SRC
+
+*** Downloading
+
+There is probably some better way to do this, but well, this sorta works.
+#+BEGIN_SRC emacs-lisp
+  (defun jj-wget-link ()
+    (interactive)
+    (let ((default-directory "~/Downloads/")
+          (url (browse-url-url-at-point)))
+      (start-process "jj-wget" " *jj-wget*" "wget"
+                     "-nv" url)))
+#+END_SRC
+
 *** IRC
+<<<<<<< HEAD
+=======
+
+#+BEGIN_SRC emacs-lisp
+  (defun jj-kill-irc ()
+    "Kill all IRC buffers"
+    (interactive)
+    (kill-matching-buffers "#[[:word:]-]*")
+    (kill-matching-buffers (concat jj-home-host ":[0-9]+.*")))
+#+END_SRC
+
+>>>>>>> 763f18d96dbf47dcee22b995181aa230e85bdee2
 **** Weechat
 
      Weechat for IRC. Turn of auto fill mode in weechat, since it chops up messages.
@@ -1293,6 +1539,7 @@
 **** ERC
 
      #+BEGIN_SRC emacs-lisp
+<<<<<<< HEAD
        (require 'erc)
        (require 'erc-track)
 
@@ -1311,18 +1558,45 @@
                                              erc-dangerous-host-face
                                              erc-notice-face
                                              erc-prompt-face))
+=======
+  (require 'erc)
+  (require 'erc-track)
+
+  (erc-track-mode t)
+  (setq-default erc-track-exclude-types '("JOIN" "NICK" "PART" "QUIT" "MODE"
+                                          "324" "329" "332" "333" "353" "477"))
+  (setq-default erc-hide-list '("JOIN" "PART" "QUIT" "NICK" "MODE" "AWAY"))
+  (setq erc-format-query-as-channel-p t
+        erc-track-priority-faces-only 'all
+        erc-track-faces-priority-list '(erc-error-face
+                                        erc-current-nick-face
+                                        erc-keyword-face
+                                        erc-nick-msg-face
+                                        erc-direct-msg-face
+                                        erc-dangerous-host-face
+                                        erc-notice-face
+                                        erc-prompt-face))
+>>>>>>> 763f18d96dbf47dcee22b995181aa230e85bdee2
      #+END_SRC
 
+     I wan't notifications when somebody messages me. 
      #+BEGIN_SRC emacs-lisp
        (push 'notifications erc-modules)
+<<<<<<< HEAD
        (erc-update-modules)
+=======
+>>>>>>> 763f18d96dbf47dcee22b995181aa230e85bdee2
+     #+END_SRC
+     
+     The ERC filling splits long messages over several messages, which I think
+     looks a little strange. It gets wrapped anyway, so remove that module.
+     #+BEGIN_SRC emacs-lisp
+       (setq erc-modules (remove 'fill erc-modules))
      #+END_SRC
 
+     Since I don't use the customize interface this has to be run.
      #+BEGIN_SRC emacs-lisp
-
-     #+END_SRC
-
-     #+BEGIN_SRC emacs-lisp
+<<<<<<< HEAD
        (setq erc-default-server jj-home-host
              erc-default-port 20026
              erc-nick '("jalle" "jockej")
@@ -1397,6 +1671,26 @@
 
     #+END_SRC
 
+=======
+       (erc-update-modules)
+     #+END_SRC
+
+     #+BEGIN_SRC emacs-lisp
+       (setq erc-default-server jj-home-host
+             erc-default-port 20026
+             erc-nick '("jalle" "jockej")
+             erc-nick-uniquifier "_"
+             )
+     #+END_SRC
+
+     I am connected to two different servers via weechat, so I have two
+     different passwords on the same machine and port. Unfortunately this means
+     I can't use the =auth-source= mechanism, which is a shame.
+     #+BEGIN_SRC emacs-lisp
+       (setq erc-prompt-for-password t)
+     #+END_SRC
+
+>>>>>>> 763f18d96dbf47dcee22b995181aa230e85bdee2
 ** Programming
 *** General
 
@@ -1438,12 +1732,22 @@
       (defun jj-create-tags (dir)
         "Create TAGS using excuberant ctags."
         (interactive "DDirecory: ")
+<<<<<<< HEAD
         (let ((ctags (cond ((eq system-type 'gnu/linux) (executable-find "ctags"))
                                               ; Excuberant ctags gets installed as 'exctags' on FreeBSD
                            ((eq system-type 'berkley-unix) (executable-find "exctags")))
                      (default-directory dir))
               (start-process (format "ctags-%s" (directory-file-name dir))
                              nil ctags "-R" "-e" dir))))
+=======
+        (let ((ctags
+               (cond ((eq system-type 'gnu/linux) (executable-find "ctags"))
+                                              ; Excuberant ctags gets installed as 'exctags' on FreeBSD
+                     ((eq system-type 'berkley-unix) (executable-find "exctags"))))
+              (default-directory dir))
+          (start-process (format "ctags-%s" (directory-file-name dir))
+                         nil ctags "-R" "-e" dir)))
+>>>>>>> 763f18d96dbf47dcee22b995181aa230e85bdee2
     #+END_SRC
 
 *** Debugging
@@ -2042,6 +2346,7 @@
 *** Calendar
 
     #+BEGIN_SRC emacs-lisp
+<<<<<<< HEAD
       (setq org-agenda-files '("~/org/calendars/"))
       (setq org-agenda-include-diary t)
 
@@ -2050,6 +2355,17 @@
       (setq org-caldav-inbox "~/org/calendars/fastmail.org")
       (setq org-icalendar-timezone "Europe/Stockholm")
       (setq org-caldav-files '("~/org/calendars/fastmail.org"))
+=======
+      (setq org-agenda-files '("~/org/calendars/")) ;
+      (setq org-agenda-include-diary t)
+
+      (setq org-caldav-url "http://localhost:1080/users/joakim.jalap@tritech.se"
+            org-caldav-calendar-id "calendar"
+            org-caldav-inbox "~/org/calendars/tritech.org"
+            org-icalendar-timezone "Europe/Stockholm"
+            org-caldav-files '("~/org/calendars/tritech.org")
+            org-caldav-uuid-extension ".EML")
+>>>>>>> 763f18d96dbf47dcee22b995181aa230e85bdee2
     #+END_SRC
 
 ** Needed External Programs
