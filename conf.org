@@ -948,7 +948,7 @@ Bind =C-j= to a command which executes the script under the cursor. Quite handy.
                                   ":gnus-sync/gnus")
         gnus-sync-global-vars '(gnus-newsrc-last-checked-date
                                 gnus-topic-topology
-                                gnu-topic-alist
+                                gnus-topic-alist
                                 gnus-newsrc-alist)
         gnus-sync-newsrc-groups '("nntp")
         gnus-sync-newsrc-offsets '(2 3))
@@ -1024,7 +1024,7 @@ Bind =C-j= to a command which executes the script under the cursor. Quite handy.
   (bbdb-mua-auto-update-init 'message)
 #+END_SRC
 
-I don't live in North America.
+I don't live in North America, but I hear Canada's pretty nice.
 #+BEGIN_SRC emacs-lisp
 (setq bbdb-north-american-phone-numbers-p nil)
 #+END_SRC
