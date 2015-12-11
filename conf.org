@@ -1721,6 +1721,22 @@ Don't show pictures of people, I don't wanna see...
            (c-set-offset 'inextern-lang '0)))
      #+END_SRC
 
+     C-styles for my job.
+     #+BEGIN_SRC emacs-lisp
+       (c-add-style "tritech"
+                    '("linux"
+                      (c-basic-offset . 3)
+                      (c-offsets-alist . ((case-label . +)
+                                          (statement-case-open . +)))))
+
+       (c-add-style "delaval"
+                    '("linux"
+                      (c-basic-offset . 4)
+                      (c-offsets-alist . ((case-label . +)
+                                          (statement-case-open . +)))))
+
+     #+END_SRC
+
      Add all the hooks.
      #+BEGIN_SRC emacs-lisp
        (defvar jj-c-mode-common-hook nil
