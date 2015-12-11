@@ -958,16 +958,11 @@ Don't show pictures of people, I don't wanna see...
              gnus-sync-newsrc-groups '("nntp")
              gnus-sync-newsrc-offsets '(2 3))
 
-       (defun jj-maybe-read-sync (&rest ignored)
-         (when (y-or-n-p "Sync the gnus? ")
-           (gnus-sync-read t)))
-
        (defun jj-maybe-save-sync (&rest ignored)
          (when (y-or-n-p "Sync the gnus? ")
            (gnus-sync-save)))
 
        (remove-hook 'gnus-save-newsrc-hook 'gnus-sync-save)
-       (advice-add 'gnus :after 'jj-maybe-read-sync)
        (add-hook 'gnus-save-newsrc-hook 'jj-maybe-save-sync)
      #+END_SRC
 
@@ -1149,21 +1144,18 @@ Don't show pictures of people, I don't wanna see...
      Add my mail as a selection method in gnus.
      #+BEGIN_SRC emacs-lisp
        (require 'nnir)
-       (push `(nnmaildir "fastmail" (directory ,(expand-file-name "~/mail/fastmail"))
-                         (get-new-mail nil)
-                         (nnir-search-engine notmuch))
+       (push '(nnimap "fastmail" (nnimap-address "mail.messagingengine.com")
+                         (nnimap-server-port 993)
+                         (nnimap-stream ssl))
              gnus-secondary-select-methods)
        (setq mail-sources nil)
-
-       (setq nnir-notmuch-remove-prefix (expand-file-name "~/mail"))
      #+END_SRC
-
 
      And my old gmail.
      #+BEGIN_SRC emacs-lisp
-       (push `(nnmaildir "gmail" (directory ,(expand-file-name "~/mail/gmail"))
-                         (get-new-mail nil)
-                         (nnir-search-engine notmuch))
+       (push '(nnimap "gmail" (nnimap-address "imap.gmail.com")
+                         (nnimap-server-port 993)
+                         (nnimap-stream ssl))
              gnus-secondary-select-methods)
      #+END_SRC
 
@@ -1178,7 +1170,7 @@ Don't show pictures of people, I don't wanna see...
      I want to see my mail inboxes even when they are empty, mainly so that I can
      use =C-u m= to send mail with the correct parameters.
      #+BEGIN_SRC emacs-lisp
-       (setq gnus-permanently-visible-groups ".*\\(Inbox\\|INBOX\\).*")
+       (setq gnus-permanently-visible-groups ".*INBOX$")
      #+END_SRC
 
      I found this in an old mailing list post (as you always do) and I'm adapting
