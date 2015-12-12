@@ -967,7 +967,7 @@ Don't show pictures of people, I don't wanna see...
            (gnus-sync-save)))
 
        (remove-hook 'gnus-save-newsrc-hook 'gnus-sync-save)
-       (advice-add 'gnus :after 'jj-maybe-read-sync)
+       (advice-add 'gnus :before 'jj-maybe-read-sync)
        (add-hook 'gnus-save-newsrc-hook 'jj-maybe-save-sync)
      #+END_SRC
 
