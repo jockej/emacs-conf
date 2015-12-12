@@ -3,7 +3,7 @@
 * My Emacs conf
 
   #+BEGIN_SRC emacs-lisp
-  ;; -*- lexical-binding: t -*-
+    ;; -*- lexical-binding: t -*-
   #+END_SRC
 
 ** Personal
@@ -11,7 +11,7 @@
 
    My name.
    #+BEGIN_SRC emacs-lisp
-  (setq user-full-name  "Joakim Jalap")
+     (setq user-full-name  "Joakim Jalap")
    #+END_SRC
 
    These are some predicates that I want to check now and then to see what kind of
@@ -19,26 +19,26 @@
 
    Am I on my home lan?
    #+BEGIN_SRC emacs-lisp
-  (defun jj-is-home-p ()
-    (string-suffix-p "jockej.lan" system-name t))
+     (defun jj-is-home-p ()
+       (string-suffix-p "jockej.lan" system-name t))
    #+END_SRC
 
    Is this my work computer?
    #+BEGIN_SRC emacs-lisp
-  (defun jj-is-work-comp-p ()
-    (string-prefix-p "msundjoakimj" system-name))
+     (defun jj-is-work-comp-p ()
+       (string-prefix-p "msundjoakimj" system-name))
    #+END_SRC
 
    The hostname of my home server, I should get my act together and buy a real
    domain...
    #+BEGIN_SRC emacs-lisp
-  (defconst jj-home-host "jockej.mooo.com" "Hostname of my server")
+     (defconst jj-home-host "jockej.mooo.com" "Hostname of my server")
    #+END_SRC
 
    The name I give my home server in my =.ssh/config=.
    #+BEGIN_SRC emacs-lisp
-  (defconst jj-home-host-ssh-name "jockej"
-    "The name my home host has in my .ssh/config")
+     (defconst jj-home-host-ssh-name "jockej"
+       "The name my home host has in my .ssh/config")
    #+END_SRC
 
 ** Packages
@@ -49,7 +49,7 @@
     #+BEGIN_SRC emacs-lisp
       (require 'cl)
       (setq package-archives
-            '(("melpa" . "http://melpa.milkbox.net/packages/")
+            '(("melpa" . "http://melpa.org/packages/")
               ("gnu" . "http://elpa.gnu.org/packages/")
               ;; ("marmalade" . "http://marmalade-repo.org/packages/")
               ))
@@ -67,6 +67,7 @@
                               avy-zap
                               company-anaconda
                               auctex
+                              bbdb
                               browse-url-dwim
                               comment-dwim-2
                               company
@@ -105,6 +106,7 @@
                               move-text
                               multi-term
                               multiple-cursors
+                              notmuch
                               org-caldav
                               origami
                               pandoc-mode
@@ -135,54 +137,57 @@
 
     This make sure all the packages listed in the above list get installed upon startup.
     #+BEGIN_SRC emacs-lisp
-(defun ensure-packages-package-installed-p (p)
-  (cond ((package-installed-p p) t)
-        (t nil)))
+      (defun ensure-packages-package-installed-p (p)
+        (cond ((package-installed-p p) t)
+              (t nil)))
 
-(defun ensure-packages-installed-p ()
-  (mapcar 'ensure-packages-package-installed-p ensure-packages))
+      (defun ensure-packages-installed-p ()
+        (mapcar 'ensure-packages-package-installed-p ensure-packages))
 
-(defun ensure-packages-install-missing ()
-  (interactive)
-  (unless (every 'identity (ensure-packages-installed-p))
-  ; check for new packages (package versions)
-  (message "%s" "Emacs is now refreshing its package database...")
-  (package-refresh-contents)
-  (message "%s" " done.")
-  ; install the missing packages
-  (dolist (p ensure-packages)
-    (when (not (package-installed-p p))
-      (package-install p)))))
+      (defun ensure-packages-install-missing ()
+        (interactive)
+        (unless (every 'identity (ensure-packages-installed-p))
+                                              ; check for new packages (package versions)
+          (message "%s" "Emacs is now refreshing its package database...")
+          (package-refresh-contents)
+          (message "%s" " done.")
+                                              ; install the missing packages
+          (dolist (p ensure-packages)
+            (when (not (package-installed-p p))
+              (package-install p)))))
+    #+END_SRC
 
-(ensure-packages-install-missing)
+    I have to do this this way it seems, I'm not sure why but just setting
+    =url-proxy-services= to nil doens't work.
+    #+BEGIN_SRC emacs-lisp
+      (let ((url-proxy-services))
+        (ensure-packages-install-missing))
     #+END_SRC
 
 *** And the those from el-get
 
     #+BEGIN_SRC emacs-lisp
-  (setq jj-el-get-packages
-        '(
-          ;; mu4e
-          rscope
-          cobol-mode
-          ;; mu4e-multi
-          ))
+      (setq jj-el-get-packages
+            '(
+              rscope
+              ;rtags
+              cobol-mode
+              ))
 
-  (add-to-list 'load-path "~/.emacs.d/el-get/el-get")
+      (add-to-list 'load-path "~/.emacs.d/el-get/el-get")
 
-  (unless (require 'el-get nil 'noerror)
-    (with-current-buffer
-        (url-retrieve-synchronously
-         "https://raw.githubusercontent.com/dimitri/el-get/master/el-get-install.el")
-      (goto-char (point-max))
-      (eval-print-last-sexp)))
+      (unless (require 'el-get nil 'noerror)
+        (with-current-buffer
+            (url-retrieve-synchronously
+             "https://raw.githubusercontent.com/dimitri/el-get/master/el-get-install.el")
+          (goto-char (point-max))
+          (eval-print-last-sexp)))
 
-  (add-to-list 'el-get-recipe-path "~/.emacs.d/el-get-user/recipes")
-  (add-to-list 'el-get-recipe-path "~/.emacs.d/el-get/el-get/recipes")
-  (add-to-list 'el-get-recipe-path "~/.emacsconf/el-get-recipes")
+      (add-to-list 'el-get-recipe-path "~/.emacs.d/el-get-user/recipes")
+      (add-to-list 'el-get-recipe-path "~/.emacs.d/el-get/el-get/recipes")
+      (add-to-list 'el-get-recipe-path "~/.emacsconf/el-get-recipes")
 
-
-  (el-get 'sync jj-el-get-packages)
+      (el-get 'sync jj-el-get-packages)
     #+END_SRC
 
 ** General
@@ -192,95 +197,95 @@
 
     Start in my home directory by default, why not?
     #+BEGIN_SRC emacs-lisp
-  (setq inhibit-startup-message t
-        inhibit-splash-screen t
-        initial-scratch-message nil
-        initial-buffer-choice "~/")
+      (setq inhibit-startup-message t
+            inhibit-splash-screen t
+            initial-scratch-message nil
+            initial-buffer-choice "~/")
     #+END_SRC
 
 *** Misc
 
     Some tuning of the Emacs gc which was suggested on flx-ido's page.
     #+BEGIN_SRC emacs-lisp
-  (setq gc-cons-threshold 20000000)
+      (setq gc-cons-threshold 20000000)
     #+END_SRC
 
     Some things I keep in an /unpublished/ directory. This directory is for things
     that I hope will one day be on melpa, but for now they'll just tag along my
     conf.
     #+BEGIN_SRC emacs-lisp
-  (let ((default-directory "~/.emacsconf/unpublished/"))
-    (progn
-      (add-to-list 'load-path default-directory)
-      (normal-top-level-add-subdirs-to-load-path)))
+      (let ((default-directory "~/.emacsconf/unpublished/"))
+        (progn
+          (add-to-list 'load-path default-directory)
+          (normal-top-level-add-subdirs-to-load-path)))
     #+END_SRC
 
     This sets up some good ignores for different modes.
     #+BEGIN_SRC emacs-lisp
-  (require 'ignoramus)
-  (ignoramus-setup)
+      (require 'ignoramus)
+      (ignoramus-setup)
     #+END_SRC
 
     Follow symlinks.
     #+BEGIN_SRC emacs-lisp
-  (setq-default find-file-visit-truename t)
+      (setq-default find-file-visit-truename t)
     #+END_SRC
 
     Projectile is a project framework.
     #+BEGIN_SRC emacs-lisp
-(require 'projectile)
-(projectile-global-mode)
-(setq projectile-enable-caching t)
+      (require 'projectile)
+      (projectile-global-mode)
+      (setq projectile-enable-caching t)
     #+END_SRC
 
     A function to shutdown the server.
     #+BEGIN_SRC emacs-lisp
-  (defun jj-server-shutdown ()
-    "Save buffers, quit gnus if it's running and kill server"
-    (interactive)
-    (save-some-buffers)
-    (when (and (fboundp 'gnus-alive-p) (gnus-alive-p))
-      (gnus-group-exit))
-    (kill-emacs))
+      (defun jj-server-shutdown ()
+        "Save buffers, quit gnus if it's running and kill server"
+        (interactive)
+        (save-some-buffers)
+        (when (and (fboundp 'gnus-alive-p) (gnus-alive-p))
+          (gnus-group-exit))
+        (kill-emacs))
     #+END_SRC
 
     The good folks att EmacsWiki say this is faster than the default 'scp', and I
     believe them.
     #+BEGIN_SRC emacs-lisp
-  (setq tramp-default-method "ssh")
+      (setq tramp-default-method "ssh")
     #+END_SRC
 
     Who has the time to type "yes"?
     #+BEGIN_SRC emacs-lisp
-(defalias 'yes-or-no-p 'y-or-n-p)
+      (defalias 'yes-or-no-p 'y-or-n-p)
     #+END_SRC
 
     Keep it on the keyboard.
     #+BEGIN_SRC emacs-lisp
-  (setq use-file-dialog nil
-        use-dialog-box nil)
+      (setq use-file-dialog nil
+            use-dialog-box nil)
     #+END_SRC
 
     This makes it slightly easier to paste things into Emacs, I don't actually use
     it much, but it doesn't do any harm.
     #+BEGIN_SRC emacs-lisp
-  (setq save-interprogram-paste-before-kill t)
+      (setq save-interprogram-paste-before-kill t)
     #+END_SRC
 
     The calc window is very small and very specific, make sure nothing else opens
     there.
     #+BEGIN_SRC emacs-lisp
-  (defun jj-set-calc-win-dedicated (&rest args)
-    (let ((win (get-buffer-window "*Calculator*")))
-      (when win
-        (set-window-dedicated-p win t))))
-  (advice-add 'calc :after 'jj-set-calc-win-dedicated)
+      (defun jj-set-calc-win-dedicated (&rest args)
+        (let ((win (get-buffer-window "*Calculator*")))
+          (when win
+            (set-window-dedicated-p win t))))
+      (advice-add 'calc :after 'jj-set-calc-win-dedicated)
     #+END_SRC
 
     If I have made no modifications to a file and it's been changed on disk, revert
     it without asking.
     #+BEGIN_SRC emacs-lisp
-  (global-auto-revert-mode 1)
+      (global-auto-revert-mode 1)
     #+END_SRC
 
     Now, this is what i love about =Emacs=, you can have it just the way you like
@@ -294,12 +299,12 @@
     corner, but it's really not that annoying, and I don't really use the mouse much
     anyways.
     #+BEGIN_SRC emacs-lisp
-  (when (display-graphic-p)
-    (defun jj-move-pointer ()
-      "Move pointer to the top left corner"
-      (set-mouse-position (car (mouse-position)) 0 0))
+      (when (display-graphic-p)
+        (defun jj-move-pointer ()
+          "Move pointer to the top left corner"
+          (set-mouse-position (car (mouse-position)) 0 0))
 
-    (add-hook 'focus-in-hook 'jj-move-pointer))
+        (add-hook 'focus-in-hook 'jj-move-pointer))
     #+END_SRC
 
 **** GPG
@@ -310,10 +315,11 @@
      =--enable-pinentry-emacs=. Then add "allow-pinentry-emacs" to
      =~/.gnupg/gpg-agent.conf=.
      Then one simply does:
-#+BEGIN_SRC emacs-lisp
-  (pinentry-start)
-  (setenv "INSIDE_EMACS" "YES")
-#+END_SRC
+     #+BEGIN_SRC emacs-lisp
+       (require 'pinentry)
+       (pinentry-start)
+       (setenv "INSIDE_EMACS" "YES")
+     #+END_SRC
 
 **** Helper fuctions
 
@@ -322,66 +328,83 @@
      for the =&rest args= is that I need to be able to use it as advice to a function
      which takes arguments.
      #+BEGIN_SRC emacs-lisp
-  (defun jj-other-window (&rest args)
-    (other-window 1))
+       (defun jj-other-window (&rest args)
+         (other-window 1))
      #+END_SRC
 
 *** Dired
 
     Some tasty extras for dired.
     #+BEGIN_SRC emacs-lisp
-  (require 'dired-x)
-  (require 'dired+)
+      (require 'dired-x)
+      (require 'dired+)
     #+END_SRC
 
     Don't create new dired buffers all the time.
     #+BEGIN_SRC emacs-lisp
-  (toggle-diredp-find-file-reuse-dir 1)
+      (toggle-diredp-find-file-reuse-dir 1)
     #+END_SRC
 
     Dired+ does crazy amounts of font lock, too much for my taste. Turn it down a
     notch.
     #+BEGIN_SRC emacs-lisp
-  (setq font-lock-maximum-decoration '((dired-mode . nil)
-                                       (wdired-mode . nil)
-                                       (t . t)))
+      (setq font-lock-maximum-decoration '((dired-mode . nil)
+                                           (wdired-mode . nil)
+                                           (t . t)))
     #+END_SRC
 
     Hide details like owner and such.
     #+BEGIN_SRC emacs-lisp
-  (setq diredp-hide-details-initially-flag t
-        diredp-hide-details-propagate-flag t)
+      (setq diredp-hide-details-initially-flag t
+            diredp-hide-details-propagate-flag t)
     #+END_SRC
 
     Always copy and delete recursively withour prompting.
     #+BEGIN_SRC emacs-lisp
-  (setq dired-recursive-copies 'always
-        dired-recursive-deletes 'always)
+      (setq dired-recursive-copies 'always
+            dired-recursive-deletes 'always)
     #+END_SRC
 
     "Dwim-target" means that if there is another dired window in the same frame,
     that will be the default target of rename and copy operations. This means that
     we can use Emacs as a midnight commander!
     #+BEGIN_SRC emacs-lisp
-  (setq dired-dwim-target t)
+      (setq dired-dwim-target t)
     #+END_SRC
 
     A list of programs to use for different extensions.
     #+BEGIN_SRC emacs-lisp
-  (setq dired-guess-shell-alist-user
-        '(
-          ("\\.pdf\\'" "zathura")
-          ("\\.f?od.\\'" "libreoffice")
-          ("\\.docx?\\'" "libreoffice")
-          ("\\.mkv\\'" "mplayer -ao sdl")
-          ("\\.avi\\'" "mplayer -ao sdl")
-          ("\\.mpeg\\'" "mplayer -ao sdl")
-          ))
+      (setq dired-guess-shell-alist-user
+            '(
+              ("\\.pdf\\'" "zathura")
+              ("\\.f?od.\\'" "libreoffice")
+              ("\\.docx?\\'" "libreoffice")
+              ("\\.mkv\\'" "mplayer -ao sdl")
+              ("\\.avi\\'" "mplayer -ao sdl")
+              ("\\.mpeg\\'" "mplayer -ao sdl")
+              ))
     #+END_SRC
 
     Add switches for human readable sizes and to hide dotfiles.
     #+BEGIN_SRC emacs-lisp
-  (setq dired-listing-switches "-lh")
+      (setq dired-listing-switches "-lh")
+    #+END_SRC
+
+    Bind =C-j= to a command which executes the script under the cursor. Quite handy.
+    #+BEGIN_SRC emacs-lisp
+      (defun jj-this-script ()
+        "Run the file under cursor, hopefully it is a script"
+        (interactive)
+        (when (eq major-mode 'dired-mode)
+          (let ((script (dired-get-filename)))
+            (if (and (file-regular-p script)
+                     (file-executable-p script))
+                (shell-command script
+                               "*jj-dired-script*"
+                               "*jj-dired-script-error*")
+              (user-error "Can't run that file")))))
+
+      (define-key dired-mode-map (kbd "C-j") 'jj-this-script)
     #+END_SRC
 
     Async mode for dired. This launches a separate =Emacs= instance as a slave to do
@@ -399,8 +422,8 @@
     These are just some bindings I find more comfortable than the defaults, which I
     honestly find quite horrible.
     #+BEGIN_SRC emacs-lisp
-(global-set-key (kbd "C-;") 'Control-X-prefix)
-(define-key key-translation-map (kbd "C-,") (kbd "C-c"))
+      (global-set-key (kbd "C-;") 'Control-X-prefix)
+      (define-key key-translation-map (kbd "C-,") (kbd "C-c"))
     #+END_SRC
 
     I also add a Hyper modifier key, which gives the possibility for many new global
@@ -408,13 +431,13 @@
     I use the "Menu" key, which I otherwise don't use for anything anyway.
     On GNU/Linux I do this via xmodmap, but on Windows you can do this instead:
     #+BEGIN_SRC emacs-lisp
-  (when (eq system-type 'windows-nt)
-    (setq w32-apps-modifier 'hyper))
+      (when (eq system-type 'windows-nt)
+        (setq w32-apps-modifier 'hyper))
     #+END_SRC
 
     Unfortunately I can't use the menu key in the terminal, so I also add this:
     #+BEGIN_SRC emacs-lisp
-(define-key function-key-map (kbd "<f9>") 'event-apply-hyper-modifier)
+      (define-key function-key-map (kbd "<f9>") 'event-apply-hyper-modifier)
     #+END_SRC
 
     Actually what I do is I make the menu key send 'F9', so I can use when I ssh
@@ -423,7 +446,7 @@
     I have written an input method for the programmers dvorak layout. MAybe one day
     I'll put it on Melpa.
     #+BEGIN_SRC emacs-lisp
-  (require 'programmers-dvorak)
+      (require 'programmers-dvorak)
     #+END_SRC
 
 *** Editing
@@ -433,51 +456,51 @@
     I used to do most my programming on a 10" netbook, so I got used to these
     settings, and now I quite like them.
     #+BEGIN_SRC emacs-lisp
-  (setq standard-indent 2)
-  (setq tab-width 2)
-  (setq-default fill-column 80
-                auto-fill-function 'do-auto-fill
-                indent-tabs-mode nil)
+      (setq standard-indent 2)
+      (setq tab-width 2)
+      (setq-default fill-column 80
+                    auto-fill-function 'do-auto-fill
+                    indent-tabs-mode nil)
     #+END_SRC
 
     Require a newline at the end of files.
     #+BEGIN_SRC emacs-lisp
-  (setq-default require-final-newline t)
+      (setq-default require-final-newline t)
     #+END_SRC
 
     This is some weird anachronism.
     #+BEGIN_SRC emacs-lisp
-  (setq-default sentence-end-double-space nil)
+      (setq-default sentence-end-double-space nil)
     #+END_SRC
 
     I delete more than I read help docs, a fact which probably says something about
     me as a person...
     #+BEGIN_SRC emacs-lisp
-(define-key global-map "\C-h" 'backward-delete-char)
+      (define-key global-map "\C-h" 'backward-delete-char)
     #+END_SRC
 
     These are very nice builtins, but have no keybindings per default.
     #+BEGIN_SRC emacs-lisp
-  (require 'misc)
-  (global-set-key (kbd "M-B") 'backward-to-word)
-  (global-set-key (kbd "M-F") 'forward-to-word)
+      (require 'misc)
+      (global-set-key (kbd "M-B") 'backward-to-word)
+      (global-set-key (kbd "M-F") 'forward-to-word)
     #+END_SRC
 
     These are more useful this way, when they operate on the whole word.
     TODO: convert these to the new `advice-add' syntax.
     #+BEGIN_SRC emacs-lisp
-  (defadvice upcase-word (before upcase-word-advice activate)
-    (unless (looking-back "\\b")
-      (backward-word)))
+      (defadvice upcase-word (before upcase-word-advice activate)
+        (unless (looking-back "\\b")
+          (backward-word)))
 
-  (defadvice downcase-word (before downcase-word-advice activate)
-    (unless (looking-back "\\b")
-      (backward-word)))
+      (defadvice downcase-word (before downcase-word-advice activate)
+        (unless (looking-back "\\b")
+          (backward-word)))
 
-  (defadvice capitalize-word (before capitalize-word-advice activate)
-    (unless (or (looking-back "\\b")
-                (bound-and-true-p subword-mode))
-      (backward-word)))
+      (defadvice capitalize-word (before capitalize-word-advice activate)
+        (unless (or (looking-back "\\b")
+                    (bound-and-true-p subword-mode))
+          (backward-word)))
     #+END_SRC
 
 **** Custom commands
@@ -490,356 +513,361 @@
 
      A function to open a line above, sort of like vi's =O=.
      #+BEGIN_SRC emacs-lisp
-  ;; need this for org-table-check-inside-data-field
-  (require 'org-table)
-  (defun jj-open-line-above (arg)
-    "Insert a new line above the current line and indent it.
+       ;; need this for org-table-check-inside-data-field
+       (require 'org-table)
+       (defun jj-open-line-above (arg)
+         "Insert a new line above the current line and indent it.
 
-  If we're in an org table, insert a new row, like `org-open-line' does. With a
-    prefix argument, call `open-line', and indent stuff properly (not in an org-table)."
-    (interactive "P")
-    (if (and (eq major-mode 'org-mode)
-             (org-table-check-inside-data-field t))
-        (org-table-insert-row)
-      (if arg
-          (save-excursion
-            (open-line 1)
-            (forward-line 1)
-            (indent-according-to-mode)
-            (forward-line -1))
-        (progn
-          (beginning-of-line)
-          (open-line 1)
-          (indent-according-to-mode)))))
+       If we're in an org table, insert a new row, like `org-open-line' does. With a
+         prefix argument, call `open-line', and indent stuff properly (not in an org-table)."
+         (interactive "P")
+         (if (and (eq major-mode 'org-mode)
+                  (org-table-check-inside-data-field t))
+             (org-table-insert-row)
+           (if arg
+               (save-excursion
+                 (open-line 1)
+                 (forward-line 1)
+                 (indent-according-to-mode)
+                 (forward-line -1))
+             (progn
+               (beginning-of-line)
+               (open-line 1)
+               (indent-according-to-mode)))))
 
-  (global-set-key (kbd "C-o") 'jj-open-line-above)
-  (define-key org-mode-map (kbd "C-o") 'jj-open-line-above)
+       (global-set-key (kbd "C-o") 'jj-open-line-above)
+       (define-key org-mode-map (kbd "C-o") 'jj-open-line-above)
      #+END_SRC
 
      This is a bit like vi's =o=.
      #+BEGIN_SRC emacs-lisp
-  (defun jj-open-line-below ()
-    "Insert a new line below the current line and indent it.
+       (defun jj-open-line-below ()
+         "Insert a new line below the current line and indent it.
 
-  If we're in an org-mode buffer and in a table, go to the next table row instead,
-   so as to emulate org-modes newline-and-indent"
-    (if (and (eq major-mode 'org-mode)
-             (org-table-check-inside-data-field t))
-        (org-table-next-row)
-      (progn
-        (end-of-line)
-        (newline-and-indent))))
+       If we're in an org-mode buffer and in a table, go to the next table row instead,
+        so as to emulate org-modes newline-and-indent"
+         (if (and (eq major-mode 'org-mode)
+                  (org-table-check-inside-data-field t))
+             (org-table-next-row)
+           (progn
+             (end-of-line)
+             (newline-and-indent))))
      #+END_SRC
 
      This is one of my most used commands.
      #+BEGIN_SRC emacs-lisp
-  (defun jj-open-line (&optional abovep)
-    "Insert a newline below the current line and put point at beginning.
+       (defun jj-open-line (&optional abovep)
+         "Insert a newline below the current line and put point at beginning.
 
-  With a prefix argument, call `jj-open-line-above'.
-  With double prefix argument, call `jj-open-line-above' with prefix argument."
-    (interactive "P")
-    (cond ((equal abovep '(16))
-           (jj-open-line-above t))
-          ((equal abovep '(4))
-           (jj-open-line-above nil))
-          (t (jj-open-line-below))))
+       With a prefix argument, call `jj-open-line-above'.
+       With double prefix argument, call `jj-open-line-above' with prefix argument."
+         (interactive "P")
+         (cond ((equal abovep '(16))
+                (jj-open-line-above t))
+               ((equal abovep '(4))
+                (jj-open-line-above nil))
+               (t (jj-open-line-below))))
 
-  (global-set-key (kbd "C-j") 'jj-open-line)
-  (define-key org-mode-map (kbd "C-j") 'jj-open-line)
+       (global-set-key (kbd "C-j") 'jj-open-line)
+       (define-key org-mode-map (kbd "C-j") 'jj-open-line)
      #+END_SRC
 
      Usually I wan't to call =kill-whole-line=, but in certain situations it is
      better to call =kill-line=.
      #+BEGIN_SRC emacs-lisp
-  (defun jj-kill-line (&optional arg)
-    "Run `kill-whole-line', with prefix run `kill-line'."
-    (interactive "P")
-    (if arg (kill-line)
-      (kill-whole-line)))
+       (defun jj-kill-line (&optional arg)
+         "Run `kill-whole-line', with prefix run `kill-line'."
+         (interactive "P")
+         (if arg (kill-line)
+           (kill-whole-line)))
 
-  (define-key org-mode-map (kbd "C-k") 'jj-kill-line)
-  (global-set-key (kbd "C-k") 'jj-kill-line)
+       (define-key org-mode-map (kbd "C-k") 'jj-kill-line)
+       (global-set-key (kbd "C-k") 'jj-kill-line)
      #+END_SRC
 
      I'm starting to feel a bit of the infamous Emacs pinky. So I wanted a more
      comfortable way of scrolling than =C-n=. =just-one-space= is a useful functions
      sometimes, so it gets to semi keep its keybinding.
      #+BEGIN_SRC emacs-lisp
-  (defun jj-thumb-scroll (&optional arg)
-    "Call `next-line'. With argument call `just-one-space'."
-    (interactive "P")
-    (if arg (just-one-space)
-      (next-line)))
+       (defun jj-thumb-scroll (&optional arg)
+         "Call `next-line'. With argument call `just-one-space'."
+         (interactive "P")
+         (if arg (just-one-space)
+           (next-line)))
 
-  (global-set-key (kbd "M-SPC") 'jj-thumb-scroll)
+       (global-set-key (kbd "M-SPC") 'jj-thumb-scroll)
      #+END_SRC
 
      This is an awesome extension. Unfortunately "C-|" is on of them keybindings
      which won't work in a terminal, so bind it to <F8> also.
      #+BEGIN_SRC emacs-lisp
-  (global-set-key (kbd "C-|") 'er/expand-region)
-  (global-set-key (kbd "<f8>") 'er/expand-region)
+       (global-set-key (kbd "C-|") 'er/expand-region)
+       (global-set-key (kbd "<f8>") 'er/expand-region)
      #+END_SRC
 
      Multiple cursors. I don't actually use this... but it's good to be able to
      counter those sublimists...
      I took this from hydra's examples.
      #+BEGIN_SRC emacs-lisp
-  (require 'multiple-cursors)
-  (defhydra jj-multiple-cursors-hydra (:hint nil)
-    "
-       ^Up^            ^Down^        ^Miscellaneous^
-  ----------------------------------------------
-  [_p_]   Next    [_n_]   Next    [_l_] Edit lines
-  [_P_]   Skip    [_N_]   Skip    [_a_] Mark all
-  [_M-p_] Unmark  [_M-n_] Unmark  [_q_] Quit"
-    ("l" mc/edit-lines :exit t)
-    ("a" mc/mark-all-like-this :exit t)
-    ("n" mc/mark-next-like-this)
-    ("N" mc/skip-to-next-like-this)
-    ("M-n" mc/unmark-next-like-this)
-    ("p" mc/mark-previous-like-this)
-    ("P" mc/skip-to-previous-like-this)
-    ("M-p" mc/unmark-previous-like-this)
-    ("q" nil))
-  (global-set-key (kbd "H-m") 'jj-multiple-cursors-hydra/body)
+       (require 'multiple-cursors)
+       (defhydra jj-multiple-cursors-hydra (:hint nil)
+         "
+            ^Up^            ^Down^        ^Miscellaneous^
+       ----------------------------------------------
+       [_p_]   Next    [_n_]   Next    [_l_] Edit lines
+       [_P_]   Skip    [_N_]   Skip    [_a_] Mark all
+       [_M-p_] Unmark  [_M-n_] Unmark  [_q_] Quit"
+         ("l" mc/edit-lines :exit t)
+         ("a" mc/mark-all-like-this :exit t)
+         ("n" mc/mark-next-like-this)
+         ("N" mc/skip-to-next-like-this)
+         ("M-n" mc/unmark-next-like-this)
+         ("p" mc/mark-previous-like-this)
+         ("P" mc/skip-to-previous-like-this)
+         ("M-p" mc/unmark-previous-like-this)
+         ("q" nil))
+       (global-set-key (kbd "H-m") 'jj-multiple-cursors-hydra/body)
      #+END_SRC
 
      Undo-tree is awesome.
      #+BEGIN_SRC emacs-lisp
-  (require 'undo-tree)
-  (global-undo-tree-mode)
+       (require 'undo-tree)
+       (global-undo-tree-mode)
      #+END_SRC
 
      A function to clean up buffers in general.
      #+BEGIN_SRC emacs-lisp
-  (defun jj-clean-buffer ()
-    "A function to make sure a buffer is nicely formatted"
-    (interactive)
-    (indent-region (point-min) (point-max))
-    (untabify (point-min) (point-max))
-    (delete-trailing-whitespace))
+       (defun jj-clean-buffer ()
+         "A function to make sure a buffer is nicely formatted"
+         (interactive)
+         (indent-region (point-min) (point-max))
+         (untabify (point-min) (point-max))
+         (delete-trailing-whitespace))
      #+END_SRC
 
      #+BEGIN_SRC emacs-lisp
-  (require 'move-text)
-  (global-set-key (kbd "M-S-<up>") 'move-text-up)
-  (global-set-key (kbd "M-S-<down>") 'move-text-down)
+       (require 'move-text)
+       (global-set-key (kbd "M-S-<up>") 'move-text-up)
+       (global-set-key (kbd "M-S-<down>") 'move-text-down)
      #+END_SRC
 
      #+BEGIN_SRC emacs-lisp
-  (require 'avy-zap)
-  (global-set-key (kbd "M-Z") 'avy-zap-to-char)
+       (require 'avy-zap)
+       (global-set-key (kbd "M-Z") 'avy-zap-to-char)
      #+END_SRC
 
      A couple of functions for opening temp buffers. Comes in handy sometimes.
      #+BEGIN_SRC emacs-lisp
-  (defun jj-tmp-file (ending)
-    "Opens as new buffer with major-mode set according to ending."
-    (interactive "Mending: ")
-    (let ((name (concat "jjtmp." ending)))
-      (pop-to-buffer (generate-new-buffer name))
-      (let ((buffer-file-name name))
-        (set-auto-mode))))
+       (defun jj-tmp-file (ending)
+         "Opens as new buffer with major-mode set according to ending."
+         (interactive "Mending: ")
+         (let ((name (concat "jjtmp." ending)))
+           (pop-to-buffer (generate-new-buffer name))
+           (let ((buffer-file-name name))
+             (set-auto-mode))))
 
-  (defun jj-kill-tmps (ending)
-    "Kill all jjtmp buffer ending in 'ending', which can be the empy string, which
-    means kill all jjtmp buffers."
-    (interactive "Mending: ")
-    (let ((name (concat "jjtmp." ending)))
-      (dolist (buf (buffer-list))
-        (when (string-prefix-p name (buffer-name buf))
-          (kill-buffer buf)))))
+       (defun jj-kill-tmps (ending)
+         "Kill all jjtmp buffer ending in 'ending', which can be the empy string, which
+         means kill all jjtmp buffers."
+         (interactive "Mending: ")
+         (let ((name (concat "jjtmp." ending)))
+           (dolist (buf (buffer-list))
+             (when (string-prefix-p name (buffer-name buf))
+               (kill-buffer buf)))))
      #+END_SRC
 
 *** Completion
     I use ido for most completion, I find it less intrusive than helm for things
     like switching buffers.
     #+BEGIN_SRC emacs-lisp
-  (require 'flx-ido)
-  (ido-mode 1)
-  (ido-everywhere)
-  (flx-ido-mode 1)
-  (setq ido-enable-flex-matching t
-        ido-use-faces nil)
+      (require 'flx-ido)
+      (ido-mode 1)
+      (ido-everywhere)
+      (flx-ido-mode 1)
+      (setq ido-enable-flex-matching t
+            ido-use-faces nil)
     #+END_SRC
 
     Smex is a good replacement for M-x.
     #+BEGIN_SRC emacs-lisp
-  (global-set-key (kbd "M-x") 'smex)
-  (global-set-key (kbd "M-X") 'smex-major-mode-commands)
+      (global-set-key (kbd "M-x") 'smex)
+      (global-set-key (kbd "M-X") 'smex-major-mode-commands)
     #+END_SRC
 
 *** Terminal
+
+    This adds Emacs' =compile= functionality to comint buffers.
+    #+BEGIN_SRC emacs-lisp
+      (add-hook 'shell-mode-hook 'compilation-shell-minor-mode)
+    #+END_SRC
 
 **** Ansi-term
 
      Use =zsh= if available, otherwise default to a regular bourne shell.
      #+BEGIN_SRC emacs-lisp
-  (require 'multi-term)
-  (setq multi-term-program (or (executable-find "zsh") "/bin/sh"))
+       (require 'multi-term)
+       (setq multi-term-program (or (executable-find "zsh") "/bin/sh"))
 
-  (defun jj-do-in-other-window (func &optional arg)
-    "Move to other window and apply func."
-    (jj-other-window)
-    (call-interactively func arg))
+       (defun jj-do-in-other-window (func &optional arg)
+         "Move to other window and apply func."
+         (jj-other-window)
+         (call-interactively func arg))
 
-  (defun jj-open-term-other-window (&optional arg)
-    "Open a new terminal in the other window."
-    (interactive "P")
-    (jj-do-in-other-window 'multi-term arg))
+       (defun jj-open-term-other-window (&optional arg)
+         "Open a new terminal in the other window."
+         (interactive "P")
+         (jj-do-in-other-window 'multi-term arg))
 
-  (defun jj-next-term-other-window (&optional arg)
-    "Switch to next terminal in other window"
-    (interactive "P")
-    (jj-do-in-other-window 'multi-term-next arg))
+       (defun jj-next-term-other-window (&optional arg)
+         "Switch to next terminal in other window"
+         (interactive "P")
+         (jj-do-in-other-window 'multi-term-next arg))
 
-  (defun jj-prev-term-other-window (&optional arg)
-    "Switch to previous terminal in other window"
-    (interactive "P")
-    (jj-do-in-other-window 'multi-term-prev arg))
+       (defun jj-prev-term-other-window (&optional arg)
+         "Switch to previous terminal in other window"
+         (interactive "P")
+         (jj-do-in-other-window 'multi-term-prev arg))
 
-  (global-set-key (kbd "H-t c") 'multi-term)
-  (global-set-key (kbd "H-t 4 c") 'jj-open-term-other-window)
-  (global-set-key (kbd "H-t n") 'multi-term-next)
-  (global-set-key (kbd "H-t 4 n") 'jj-next-term-other-window)
-  (global-set-key (kbd "H-t p") 'multi-term-prev)
-  (global-set-key (kbd "H-t 4 p") 'jj-prev-term-other-window)
+       (global-set-key (kbd "H-t c") 'multi-term)
+       (global-set-key (kbd "H-t 4 c") 'jj-open-term-other-window)
+       (global-set-key (kbd "H-t n") 'multi-term-next)
+       (global-set-key (kbd "H-t 4 n") 'jj-next-term-other-window)
+       (global-set-key (kbd "H-t p") 'multi-term-prev)
+       (global-set-key (kbd "H-t 4 p") 'jj-prev-term-other-window)
      #+END_SRC
 
 **** Eshell
 
      The Emacs shell.
      #+BEGIN_SRC emacs-lisp
-  (require 'eshell)
+       (require 'eshell)
 
-  (defun jj-eshell-other-window ()
-    "Open eshell in other window."
-    (interactive)
-    (jj-other-window)
-    (eshell))
+       (defun jj-eshell-other-window ()
+         "Open eshell in other window."
+         (interactive)
+         (jj-other-window)
+         (eshell))
 
-  (global-set-key (kbd "H-t e") 'eshell)
-  (global-set-key (kbd "H-t 4 e") 'jj-eshell-other-window)
+       (global-set-key (kbd "H-t e") 'eshell)
+       (global-set-key (kbd "H-t 4 e") 'jj-eshell-other-window)
      #+END_SRC
 
      I don't know why this has to be done this way...
      #+BEGIN_SRC emacs-lisp
-  (add-hook 'eshell-mode-hook
-            (lambda ()
-              (define-key eshell-mode-map (kbd "C-d")
-                'eshell-life-is-too-much)))
+       (add-hook 'eshell-mode-hook
+                 (lambda ()
+                   (define-key eshell-mode-map (kbd "C-d")
+                     'eshell-life-is-too-much)))
      #+END_SRC
 
      Better to use Emacs.
      #+BEGIN_SRC emacs-lisp
-  (setenv "PAGER" (executable-find "cat"))
+       (setenv "PAGER" (executable-find "cat"))
      #+END_SRC
 
      #+BEGIN_SRC emacs-lisp
-  (require 'em-smart)
-  (setq eshell-where-to-jump 'begin)
-  (setq eshell-review-quick-commands nil)
-  (setq eshell-smart-space-goes-to-end t)
+       (require 'em-smart)
+       (setq eshell-where-to-jump 'begin
+             eshell-review-quick-commands nil
+             eshell-smart-space-goes-to-end t)
      #+END_SRC
 
 *** Help
 
     I need somebody..
     #+BEGIN_SRC emacs-lisp
-(require 'ehelp)
-(define-key global-map [help] 'ehelp-command)
-(define-key global-map [f1] 'ehelp-command)
+      (require 'ehelp)
+      (define-key global-map [help] 'ehelp-command)
+      (define-key global-map [f1] 'ehelp-command)
     #+END_SRC
 
 *** Scrolling
 
     Scrolling is always problematic.
     #+BEGIN_SRC emacs-lisp
-  (setq scroll-conservatively 101
-        scroll-margin 3
-        scroll-preserve-screen-position t)
+      (setq scroll-conservatively 101
+            scroll-margin 3
+            scroll-preserve-screen-position t)
     #+END_SRC
 
 *** Navigation
 
     These are functions to jump around in or between windows.
     #+BEGIN_SRC emacs-lisp
-  (require 'avy)
-  (defun jj-avy-or-clear-table-cell ()
-    "If in org-mode table call `org-table-blank-field', otherwise
-  call `avy-goto-word-or-subword-1'."
-    (interactive)
-    (if (and (eq major-mode 'org-mode)
-             (org-table-check-inside-data-field t))
-        (org-table-blank-field)
-      (avy-goto-word-or-subword-1)))
+      (require 'avy)
+      (defun jj-avy-or-clear-table-cell ()
+        "If in org-mode table call `org-table-blank-field', otherwise
+      call `avy-goto-word-or-subword-1'."
+        (interactive)
+        (if (and (eq major-mode 'org-mode)
+                 (org-table-check-inside-data-field t))
+            (org-table-blank-field)
+          (avy-goto-word-or-subword-1)))
 
-  (global-set-key (kbd "C-c SPC") 'jj-avy-or-clear-table-cell)
-  (define-key org-mode-map (kbd "C-c SPC") 'jj-avy-or-clear-table-cell)
+      (global-set-key (kbd "C-c SPC") 'jj-avy-or-clear-table-cell)
+      (define-key org-mode-map (kbd "C-c SPC") 'jj-avy-or-clear-table-cell)
     #+END_SRC
 
     Jump to a window.
     #+BEGIN_SRC emacs-lisp
-  (require 'ace-window)
-  (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l))
-  (define-key global-map (kbd "C-c <tab>") 'ace-window)
+      (require 'ace-window)
+      (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l))
+      (define-key global-map (kbd "C-c <tab>") 'ace-window)
     #+END_SRC
 
     #+BEGIN_SRC emacs-lisp
-  (require 'ace-link)
-  (ace-link-setup-default)
+      (require 'ace-link)
+      (ace-link-setup-default)
     #+END_SRC
 
     Idomenu is a way to navigate imenu using ido, which is vastly superior to the
     default imenu in my opinion.
     #+BEGIN_SRC emacs-lisp
-  (require 'idomenu)
-  (setq-default imenu-auto-rescan t)
+      (require 'idomenu)
+      (setq-default imenu-auto-rescan t)
     #+END_SRC
 
     When I search for something I usually want to move to that thing. So move to the
     Occur buffer after invoking occur.
     #+BEGIN_SRC emacs-lisp
-  (add-hook 'occur-hook 'jj-other-window)
+      (add-hook 'occur-hook 'jj-other-window)
     #+END_SRC
 
     A little function to search the symbol at point.
     #+BEGIN_SRC emacs-lisp
-  (require 'thingatpt)
-  (defun jj-occur-this (&optional proj)
-    "Occur the symbol at point.
+      (require 'thingatpt)
+      (defun jj-occur-this (&optional proj)
+        "Occur the symbol at point.
 
-  With prefix, do a projectile-multi-occur. If there is no symbol at point, fall
-    back to the regular `occur' or `projectile-multi-occur'."
-    (interactive "P")
-    (let ((thing (thing-at-point 'symbol t)))
-      (if proj
-          (if thing (multi-occur (projectile-project-buffers) thing)
-            (projectile-multi-occur))
-        (if thing (occur thing)
-          (call-interactively 'occur)))))
-  (global-set-key (kbd "H-a o") 'jj-occur-this)
+      With prefix, do a projectile-multi-occur. If there is no symbol at point, fall
+        back to the regular `occur' or `projectile-multi-occur'."
+        (interactive "P")
+        (let ((thing (thing-at-point 'symbol t)))
+          (if proj
+              (if thing (multi-occur (projectile-project-buffers) thing)
+                (projectile-multi-occur))
+            (if thing (occur thing)
+              (call-interactively 'occur)))))
+      (global-set-key (kbd "H-a o") 'jj-occur-this)
     #+END_SRC
 
     #+BEGIN_SRC emacs-lisp
-  (require 'swiper)
-  (global-set-key (kbd "H-s") 'swiper)
+      (require 'swiper)
+      (global-set-key (kbd "H-s") 'swiper)
     #+END_SRC
 
 *** Backups
 
     Control the Emacs backups.
     #+BEGIN_SRC emacs-lisp
-(setq
-   backup-by-copying t
-   backup-directory-alist
-    '(("." . "~/.emacs-backups"))
-   delete-old-versions t
-   kept-new-versions 4
-   kept-old-versions 2
-   version-control t)
+      (setq
+       backup-by-copying t
+       backup-directory-alist
+       '(("." . "~/.emacs-backups"))
+       delete-old-versions t
+       kept-new-versions 4
+       kept-old-versions 2
+       version-control t)
     #+END_SRC
 
 ** Non programming editing modes
@@ -847,317 +875,445 @@
 *** Latex
 
     #+BEGIN_SRC emacs-lisp
-  (require 'tex-site)
-  (setq TeX-auto-save t)
-  (setq TeX-parse-self t)
-  (setq TeX-PDF-mode t)
-  (setq-default TeX-master nil)
-  (setq TeX-source-correlate-method 'synctex)
-  (setq TeX-source-correlate-mode t)
-  (setq TeX-source-correlate-start-server t)
-  (setq reftex-plug-into-AUCTeX t)
-  (setq TeX-view-program-selection '((output-pdf "zathura")))
-  (require 'company-auctex)
-  (require 'company-math)
+      (require 'tex-site)
+      (setq TeX-auto-save t)
+      (setq TeX-parse-self t)
+      (setq TeX-PDF-mode t)
+      (setq-default TeX-master nil)
+      (setq TeX-source-correlate-method 'synctex)
+      (setq TeX-source-correlate-mode t)
+      (setq TeX-source-correlate-start-server t)
+      (setq reftex-plug-into-AUCTeX t)
+      (setq TeX-view-program-selection '((output-pdf "zathura")))
+      (require 'company-auctex)
+      (require 'company-math)
 
-  (defun jj-latex-hook ()
-    "My hook for latex mode"
-    (turn-on-reftex)
-    (setq-local company-backends
-                (append '(company-latex-commands company-math-symbols-latex)
-                        company-backends))
-    (company-auctex-init))
+      (defun jj-latex-hook ()
+        "My hook for latex mode"
+        (turn-on-reftex)
+        (setq-local company-backends
+                    (append '(company-latex-commands company-math-symbols-latex)
+                            company-backends))
+        (company-auctex-init))
 
-  (add-hook 'LaTeX-mode-hook 'jj-latex-hook)
+      (add-hook 'LaTeX-mode-hook 'jj-latex-hook)
     #+END_SRC
 
 *** Markdown
 
     #+BEGIN_SRC emacs-lisp
-(autoload 'markdown-mode "markdown-mode"
-  "Major mode for editing markdown files" t)
-(add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
+      (autoload 'markdown-mode "markdown-mode"
+        "Major mode for editing markdown files" t)
+      (add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
     #+END_SRC
 
 ** Internet stuff
-*** The mighty gnus
 
-    I use the mighty =gnus= to read some mailing lists. I'm also starting to use it
-    to read my mail and rss feeds, but I'm not quite satisfied with my setup, so I'm
-    keeping my old =mu4e= and =elfeed= setups for now.
-    #+BEGIN_SRC emacs-lisp
-  (require 'gnus)
-  (setq gnus-select-method `(nntp "gmane"
-                                  (nntp-open-connection-function
-                                   nntp-open-tls-stream)
-                                  (nntp-port-number
-                                   ,(if (jj-is-work-comp-p) 20027 563))
-                                   (nntp-address
-                                    ,(if (jj-is-work-comp-p) "localhost" "news.gmane.org")))
-        gnus-nntp-server nil
-        gnus-large-newsgroup 1000
-        mm-text-html-renderer 'shr
-        gnus-home-directory "~/.gnus/")
-    #+END_SRC
+*** Mail and NNTP
+**** General
 
-    #+BEGIN_SRC emacs-lisp
-  (defvar jj-gmane-tunnel-running nil
-    "A closure to check if the ssh tunnel I need to access gmane from work is
-    running.")
+     My primary mail address.
+     #+BEGIN_SRC emacs-lisp
+       (setq user-mail-address "joakim.jalap@fastmail.com")
+     #+END_SRC
 
-  (when (jj-is-work-comp-p)
-    (unless (and jj-gmane-tunnel-running (funcall jj-gmane-tunnel-running))
-      (let ((proc (start-process "gmane-tunnel"
-                                 nil
-                                 (executable-find "ssh")
-                                 "-f" "-N" "-L" "20027:news.gmane.org:563"
-                                 jj-home-host-ssh-name)))
-        (setq jj-gmane-tunnel-running
-              (lambda ()
-                (eq (process-status proc) 'run))))))
+     This is where I store my mail.
+     #+BEGIN_SRC emacs-lisp
+       (setq message-directory "~/mail")
+     #+END_SRC
 
-  (defun jj-can-connect-to-gmane ()
-    "Is it ok to connect to gmane?"
-    (when (jj-is-work-comp-p)
-      (unless (and jj-gmane-tunnel-running (funcall jj-gmane-tunnel-running))
-        (user-error "No ssh tunnel to gmane"))))
-    #+END_SRC
+**** The mighty gnus
 
-    This is bound to 'read manual' in gnus. That's for losers!
-    #+BEGIN_SRC emacs-lisp
-  (define-key gnus-group-mode-map (kbd "C-c <tab>") 'ace-window)
-    #+END_SRC
+     I use =gnus= to read mail. It is really awesome.
+     #+BEGIN_SRC emacs-lisp
+       (require 'gnus)
+       (setq gnus-nntp-server nil
+             gnus-large-newsgroup 1000
+             mm-text-html-renderer 'shr
+             gnus-home-directory "~/.gnus/"
+             gnus-use-cache t
+             gnus-thread-hide-subtree t
+             gnus-auto-select-first nil)
+     #+END_SRC
 
-    Sync the state to my home server, but ask first. The reason is that if there is
-    something wrong with some setup, this sync can really fuck things up if it gets
-    written to the server.
-    #+BEGIN_SRC emacs-lisp
-  (require 'gnus)
-  (require 'gnus-sync)
-  (setq gnus-sync-backend (concat "/ssh:" jj-home-host-ssh-name
-                                  ":gnus-sync/gnus")
-        gnus-sync-global-vars '(gnus-newsrc-last-checked-date
-                                gnus-topic-topology
-                                gnu-topic-alist
-                                gnus-newsrc-alist)
-        gnus-sync-newsrc-groups '("nntp")
-        gnus-sync-newsrc-offsets '(2 3))
-
-  (defun jj-maybe-read-sync (&rest ignored)
-    (when (y-or-n-p "Sync the gnus? ")
-      (gnus-sync-read t)))
-
-  (defun jj-maybe-save-sync (&rest ignored)
-    (when (y-or-n-p "Sync the gnus? ")
-      (gnus-sync-save)))
-
-  (remove-hook 'gnus-save-newsrc-hook 'gnus-sync-save)
-  (advice-add 'gnus :before 'jj-maybe-read-sync)
-  (add-hook 'gnus-save-newsrc-hook 'jj-maybe-save-sync)
-    #+END_SRC
-
-    Also read news from eternal september.
-    #+BEGIN_SRC emacs-lisp
-  (push '(nntp "eternal-september"
-               (nntp-open-connection-function nntp-open-tls-stream)
-               (nntp-port-number 443)
-               (nntp-address "news.eternal-september.org"))
-        gnus-secondary-select-methods)
-    #+END_SRC
-
-    Use topics.
-    #+BEGIN_SRC emacs-lisp
-  (add-hook 'gnus-group-mode-hook 'gnus-topic-mode)
-    #+END_SRC
-
-    This is from EmacsWiki.
-    #+BEGIN_SRC emacs-lisp
-  (defun jj-gnus-topic-fold-this-topic nil
-        "Toggle folding of current topic."
-        (interactive)
-        (gnus-topic-goto-topic (gnus-current-topic))
-        (gnus-topic-fold))
-  (define-key gnus-group-mode-map (kbd "<tab>")
-    'jj-gnus-topic-fold-this-topic)
-    #+END_SRC
-
-    #+BEGIN_SRC emacs-lisp
-  (setq gnus-use-cache t
-        gnus-thread-hide-subtree t
-        gnus-topic-display-empty-topics nil
-        gnus-auto-select-first nil
-        gnus-treat-from-picon nil
+Don't show pictures of people, I don't wanna see...
+#+BEGIN_SRC emacs-lisp
+  (setq gnus-treat-from-picon nil
         gnus-treat-mail-picon nil
         gnus-treat-from-gravatar nil
         gnus-treat-mail-gravatar nil
         gnus-treat-newsgroups-picon nil
         gnus-treat-display-smileys nil
         gnus-treat-display-face nil
-        gnus-treat-display-x-face nil
-        )
+        gnus-treat-display-x-face nil)
+#+END_SRC
 
-  (add-hook 'gnus-summary-prepared-hook 'gnus-summary-hide-all-threads)
+     This is bound to 'read manual' in gnus. That's for losers!
+     #+BEGIN_SRC emacs-lisp
+       (define-key gnus-group-mode-map (kbd "C-c <tab>") 'ace-window)
+     #+END_SRC
+
+     Sync the state to my home server, but ask first. The reason is that if there is
+     something wrong with some setup, this sync can really fuck things up if it gets
+     written to the server.
+     #+BEGIN_SRC emacs-lisp
+       (require 'gnus)
+       (require 'gnus-sync)
+       (setq gnus-sync-backend (concat "/ssh:" jj-home-host-ssh-name
+                                       ":gnus-sync/gnus")
+             gnus-sync-global-vars '(gnus-newsrc-last-checked-date
+                                     gnus-topic-topology
+                                     gnus-topic-alist
+                                     gnus-newsrc-alist)
+             gnus-sync-newsrc-groups '("nntp")
+             gnus-sync-newsrc-offsets '(2 3))
+
+       (defun jj-maybe-save-sync (&rest ignored)
+         (when (y-or-n-p "Sync the gnus? ")
+           (gnus-sync-save)))
+
+       (remove-hook 'gnus-save-newsrc-hook 'gnus-sync-save)
+       (add-hook 'gnus-save-newsrc-hook 'jj-maybe-save-sync)
+     #+END_SRC
+
+     Use topics, but don't display empty topics.
+     #+BEGIN_SRC emacs-lisp
+       (add-hook 'gnus-group-mode-hook 'gnus-topic-mode)
+       (setq gnus-topic-display-empty-topics nil)
+     #+END_SRC
+
+     This is from EmacsWiki.
+     #+BEGIN_SRC emacs-lisp
+       (defun jj-gnus-topic-fold-this-topic nil
+         "Toggle folding of current topic."
+         (interactive)
+         (gnus-topic-goto-topic (gnus-current-topic))
+         (gnus-topic-fold))
+       (define-key gnus-group-mode-map (kbd "<tab>")
+         'jj-gnus-topic-fold-this-topic)
+     #+END_SRC
+
+     #+BEGIN_SRC emacs-lisp
+       (add-hook 'gnus-summary-prepared-hook 'gnus-summary-hide-all-threads)
+     #+END_SRC
+
+**** Reading NNTP
+
+     These are the settings I use to read mailing lists via nntp.
+     #+BEGIN_SRC emacs-lisp
+       (setq gnus-select-method `(nntp "gmane"
+                                       (nntp-open-connection-function
+                                        nntp-open-tls-stream)
+                                       (nntp-port-number
+                                        ,(if (jj-is-work-comp-p) 20027 563))
+                                       (nntp-address
+                                        ,(if (jj-is-work-comp-p) "localhost" "news.gmane.org"))))
+     #+END_SRC
+
+     Also read news from eternal september.
+     #+BEGIN_SRC emacs-lisp
+       (push '(nntp "eternal-september"
+                    (nntp-open-connection-function nntp-open-tls-stream)
+                    (nntp-port-number 443)
+                    (nntp-address "news.eternal-september.org"))
+             gnus-secondary-select-methods)
+     #+END_SRC
+
+
+     This is needed to send my login info to eternal-september.
+     #+BEGIN_SRC emacs-lisp
+       (defun jj-nntp-send-auth ()
+         (nntp-send-authinfo t))
+       (add-hook 'nntp-server-opened-hook 'jj-nntp-send-auth)
+     #+END_SRC
+
+     At my work there is a big corporate firewall, so to read nntp I have to ssh
+     tunnel via my home server.
+     #+BEGIN_SRC emacs-lisp
+       (defvar jj-gmane-tunnel-running nil
+         "A closure to check if the ssh tunnel I need to access gmane from work is
+         running.")
+
+       (when (jj-is-work-comp-p)
+         (unless (and jj-gmane-tunnel-running (funcall jj-gmane-tunnel-running))
+           (let ((proc (start-process "gmane-tunnel"
+                                      nil
+                                      (executable-find "ssh")
+                                      "-f" "-N" "-L" "20027:news.gmane.org:563"
+                                      jj-home-host-ssh-name)))
+             (setq jj-gmane-tunnel-running
+                   (lambda ()
+                     (eq (process-status proc) 'run))))))
+
+       (defun jj-can-connect-to-gmane ()
+         "Is it ok to connect to gmane?"
+         (when (jj-is-work-comp-p)
+           (unless (and jj-gmane-tunnel-running (funcall jj-gmane-tunnel-running))
+             (user-error "No ssh tunnel to gmane"))))
+     #+END_SRC
+
+**** Sending mail
+
+     Basic settings for sending mail.
+     #+BEGIN_SRC emacs-lisp
+       (require 'smtpmail)
+       (setq smtpmail-default-smtp-server "mail.messagingengine.com")
+       (setq send-mail-function 'smtpmail-send-it
+             message-send-mail-function 'smtpmail-send-it
+             smtpmail-stream-type 'ssl
+             smtpmail-smtp-server "mail.messagingengine.com"
+             smtpmail-smtp-service 465)
+     #+END_SRC
+
+     Kill the message buffer after sending.
+     #+BEGIN_SRC emacs-lisp
+       (setq message-kill-buffer-on-exit t)
+     #+END_SRC
+
+     This sets up the stream type for connecting to smtp servers. On locahost
+     (davmail) it has to be plain, otherwise let it be ssl. There is probably a
+     better way to do this, but what the hell.
+     #+BEGIN_SRC emacs-lisp
+   (defun jj-setup-smtp-stream-type (orig-fun &rest args)
+     (let ((smtpmail-stream-type
+            (if (string= smtpmail-smtp-server "localhost")
+                'plain
+              'ssl)))
+       (apply orig-fun args)))
+
+   (advice-add 'smtpmail-via-smtp :around 'jj-setup-smtp-stream-type)
+     #+END_SRC
+
+     Store sent mail here.
+     #+BEGIN_SRC emacs-lisp
+    (setq gnus-message-archive-group
+          '(("^nnmaildir.*fastmail.*" . "nnmaildir+fastmail:Sent")))
+     #+END_SRC
+
+     Setup the different posting styles.
+     #+BEGIN_SRC emacs-lisp
+        (setq gnus-parameters
+              '(("^nnmaildir.*fastmail*"
+                 (posting-style
+                  (name "Joakim Jalap")
+                  (address "joakim.jalap@fastmail.com")
+                  (gcc "nnmaildir+fastmail:Sent")
+                  ("X-Message-SMTP-Method" "smtp mail.messagingengine.com 465")
+                  ))
+                ("^nnmaildir.*gmail:.*"
+                 (posting-style
+                  (name "Joakim Jalap")
+                  (address "joakim.jalap@gmail.com")
+                  (gcc "nnmaildir+gmail:Sent")
+                  ("X-Message-SMTP-Method" "smtp smtp.gmail.com 465")
+                  ))
+                ("^nnimap.*tritech:.*"
+                 (posting-style
+                  (name "Joakim Jalap")
+                  (address "joakim.jalap@tritech.se")
+                  ("X-Message-SMTP-Method" "smtp localhost 1025")
+                  ))
+                ))
+     #+END_SRC
+
+**** mbsync
+
+     This is my own little package to sync my mail using mbsync. The main benefit
+     of doing it from within Emacs is that I can use the ~auth-source~ mechanism
+     to get the passwords.
+     #+BEGIN_SRC emacs-lisp
+       (require 'mbsync)
+       (setq mbsync-sync-objects
+             '(("fastmail" . "mail.messagingengine.com")
+               ("gmail" . "imap.gmail.com")))
+     #+END_SRC
+
+     #+BEGIN_SRC emacs-lisp
+       (setq mbsync-top-maildir (expand-file-name "~/mail"))
+     #+END_SRC
+
+     Run =notmuch new= to index mail after getting it.
+     #+BEGIN_SRC emacs-lisp
+       (add-hook 'mbsync-after-fetch-hook 'mbsync-notmuch-new)
+     #+END_SRC
+
+     A little function to show a notification when I've got mail.
+     #+BEGIN_SRC emacs-lisp
+       (when (display-graphic-p)
+         (require 'notifications)
+         (defun jj-new-mail-notification (sender)
+           "Notify me that there is new mail"
+           (notifications-notify
+            :title "You've got mail!"
+            :body sender
+            :urgency 'normal)))
+     #+END_SRC
+
+**** Reading mail
+
+     Add my mail as a selection method in gnus.
+     #+BEGIN_SRC emacs-lisp
+       (require 'nnir)
+       (push '(nnimap "fastmail" (nnimap-address "mail.messagingengine.com")
+                         (nnimap-server-port 993)
+                         (nnimap-stream ssl))
+             gnus-secondary-select-methods)
+       (setq mail-sources nil)
+     #+END_SRC
+
+     And my old gmail.
+     #+BEGIN_SRC emacs-lisp
+       (push '(nnimap "gmail" (nnimap-address "imap.gmail.com")
+                         (nnimap-server-port 993)
+                         (nnimap-stream ssl))
+             gnus-secondary-select-methods)
+     #+END_SRC
+
+     And my work mail, which I access through =davmail=.
+     #+BEGIN_SRC emacs-lisp
+       (push '(nnimap "tritech" (nnimap-address "localhost")
+                      (nnimap-server-port 1143)
+                      (nnimap-stream network))
+             gnus-secondary-select-methods)
+     #+END_SRC
+
+     I want to see my mail inboxes even when they are empty, mainly so that I can
+     use =C-u m= to send mail with the correct parameters.
+     #+BEGIN_SRC emacs-lisp
+       (setq gnus-permanently-visible-groups ".*INBOX$")
+     #+END_SRC
+
+     I found this in an old mailing list post (as you always do) and I'm adapting
+     it a bit to make it work for me. Currently it DOES NOT WORK, though.
+     #+BEGIN_SRC emacs-lisp
+       (require 'notmuch)
+
+       (defun jj-notmuch-find-group (file)
+         (let ((group (file-name-directory (directory-file-name (file-name-directory
+                                                                 file)))))
+           ;; get rid of the first part of the path
+           ;; FIXME: will this work on FreeBSD where it's /usr/home?
+           (setq group (replace-regexp-in-string
+                        (concat "/home/" (user-login-name) "/mail/")
+                        ""
+                        group))
+           ;; construct the group name from the words up to the first "/"
+           (setq group (replace-regexp-in-string "^\\([^/]+\\)/" "nnmaildir+\\1:" group
+                                                 t))
+           ;; then remove the last "/"
+           (setq group (replace-regexp-in-string "/$" "" group))
+           (if (string-match ":$" group)
+               (concat group "Inbox")
+             (replace-regexp-in-string ":\\." ":" group))))
+
+       (defun th-notmuch-goto-message-in-gnus ()
+         "Open a summary buffer containing the current notmuch article."
+         (interactive)
+         (let ((group (jj-notmuch-find-group (notmuch-show-get-filename)))
+               (message-id (replace-regexp-in-string
+                            "^id:" "" (notmuch-show-get-message-id))))
+           (if (and group message-id)
+               (org-gnus-follow-link group message-id)
+             (message "Couldn't get relevant info for switching to Gnus"))))
+
+       (define-key notmuch-show-mode-map (kbd "C-c C-c") 'th-notmuch-goto-message-in-gnus)
+     #+END_SRC
+
+*** BBDB
+
+    #+BEGIN_SRC emacs-lisp
+  (require 'bbdb)
+  (bbdb-initialize 'gnus 'message)
+  (bbdb-mua-auto-update-init 'message)
+    #+END_SRC
+
+    I don't live in North America, but I hear Canada's pretty nice.
+    #+BEGIN_SRC emacs-lisp
+(setq bbdb-north-american-phone-numbers-p nil)
     #+END_SRC
 
 
     #+BEGIN_SRC emacs-lisp
-  (defun jj-nntp-send-auth ()
-    (nntp-send-authinfo t))
-
-  (add-hook 'nntp-server-opened-hook 'jj-nntp-send-auth)
-    #+END_SRC
-
-*** Mail
-
-    #+BEGIN_SRC emacs-lisp
-  (setq user-mail-address "joakim.jalap@fastmail.com")
-    #+END_SRC
-
-    This is where I store my mail.
-    #+BEGIN_SRC emacs-lisp
-  (setq message-directory "~/mail")
-    #+END_SRC
-
-    Basic settings for sending mail.
-    #+BEGIN_SRC emacs-lisp
-  (setq smtpmail-default-smtp-server "mail.messagingengine.com")
-  (require 'smtpmail)
-  (setq send-mail-function 'smtpmail-send-it
-        message-send-mail-function 'smtpmail-send-it
-        smtpmail-stream-type 'ssl
-        smtpmail-smtp-server "mail.messagingengine.com"
-        smtpmail-smtp-service 465)
-    #+END_SRC
-
-    Kill the message buffer after sending.
-    #+BEGIN_SRC emacs-lisp
-  (setq message-kill-buffer-on-exit t)
-    #+END_SRC
-
-    #+BEGIN_SRC emacs-lisp
-  (require 'mbsync)
-  (setq mbsync-sync-objects
-        '(("fastmail" . "mail.messagingengine.com")
-          ("gmail" . "imap.gmail.com")))
-    #+END_SRC
-
-    #+BEGIN_SRC emacs-lisp
-  (setq mbsync-top-maildir (expand-file-name "~/mail"))
-    #+END_SRC
-
-    #+BEGIN_SRC emacs-lisp
-  (add-hook 'mbsync-after-fetch-hook 'mbsync-notmuch-new)
-  (add-hook 'mbsync-after-fetch-hook 'mbsync-mu-index)
-    #+END_SRC
-
-    My configuration for mu4e.
-    #+BEGIN_SRC emacs-lisp
-  (if (display-graphic-p)
-      (setq mu4e-view-show-images t
-            mu4e-view-prefer-html t
-            mu4e-use-fancy-chars t)
-    (setq mu4e-view-show-images nil
-          mu4e-view-prefer-html nil
-          mu4e-use-fancy-chars nil))
-
-  (setq mu4e-maildir (expand-file-name "~/mail/fastmail")
-        mu4e-sent-folder "/Sent Items"
-        mu4e-drafts-folder "/Drafts"
-        mu4e-html2text-command 'html2text
-        mu4e-sent-messages-behavior 'delete)
-
-  (defun jj-setup-for-mu4e ()
-    "Setup for using mu4e."
-    (interactive)
-    (setq mail-user-agent 'mu4e-user-agent))
-    #+END_SRC
-
-    A little function to show a notification when I've got mail.
-    #+BEGIN_SRC emacs-lisp
-  (when (display-graphic-p)
-    (require 'notifications)
-    (defun jj-new-mail-notification (sender)
-      "Notify me that there is new mail"
-      (notifications-notify
-       :title "You've got mail!"
-       :body sender
-       :urgency 'normal)))
-    #+END_SRC
-
-    Add my mail as a selection method in gnus.
-    #+BEGIN_SRC emacs-lisp
-  (require 'nnir)
-  (push `(nnmaildir "fastmail" (directory ,(expand-file-name "~/mail/fastmail"))
-                    (get-new-mail nil)
-                    (nnir-search-engine notmuch))
-        gnus-secondary-select-methods)
-  (setq mail-sources nil)
-
-  (setq nnir-notmuch-remove-prefix (expand-file-name "~/mail"))
-    #+END_SRC
-
-    And my old gmail.
-    #+BEGIN_SRC emacs-lisp
-  (push `(nnmaildir "gmail" (directory ,(expand-file-name "~/mail/gmail"))
-                    (get-new-mail nil)
-                    (nnir-search-engine notmuch))
-        gnus-secondary-select-methods)
-    #+END_SRC
-
-    Setup the different posting styles.
-    #+BEGIN_SRC emacs-lisp
-  (setq gnus-parameters
-        '(("^nnmaildir.*fastmail*"
-           (posting-style
-            (name "Joakim Jalap")
-            (address "joakim.jalap@fastmail.com")
-            (gcc "nnmaildir+fastmail:Sent Items")
-            ("X-Message-SMTP-Method" "smtp mail.messagingengine.com 465")
-            ))
-          ("^nnmaildir.*gmail:.*"
-           (posting-style
-            (name "Joakim Jalap")
-            (address "joakim.jalap@gmail.com")
-            (gcc "nnmaildir+gmail:Sent")
-            ("X-Message-SMTP-Method" "smtp smtp.gmail.com 465")
-            ))))
+  (setq bbdb-user-mail-names
+        (regexp-opt '("joakim.jalap@fastmail.com"
+                      "joakim.jalap@gmail.com"
+                      "joakim.jalap@tritech.se")))
     #+END_SRC
 
 
     #+BEGIN_SRC emacs-lisp
-  (setq gnus-permanently-visible-groups ".*Inbox.*")
+  (setq bbdb-complete-mail t
+        bbdb-complete-mail-allow-cycling t
+        bbdb-mua-auto-update-p 'query)
+    #+END_SRC
+
+    #+BEGIN_SRC emacs-lisp
+
     #+END_SRC
 
 *** Browsing
-
-    =Eww= is the built in browser in Emacs, well on of them anyway, and it's really
-    good, so I use it by default. Then I set an external browser depending on the
-    environment.
+    Set a default browser.
     #+BEGIN_SRC emacs-lisp
-  (setq browse-url-browser-function 'eww-browse-url
-        shr-external-browser 'browse-url-generic)
+      (setq browse-url-browser-function 'w3m-browse-url
+            shr-external-browser 'browse-url-generic)
 
-  (setq browse-url-generic-program
-        (cond ((eq system-type 'windows-nt)
-               (executable-find "Chrome"))
-              (t (setq browse-url-generic-program
-                       (if (display-graphic-p)
-                           (executable-find "conkeror")
-                         (executable-find "w3m"))))))
+      (setq browse-url-generic-program
+            (cond ((eq system-type 'windows-nt)
+                   (executable-find "Chrome"))
+                  (t (setq browse-url-generic-program
+                           (if (display-graphic-p)
+                               (executable-find "conkeror")
+                             (executable-find "w3m"))))))
 
-  ;;(require 'browse-url-dwim)
-  ;;(browse-url-dwim-mode 1)
+      ;;(require 'browse-url-dwim)
+      ;;(browse-url-dwim-mode 1)
     #+END_SRC
 
     This package implements =conkeror= like functionality for =eww=, and it really is
     the bees knees.
     #+BEGIN_SRC emacs-lisp
-  (require 'eww-lnum)
-  (eval-after-load "eww"
-    '(progn (define-key eww-mode-map "f" 'eww-lnum-follow)
-            (define-key eww-mode-map "F" 'eww-lnum-universal)))
+      (require 'eww-lnum)
+      (eval-after-load "eww"
+        '(progn (define-key eww-mode-map "f" 'eww-lnum-follow)
+                (define-key eww-mode-map "F" 'eww-lnum-universal)))
     #+END_SRC
 
+
+    This is an Emacs interface to =w3m=, it's maybe a little better than =eww= actually.
+    #+BEGIN_SRC emacs-lisp
+      (require 'w3m)
+      (setq w3m-home-page "https://duckduckgo.com")
+      (require 'w3m-search)
+      (add-to-list 'w3m-search-engine-alist
+                   '("ddg" "https://duckduckgo.com/?q=%s"))
+      (setq w3m-search-default-engine "ddg")
+    #+END_SRC
+
+    For that awesome conkerorlikeness.
+    #+BEGIN_SRC emacs-lisp
+      (require 'w3m-lnum)
+      (w3m-lnum-mode 1)
+    #+END_SRC
+
+    Download to the same place as every other program.
+    #+BEGIN_SRC emacs-lisp
+      (setq w3m-default-save-directory (expand-file-name "~/Downloads"))
+    #+END_SRC
+
+    Use the page title as the buffer name.
+    #+BEGIN_SRC emacs-lisp
+      (setq w3m-use-title-buffer-name t)
+    #+END_SRC
+
+    #+BEGIN_SRC emacs-lisp
+      (define-key w3m-mode-map (kbd "C-c C-t") 'w3m-view-this-url-new-session)
+    #+END_SRC
+
+    This mode associates a =w3m= window with the frame it is in, so that a =w3m= window
+    only has tabs for the buffers in the same frame.
+    #+BEGIN_SRC emacs-lisp
+      (w3m-fb-mode 1)
+    #+END_SRC
 
     When it comes to graphical browsers, I really like =conkeror=, it's the =Emacs=
     of browsers. It seems to have a special place in the heart of Emacs hackers, so
@@ -1169,73 +1325,57 @@
                               (conkeror-minor-mode 1))))
     #+END_SRC
 
-    This is an Emacs interface to =w3m=, it's maybe a little better than =eww= actually.
-    #+BEGIN_SRC emacs-lisp
-  (require 'w3m)
-  (setq w3m-home-page "https://duckduckgo.com")
-  (require 'w3m-search)
-  (add-to-list 'w3m-search-engine-alist
-               '("ddg" "https://duckduckgo.com/?q=%s"))
-  (setq w3m-search-default-engine "ddg")
-    #+END_SRC
+*** Downloading
 
-    For that awesome conkerorlikeness.
+    There is probably some better way to do this, but well, this sorta works.
     #+BEGIN_SRC emacs-lisp
-  (require 'w3m-lnum)
-  (w3m-lnum-mode 1)
-    #+END_SRC
-
-    Download to the same place as every other program.
-    #+BEGIN_SRC emacs-lisp
-  (setq w3m-default-save-directory (expand-file-name "~/Downloads"))
-    #+END_SRC
-
-    Use the page title as the buffer name.
-    #+BEGIN_SRC emacs-lisp
-  (setq w3m-use-title-buffer-name t)
-    #+END_SRC
-
-    #+BEGIN_SRC emacs-lisp
-  (define-key w3m-mode-map (kbd "C-c C-t") 'w3m-view-this-url-new-session)
-    #+END_SRC
-
-    This mode associates a =w3m= window with the frame it is in, so that a =w3m= window
-    only has tabs for the buffers in the same frame.
-    #+BEGIN_SRC emacs-lisp
-  (w3m-fb-mode 1)
+  (defun jj-wget-link ()
+    (interactive)
+    (let ((default-directory "~/Downloads/")
+          (url (browse-url-url-at-point)))
+      (start-process "jj-wget" " *jj-wget*" "wget"
+                     "-nv" url)))
     #+END_SRC
 
 *** IRC
+
+    #+BEGIN_SRC emacs-lisp
+  (defun jj-kill-irc ()
+    "Kill all IRC buffers"
+    (interactive)
+    (kill-matching-buffers "#[[:word:]-]*")
+    (kill-matching-buffers (concat jj-home-host ":[0-9]+.*")))
+    #+END_SRC
 
 **** Weechat
 
      Weechat for IRC. Turn of auto fill mode in weechat, since it chops up messages.
      #+BEGIN_SRC emacs-lisp
-  (require 'weechat)
-  (setq weechat-host-default jj-home-host
-        weechat-port-default 20023
-        weechat-mode-default 'ssl)
-  (add-hook 'weechat-mode-hook 'auto-fill-mode)
+       (require 'weechat)
+       (setq weechat-host-default jj-home-host
+             weechat-port-default 20023
+             weechat-mode-default 'ssl)
+       (add-hook 'weechat-mode-hook 'auto-fill-mode)
      #+END_SRC
 
      #+BEGIN_SRC emacs-lisp
-  (require 'gnutls)
-  (push (expand-file-name "~/.emacsconf/jockej-weechat.crt")
-        gnutls-trustfiles)
+       (require 'gnutls)
+       (push (expand-file-name "~/.emacsconf/jockej-weechat.crt")
+             gnutls-trustfiles)
      #+END_SRC
 
      I use a self signed certificate which I'm too lazy to copy to my computers...
      Probably should do that someday.
      #+BEGIN_SRC emacs-lisp
-  (require 'weechat-relay)
-  (setq weechat-relay-ssl-check-signatures nil)
+       (require 'weechat-relay)
+       (setq weechat-relay-ssl-check-signatures nil)
      #+END_SRC
 
      If we have the ability, show notifications.
      #+BEGIN_SRC emacs-lisp
-  (when (display-graphic-p)
-    (require 'notifications)
-    (push 'weechat-nottifications weechat-modules))
+       (when (display-graphic-p)
+         (require 'notifications)
+         (push 'weechat-nottifications weechat-modules))
      #+END_SRC
 
 **** ERC
@@ -1244,11 +1384,10 @@
   (require 'erc)
   (require 'erc-track)
 
-
   (erc-track-mode t)
   (setq-default erc-track-exclude-types '("JOIN" "NICK" "PART" "QUIT" "MODE"
                                           "324" "329" "332" "333" "353" "477"))
-  (setq-default erc-hide-list '("JOIN" "PART" "QUIT" "NICK"))
+  (setq-default erc-hide-list '("JOIN" "PART" "QUIT" "NICK" "MODE" "AWAY"))
   (setq erc-format-query-as-channel-p t
         erc-track-priority-faces-only 'all
         erc-track-faces-priority-list '(erc-error-face
@@ -1261,63 +1400,65 @@
                                         erc-prompt-face))
      #+END_SRC
 
+     I wan't notifications when somebody messages me.
      #+BEGIN_SRC emacs-lisp
-  (push 'notifications erc-modules)
-  (erc-update-modules)
+       (push 'notifications erc-modules)
+     #+END_SRC
+
+     The ERC filling splits long messages over several messages, which I think
+     looks a little strange. It gets wrapped anyway, so remove that module.
+     #+BEGIN_SRC emacs-lisp
+       (setq erc-modules (remove 'fill erc-modules))
+     #+END_SRC
+
+     Since I don't use the customize interface this has to be run.
+     #+BEGIN_SRC emacs-lisp
+       (erc-update-modules)
      #+END_SRC
 
      #+BEGIN_SRC emacs-lisp
-
+       (setq erc-default-server jj-home-host
+             erc-default-port 20026
+             erc-nick '("jalle" "jockej")
+             erc-nick-uniquifier "_"
+             )
      #+END_SRC
 
+     I am connected to two different servers via weechat, so I have two
+     different passwords on the same machine and port. Unfortunately this means
+     I can't use the =auth-source= mechanism, which is a shame.
      #+BEGIN_SRC emacs-lisp
-  (setq erc-default-server jj-home-host
-        erc-default-port 20026
-        erc-nick '("jalle" "jockej")
-        erc-nick-uniquifier "_"
-        )
-     #+END_SRC
-
-     #+BEGIN_SRC emacs-lisp
-  (setq erc-prompt-for-password nil)
-     #+END_SRC
-
-**** RCIRC
-
-     #+BEGIN_SRC emacs-lisp
-  (require 'rcirc)
-  (setq rcirc-server-alist
-        `((,jj-home-host :port 20026 :encryption tls)))
+       (setq erc-prompt-for-password t)
      #+END_SRC
 
 *** RSS
 
     I've got all of these from gwene as well, so this might be gone soon.
     #+BEGIN_SRC emacs-lisp
-  (require 'elfeed)
-  (setq elfeed-feeds
-        '("wingolog.org/feed/atom"
-          "http://feeds.feedburner.com/codinghorror"
-          "http://www.devttys0.com/feed/"
-          "http://syndication.thedailywtf.com/TheDailyWtf"
-          "http://git.hcoop.net/?p=bpt/emacs.git;a=rss"
-          "http://emacshorrors.com/feed"
-          "http://endlessparentheses.com/atom.xml"
-          "http://oremacs.com/atom.xml"
-          ))
+      (require 'elfeed)
+      (setq elfeed-feeds
+            '("wingolog.org/feed/atom"
+              "http://feeds.feedburner.com/codinghorror"
+              "http://www.devttys0.com/feed/"
+              "http://syndication.thedailywtf.com/TheDailyWtf"
+              "http://git.hcoop.net/?p=bpt/emacs.git;a=rss"
+              "http://emacshorrors.com/feed"
+              "http://endlessparentheses.com/atom.xml"
+              "http://oremacs.com/atom.xml"
+              ))
     #+END_SRC
 
 *** Google translate
 
     Why would I leave Emacs just to transate something?
     #+BEGIN_SRC emacs-lisp
-  (require 'google-translate)
-  (require 'google-translate-smooth-ui)
-  (setq google-translate-translation-directions-alist
-        '(("en" . "sv")
-          ("sv" . "en")))
-  (defalias 'jj-translate 'google-translate-smooth-translate
-    "Translate using google translate.")
+      (require 'google-translate)
+      (require 'google-translate-smooth-ui)
+      (setq google-translate-translation-directions-alist
+            '(("en" . "sv")
+              ("sv" . "en")))
+      (defalias 'jj-translate 'google-translate-smooth-translate
+        "Translate using google translate.")
     #+END_SRC
 
 *** Torrents
@@ -1325,31 +1466,31 @@
     This lets me control =rtorrent= via =xmlrpc= from =Emacs=. I have the matching
     =.rtorrent.rc= file in my dotfiles repo.
     #+BEGIN_SRC emacs-lisp
-  (require 'mentor)
-  (setq mentor-rtorrent-url "scgi://localhost:5000")
+      (require 'mentor)
+      (setq mentor-rtorrent-url "scgi://localhost:5000")
     #+END_SRC
 
     This lets me browse and start torrents on my headless server with ease!
     #+BEGIN_SRC emacs-lisp
-  (defun jj-queue-torrent (&optional no-start)
-    "A little hack to load a torrent into rtorrent directly from w3m, provided
-    there is a mentor buffer active. Point must be on a magnet link in w3m.
+      (defun jj-queue-torrent (&optional no-start)
+        "A little hack to load a torrent into rtorrent directly from w3m, provided
+        there is a mentor buffer active. Point must be on a magnet link in w3m.
 
-  With prefix argument, load the torrent but do not start it, otherwise start it
-  right away."
-    (interactive "P")
-    (unless (get-buffer "*mentor*")
-      (user-error "Mentor doesn't seem to be running"))
-    (let ((cmd (if no-start "load" "load_start")))
-      ;; Need `t' in order to actually kill the url
-      (w3m-print-this-url t)
-      ;; clear echo area
-      (message nil)
-      (let ((url (pop kill-ring)))
-        (set-text-properties 0 (length url) nil url)
-        (mentor-call-command (concat cmd " " url)))))
+      With prefix argument, load the torrent but do not start it, otherwise start it
+      right away."
+        (interactive "P")
+        (unless (get-buffer "*mentor*")
+          (user-error "Mentor doesn't seem to be running"))
+        (let ((cmd (if no-start "load" "load_start")))
+          ;; Need `t' in order to actually kill the url
+          (w3m-print-this-url t)
+          ;; clear echo area
+          (message nil)
+          (let ((url (pop kill-ring)))
+            (set-text-properties 0 (length url) nil url)
+            (mentor-call-command (concat cmd " " url)))))
 
-  (define-key w3m-mode-map (kbd "H-w") 'jj-queue-torrent)
+      (define-key w3m-mode-map (kbd "H-w") 'jj-queue-torrent)
 
     #+END_SRC
 
@@ -1358,54 +1499,56 @@
 
     This package allows us to insert license headers, real nifty.
     #+BEGIN_SRC emacs-lisp
-(require 'lice)
+      (require 'lice)
     #+END_SRC
 
 *** Code helpers
 
     Autocomplete, which sometimes works.
     #+BEGIN_SRC emacs-lisp
-  (require 'company)
-  (require 'semantic)
-  (add-hook 'after-init-hook 'global-company-mode)
-  (global-semanticdb-minor-mode 1)
-  (semanticdb-enable-gnu-global-databases 'c-mode)
-  (semanticdb-enable-gnu-global-databases 'c++-mode)
-  (global-semantic-idle-scheduler-mode)
-  (semantic-mode 1)
-  (eval-after-load 'company '(add-to-list 'company-backends 'company-semantic))
-  (define-key company-active-map (kbd "C-d") 'company-show-doc-buffer)
+      (require 'company)
+      (require 'semantic)
+      (add-hook 'after-init-hook 'global-company-mode)
+      (global-semanticdb-minor-mode 1)
+      (semanticdb-enable-gnu-global-databases 'c-mode)
+      (semanticdb-enable-gnu-global-databases 'c++-mode)
+      (global-semantic-idle-scheduler-mode)
+      (semantic-mode 1)
+      (eval-after-load 'company '(add-to-list 'company-backends 'company-semantic))
+      (define-key company-active-map (kbd "C-d") 'company-show-doc-buffer)
     #+END_SRC
 
     Eldoc shows documentation in the minibuffer.
     #+BEGIN_SRC emacs-lisp
-  (require 'eldoc)
-  (add-hook 'prog-mode-hook 'turn-on-eldoc-mode)
+      (require 'eldoc)
+      (add-hook 'prog-mode-hook 'turn-on-eldoc-mode)
     #+END_SRC
 
     Yasnippet is a snippet framework. Currently I only use it with irony-mode, but I
     figure I might want it for more stuff soon.
     #+BEGIN_SRC emacs-lisp
-  (require 'yasnippet)
+      (require 'yasnippet)
     #+END_SRC
 
+    A little function to create a TAGS table.
     #+BEGIN_SRC emacs-lisp
-  (defun jj-create-tags (dir)
-    "Create TAGS using excuberant ctags."
-    (interactive "DDirecory: ")
-    (let ((ctags (cond ((eq system-type 'gnu/linux) (executable-find "ctags"))
-                     ; Excuberant ctags gets installed as 'exctags' on FreeBSD
-                       ((eq system-type 'berkley-unix) (executable-find "exctags")))
-          (default-directory dir))
-      (start-process (format "ctags-%s" (directory-file-name dir))
-                     nil ctags "-R" "-e" dir))))
+      (defun jj-create-tags (dir)
+        "Create TAGS using excuberant ctags."
+        (interactive "DDirecory: ")
+        (let ((ctags
+               (cond ((eq system-type 'gnu/linux) (executable-find "ctags"))
+                                              ; Excuberant ctags gets installed as 'exctags' on FreeBSD
+                     ((eq system-type 'berkley-unix) (executable-find "exctags"))))
+              (default-directory dir))
+          (start-process (format "ctags-%s" (directory-file-name dir))
+                         nil ctags "-R" "-e" dir)))
     #+END_SRC
 
 *** Debugging
 
     GDB is really well integrated in Emacs, use it.
     #+BEGIN_SRC emacs-lisp
-(setq gdb-many-windows t)
+      (setq gdb-many-windows t)
     #+END_SRC
 
 *** Diffs
@@ -1413,244 +1556,273 @@
     Ediff is also awesome, but I prefer to see the diffs side by side, and I run a
     tiling wm so the default setup with a separate frame is a no go.
     #+BEGIN_SRC emacs-lisp
-  (setq ediff-window-setup-function 'ediff-setup-windows-plain
-        ediff-split-window-function 'split-window-horizontally)
+      (setq ediff-window-setup-function 'ediff-setup-windows-plain
+            ediff-split-window-function 'split-window-horizontally)
     #+END_SRC
 
     #+BEGIN_SRC emacs-lisp
-  (setq ediff-make-buffers-readonly-at-startup t)
+      (setq ediff-make-buffers-readonly-at-startup t)
     #+END_SRC
 
 *** Folding
 
     I use origami for folding
     #+BEGIN_SRC emacs-lisp
-  (require 'origami)
-  (defhydra jj-fold-hydra (:color blue)
-    "
-  _t_oggle node  hide _a_ll   show _A_ll   _r_ecursively toggle
-  _o_pen node   _O_pen recursively  _s_how only  _c_close node
-  _C_lose recursively  _q_uit
-  "
-    ("t" origami-toggle-node)
-    ("a" origami-close-all-nodes)
-    ("A" origami-open-all-nodes)
-    ("s" origami-open-show-only-node)
-    ("r" origami-recursively-toggle-node)
-    ("o" origami-open-node)
-    ("O" origami-open-node-recursively)
-    ("c" origami-close-node)
-    ("C" origami-close-node-recursively)
-    ("q" nil "quit"))
+      (require 'origami)
+      (defhydra jj-fold-hydra (:color blue)
+        "
+      _t_oggle node  hide _a_ll   show _A_ll   _r_ecursively toggle
+      _o_pen node   _O_pen recursively  _s_how only  _c_close node
+      _C_lose recursively  _q_uit
+      "
+        ("t" origami-toggle-node)
+        ("a" origami-close-all-nodes)
+        ("A" origami-open-all-nodes)
+        ("s" origami-open-show-only-node)
+        ("r" origami-recursively-toggle-node)
+        ("o" origami-open-node)
+        ("O" origami-open-node-recursively)
+        ("c" origami-close-node)
+        ("C" origami-close-node-recursively)
+        ("q" nil "quit"))
 
-  (add-hook 'prog-mode-hook #'origami-mode)
+      (add-hook 'prog-mode-hook #'origami-mode)
 
-  (global-set-key (kbd "H-a f") 'jj-fold-hydra/body)
-  (global-set-key (kbd "M-o") 'origami-toggle-node)
+      (global-set-key (kbd "H-a f") 'jj-fold-hydra/body)
+      (global-set-key (kbd "M-o") 'origami-toggle-node)
     #+END_SRC
 
 *** Commenting
 
     This cycles between comment states.
     #+BEGIN_SRC emacs-lisp
-  (require 'comment-dwim-2)
-  (global-set-key (kbd "M-;") 'comment-dwim-2)
+      (require 'comment-dwim-2)
+      (global-set-key (kbd "M-;") 'comment-dwim-2)
     #+END_SRC
 
 *** Compilation
 
     #+BEGIN_SRC emacs-lisp
-(defun bury-compile-buffer-if-successful (buffer string)
-  "Bury a compilation buffer if succeeded without warnings "
-  (if (and
-       (string-match "compilation" (buffer-name buffer))
-       (string-match "finished" string)
-       (not
-        (with-current-buffer buffer
-          (search-forward "warning" nil t))))
-      (run-with-timer 1 nil
-                      (lambda (buf)
-                        (bury-buffer buf)
-                        (switch-to-prev-buffer (get-buffer-window buf) 'kill))
-                      buffer)))
+      (defun bury-compile-buffer-if-successful (buffer string)
+        "Bury a compilation buffer if succeeded without warnings "
+        (if (and
+             (string-match "compilation" (buffer-name buffer))
+             (string-match "finished" string)
+             (not
+              (with-current-buffer buffer
+                (search-forward "warning" nil t))))
+            (run-with-timer 1 nil
+                            (lambda (buf)
+                              (bury-buffer buf)
+                              (switch-to-prev-buffer (get-buffer-window buf) 'kill))
+                            buffer)))
 
-(add-hook 'compilation-finish-functions 'bury-compile-buffer-if-successful)
+      (add-hook 'compilation-finish-functions 'bury-compile-buffer-if-successful)
 
-(global-set-key (kbd "H-c") 'compile)
+      (global-set-key (kbd "H-c") 'compile)
     #+END_SRC
 
 *** Version control
 
     Use magit for git, with support for github pull requests.
     #+BEGIN_SRC emacs-lisp
-  (require 'magit)
-  (setq magit-last-seen-setup-instructions "1.4.0"
-        magit-push-always-verify nil
-        magit-revert-buffers 'silent)
-  ;; (require 'magit-gh-pulls)
-  ;; (add-hook 'magit-mode-hook 'turn-on-magit-gh-pulls)
-  (global-set-key (kbd "H-g") 'magit-status)
+      (require 'magit)
+      (setq magit-last-seen-setup-instructions "1.4.0"
+            magit-push-always-verify nil
+            magit-revert-buffers 'silent)
+      ;; (require 'magit-gh-pulls)
+      ;; (add-hook 'magit-mode-hook 'turn-on-magit-gh-pulls)
+      (global-set-key (kbd "H-g") 'magit-status)
     #+END_SRC
 
     Usually when I look at a diff from the =svn= buffer I want to look at it, then
     kill it immediately, so move point there at once.
     #+BEGIN_SRC emacs-lisp
-  (require 'dsvn)
-  (advice-add 'svn-diff-file :after 'jj-other-window)
+      (require 'dsvn)
+      (advice-add 'svn-diff-file :after 'jj-other-window)
     #+END_SRC
 
 *** Language specifics
 **** C/C++
 
-     Irony is a completion engine powered by libclang.
-     #+BEGIN_SRC emacs-lisp
-  (defun jj-add-c/c++-company-backends ()
-    (add-to-list 'company-backends 'company-irony)
-    (add-to-list 'company-backends 'company-c-headers))
-     #+END_SRC
-
-     Seriously, who indents ~namespace~ or ~extern~ declarations? That's retarded.
-     #+BEGIN_SRC emacs-lisp
-  (defun jj-my-cpp-style ()
-    (progn
-      (c-set-offset 'innamespace [0])
-      (c-set-offset 'inextern-lang '0)))
-     #+END_SRC
-
      A little function to insert an include guard.
      #+BEGIN_SRC emacs-lisp
-  (defun jj-insert-include-guard ()
-    "Inserts an include guard based on the current files name and extension."
-    (interactive)
-    (save-excursion
-      (delete-trailing-whitespace)
-      (goto-char (point-min))
-      (let ((include-guard
-             (upcase (concat (file-name-base)
-                             "_"
-                             (file-name-extension (buffer-file-name))))))
-        (progn
-          (jj-open-line-above)
-          (insert "#ifndef " include-guard)
-          (jj-open-line-below)
-          (insert "#define " include-guard)
-          (goto-char (point-max))
-          (jj-open-line-below)
-          (insert "#endif /* ifndef " include-guard " */")))))
+       (defun jj-insert-include-guard ()
+         "Inserts an include guard based on the current files name and extension."
+         (interactive)
+         (save-excursion
+           (delete-trailing-whitespace)
+           (goto-char (point-min))
+           (let ((include-guard
+                  (upcase (concat (file-name-base)
+                                  "_"
+                                  (file-name-extension (buffer-file-name))))))
+             (progn
+               (jj-open-line-above nil)
+               (insert "#ifndef " include-guard)
+               (jj-open-line-below)
+               (insert "#define " include-guard)
+               (goto-char (point-max))
+               (jj-open-line-below)
+               (insert "#endif /* ifndef " include-guard " */")))))
+     #+END_SRC
+
+     Highlight ~auto~ as a type in c++.
+     #+BEGIN_SRC emacs-lisp
+       (require 'cc-mode)
+       (add-to-list 'c++-font-lock-extra-types "auto")
      #+END_SRC
 
      Srefactor is a refactoring framework.
      #+BEGIN_SRC emacs-lisp
-  (require 'srefactor)
-  (define-key c-mode-map (kbd "M-RET") 'srefactor-refactor-at-point)
-  (define-key c++-mode-map (kbd "M-RET") 'srefactor-refactor-at-point)
+       (require 'srefactor)
+       (define-key c-mode-map (kbd "M-RET") 'srefactor-refactor-at-point)
+       (define-key c++-mode-map (kbd "M-RET") 'srefactor-refactor-at-point)
      #+END_SRC
 
      #+BEGIN_SRC emacs-lisp
-  (require 'function-args)
-  (fa-config-default)
+       (require 'function-args)
+       (fa-config-default)
      #+END_SRC
 
      Rscope is an interface to cscope.
      #+BEGIN_SRC emacs-lisp
-  (require 'rscope)
-  (setq rscope-keymap-prefix (kbd "H-f"))
+       (require 'rscope)
+       (setq rscope-keymap-prefix (kbd "H-f"))
      #+END_SRC
 
      #+BEGIN_SRC emacs-lisp
-  (require 'rtags)
-  (rtags-enable-standard-keybindings)
+       (require 'rtags)
+       (require 'company-rtags)
+       (rtags-enable-standard-keybindings)
+     #+END_SRC
+
+     #+BEGIN_SRC emacs-lisp
+       (require 'irony)
+       (require 'company-irony)
      #+END_SRC
 
      This warns for suspicious constructs.
      #+BEGIN_SRC emacs-lisp
-  (global-cwarn-mode)
+       (global-cwarn-mode)
+     #+END_SRC
+
+     Irony is a completion engine powered by libclang.
+     #+BEGIN_SRC emacs-lisp
+       (defun jj-add-c/c++-company-backends ()
+         (add-to-list 'company-backends 'company-irony)
+         (add-to-list 'company-backends 'company-c-headers)
+         (add-to-list 'company-backends 'company-rtags))
+     #+END_SRC
+
+     Seriously, who indents ~namespace~ or ~extern~ declarations? That's retarded.
+     #+BEGIN_SRC emacs-lisp
+       (defun jj-my-cpp-style ()
+         (progn
+           (c-set-offset 'innamespace [0])
+           (c-set-offset 'inextern-lang '0)))
+     #+END_SRC
+
+     C-styles for my job.
+     #+BEGIN_SRC emacs-lisp
+       (c-add-style "tritech"
+                    '("linux"
+                      (c-basic-offset . 3)
+                      (c-offsets-alist . ((case-label . +)
+                                          (statement-case-open . +)))))
+
+       (c-add-style "delaval"
+                    '("linux"
+                      (c-basic-offset . 4)
+                      (c-offsets-alist . ((case-label . +)
+                                          (statement-case-open . +)))))
+
      #+END_SRC
 
      Add all the hooks.
      #+BEGIN_SRC emacs-lisp
-  (defvar jj-c-mode-common-hook nil
-    "common hooks for c and c++")
+       (defvar jj-c-mode-common-hook nil
+         "common hooks for c and c++")
 
-  (add-hook 'jj-c-mode-common-hook 'irony-mode)
-  (add-hook 'jj-c-mode-common-hook 'ggtags-mode)
-  (add-hook 'jj-c-mode-common-hood 'jj-add-c/c++-company-backends)
-  (add-hook 'jj-c-mode-common-hook 'yas-minor-mode)
+       (add-hook 'jj-c-mode-common-hook 'irony-mode)
+       (add-hook 'jj-c-mode-common-hook 'ggtags-mode)
+       (add-hook 'jj-c-mode-common-hook 'jj-add-c/c++-company-backends)
+       (add-hook 'jj-c-mode-common-hook 'yas-minor-mode)
 
-  (add-hook 'c++-mode-hook 'jj-my-cpp-style)
-
-  (dolist (hook (list c-mode-hook c++-mode-hook))
-    (setq hook (append hook jj-c-mode-common-hook)))
+       (add-hook 'c++-mode-hook 'jj-my-cpp-style)
+       (dolist (hook jj-c-mode-common-hook)
+         (add-hook 'c-mode-hook hook)
+         (add-hook 'c++-mode-hook hook))
      #+END_SRC
 
 **** COBOL
 
      #+BEGIN_SRC emacs-lisp
-  (require 'cobol-mode)
-  (setq cobol-source-format 'free
-        cobol-tab-width 2
-        cobol-format-style 'lowercase)
+       (require 'cobol-mode)
+       (setq cobol-source-format 'free
+             cobol-tab-width 2
+             cobol-format-style 'lowercase)
 
-   (setq auto-mode-alist
-     (append
-       '(("\\.cob\\'" . cobol-mode)
-         ("\\.cbl\\'" . cobol-mode)
-         ("\\.cpy\\'" . cobol-mode))
-      auto-mode-alist))
+       (setq auto-mode-alist
+             (append
+              '(("\\.cob\\'" . cobol-mode)
+                ("\\.cbl\\'" . cobol-mode)
+                ("\\.cpy\\'" . cobol-mode))
+              auto-mode-alist))
      #+END_SRC
 
 **** m4
      In m4 templates whitespace is most important.
      #+BEGIN_SRC emacs-lisp
-  (add-hook 'm4-mode-hook #'turn-off-auto-fill)
+       (add-hook 'm4-mode-hook #'turn-off-auto-fill)
      #+END_SRC
      Why is the comment character "#"?
      #+BEGIN_SRC emacs-lisp
-  (defun jj-ch-m4-comment ()
-    (set (make-variable-buffer-local 'comment-start) "dnl"))
-  (add-hook 'm4-mode-hook 'jj-ch-m4-comment)
+       (defun jj-ch-m4-comment ()
+         (set (make-variable-buffer-local 'comment-start) "dnl"))
+       (add-hook 'm4-mode-hook 'jj-ch-m4-comment)
      #+END_SRC
 
 **** Python
      Anaconda-mode seems to pretty much work for me, so use it
      #+BEGIN_SRC emacs-lisp
-  (require 'anaconda-mode)
-  (require 'company-anaconda)
-  (defun jj-python-hook ()
-    (progn
-      (anaconda-mode)
-      (add-to-list 'company-backends 'company-anaconda)))
-  (add-hook 'python-mode-hook 'jj-python-hook)
+       (require 'anaconda-mode)
+       (require 'company-anaconda)
+       (defun jj-python-hook ()
+         (progn
+           (anaconda-mode)
+           (add-to-list 'company-backends 'company-anaconda)))
+       (add-hook 'python-mode-hook 'jj-python-hook)
      #+END_SRC
 
      For sticking to the coding standards.
      #+BEGIN_SRC emacs-lisp
-  (require 'py-autopep8)
+       (require 'py-autopep8)
      #+END_SRC
 
      I have to deal with some python at work where the standards have not been followed.
      #+BEGIN_SRC emacs-lisp
-  (when (jj-is-work-comp-p)
-    (setq py-autopep8-options
-          '("--max-line-length=200")))
-  (when (jj-is-work-comp-p)
-    (add-hook 'python-mode-hook 'turn-off-auto-fill))
+       (when (jj-is-work-comp-p)
+         (setq py-autopep8-options
+               '("--max-line-length=200")))
+       (when (jj-is-work-comp-p)
+         (add-hook 'python-mode-hook 'turn-off-auto-fill))
      #+END_SRC
 
      This gives support for multiple python versions. I use it at work since we have
      to support some ancient version.
      #+BEGIN_SRC emacs-lisp
-  (when (jj-is-work-comp-p)
-    (require 'pyenv-mode)
-    (add-hook 'python-mode-hook 'pyenv-mode))
+       (when (jj-is-work-comp-p)
+         (require 'pyenv-mode)
+         (add-hook 'python-mode-hook 'pyenv-mode))
      #+END_SRC
 
 **** Shell
 
      It seems shell mode doesn't use the regular indentation variables.
      #+BEGIN_SRC emacs-lisp
-  (setq sh-basic-offset 2
-        sh-indentation 2)
+       (setq sh-basic-offset 2
+             sh-indentation 2)
      #+END_SRC
 
 **** Fortran90 (and later)
@@ -1658,18 +1830,18 @@
      Set f90 indents to two spaces. Set continuation indent to an odd number, so that
      it stands out.
      #+BEGIN_SRC emacs-lisp
-  (require 'fortran)
-  (require 'f90)
-  (setq fortran-blink-matching-if t)
-  (add-hook 'f90-mode-hook
-        (lambda () (setq f90-do-indent 2
-                         f90-if-indent 2
-                         f90-type-indent 2
-                         f90-program-indent 2
-                         f90-critical-indent 2
-                   )
-        (abbrev-mode 1)
-        (f90-add-imenu-menu)))
+       (require 'fortran)
+       (require 'f90)
+       (setq fortran-blink-matching-if t)
+       (add-hook 'f90-mode-hook
+                 (lambda () (setq f90-do-indent 2
+                                  f90-if-indent 2
+                                  f90-type-indent 2
+                                  f90-program-indent 2
+                                  f90-critical-indent 2
+                                  )
+                   (abbrev-mode 1)
+                   (f90-add-imenu-menu)))
      #+END_SRC
 
 **** SQL
@@ -1677,85 +1849,85 @@
      These functions are for inserting a sql query into an org mode buffer as an org
      table.
      #+BEGIN_SRC emacs-lisp
-  (defun jj-get-sql-cmd ()
-    "Get the sql command, if use-region-p is t, take it from the region, otherwise
-    try to use the current sql statement."
-    (let ((startend
-           (if (use-region-p)
-               ;; if we have a region, use it.
-               (cons (region-beginning) (region-end))
-             (save-excursion
-               (cons (progn (sql-beginning-of-statement -1) (point))
-                     (progn (sql-end-of-statement 1) (point)))))))
-      (replace-regexp-in-string "[[:space:]\n\r]+\\'" ""
-                                (buffer-substring-no-properties
-                                 (car startend) (cdr startend)))))
+       (defun jj-get-sql-cmd ()
+         "Get the sql command, if use-region-p is t, take it from the region, otherwise
+         try to use the current sql statement."
+         (let ((startend
+                (if (use-region-p)
+                    ;; if we have a region, use it.
+                    (cons (region-beginning) (region-end))
+                  (save-excursion
+                    (cons (progn (sql-beginning-of-statement -1) (point))
+                          (progn (sql-end-of-statement 1) (point)))))))
+           (replace-regexp-in-string "[[:space:]\n\r]+\\'" ""
+                                     (buffer-substring-no-properties
+                                      (car startend) (cdr startend)))))
 
-  (defconst jj-sql-org-formatting-cmds
-    '((sqlite . (".sep '|'" ".header on"))
-      (postgres . ("\\pset fieldsep '|'" "\\pset footer off")))
-    "An alist associating a SQL product (see `sql-product') with a list of
-    formatting commands
+       (defconst jj-sql-org-formatting-cmds
+         '((sqlite . (".sep '|'" ".header on"))
+           (postgres . ("\\pset fieldsep '|'" "\\pset footer off")))
+         "An alist associating a SQL product (see `sql-product') with a list of
+         formatting commands
 
-    Each entry in the alist should have the form: (prod . (\"cmd1\" \"cmd2\"
-    ...)), where the cmd# are commands to be sent to the SQLi session to set the
-    formatting up for exporting as an org table. The most important thing is to
-    set the field separator to '|'.")
+         Each entry in the alist should have the form: (prod . (\"cmd1\" \"cmd2\"
+         ...)), where the cmd# are commands to be sent to the SQLi session to set the
+         formatting up for exporting as an org table. The most important thing is to
+         set the field separator to '|'.")
 
-  (defun jj-sql-region-to-org-table (arg buf)
-    "A command to insert the result of an sql query as an org table.
+       (defun jj-sql-region-to-org-table (arg buf)
+         "A command to insert the result of an sql query as an org table.
 
-  Argument 'buf' must be an existing buffer. With prefix argument,
-  pop to buffer afterwards."
-    (interactive "P\nbinsert into: ")
-    (unless (eq major-mode 'sql-mode)
-      (user-error "Not in a SQL buffer"))
-    ;; check if there is a process running
-    (unless (sql-buffer-live-p sql-buffer)
-      (user-error "No SQL process found"))
-    ;; Get some buffer local variables before we leave the sql buffer
-    (let ((sqlbuf sql-buffer)
-          (sqlstr (jj-get-sql-cmd))
-          ;; We need to get these so that we can remove any prompts which happen
-          ;; to appear in the output.
-          ;; Get the prompt and continuation prompt but remove the leading '^',
-          ;; since the prompts can appear at other places than at bol.
-          ;; This is what one would call a 'dirty hack', at best.
-          (prompt (substring (with-current-buffer sql-buffer
-                               (sql-get-product-feature
-                                sql-product :prompt-regexp)) 1))
-          (cont (substring (with-current-buffer sql-buffer
-                             (sql-get-product-feature
-                              sql-product :prompt-cont-regexp)) 1)))
-      (progn
-        ;; send formatting commands
-        (let ((cmds (cdr (assoc sql-product jj-sql-org-formatting-cmds))))
-          (dolist (cmd cmds) (sql-redirect sqlbuf cmd))
-          ;; `sql-redirect' appends the results to the buffer, so we put it in a
-          ;; temp buffer, so that we can insert it at point in `buf'. Also, this
-          ;; makes it easier since we know that the table is the only thing in the
-          ;; buffer.
-          (let ((table
-                 (with-temp-buffer
-                   (progn
-                     ;; insert the result of the query
-                     (sql-redirect sqlbuf sqlstr (buffer-name) t)
-                     ;; remove any prompts or continuation prompts
-                     (dolist (rem (list prompt cont))
-                       (goto-char (point-min))
-                       (while (re-search-forward rem nil t)
-                         (replace-match "" nil nil)))
-                     ;; put a leading '|' on each line to make an org table
-                     (string-insert-rectangle (point-min) (point-max) "|")
-                     (buffer-substring-no-properties (point-min) (point-max))))))
-            (with-current-buffer buf
-              (let ((pos (point)))
-                (progn
-                  (insert table)
-                  (goto-char pos)
-                  (org-table-align))))))
-        (when arg
-          (pop-to-buffer buf)))))
+       Argument 'buf' must be an existing buffer. With prefix argument,
+       pop to buffer afterwards."
+         (interactive "P\nbinsert into: ")
+         (unless (eq major-mode 'sql-mode)
+           (user-error "Not in a SQL buffer"))
+         ;; check if there is a process running
+         (unless (sql-buffer-live-p sql-buffer)
+           (user-error "No SQL process found"))
+         ;; Get some buffer local variables before we leave the sql buffer
+         (let ((sqlbuf sql-buffer)
+               (sqlstr (jj-get-sql-cmd))
+               ;; We need to get these so that we can remove any prompts which happen
+               ;; to appear in the output.
+               ;; Get the prompt and continuation prompt but remove the leading '^',
+               ;; since the prompts can appear at other places than at bol.
+               ;; This is what one would call a 'dirty hack', at best.
+               (prompt (substring (with-current-buffer sql-buffer
+                                    (sql-get-product-feature
+                                     sql-product :prompt-regexp)) 1))
+               (cont (substring (with-current-buffer sql-buffer
+                                  (sql-get-product-feature
+                                   sql-product :prompt-cont-regexp)) 1)))
+           (progn
+             ;; send formatting commands
+             (let ((cmds (cdr (assoc sql-product jj-sql-org-formatting-cmds))))
+               (dolist (cmd cmds) (sql-redirect sqlbuf cmd))
+               ;; `sql-redirect' appends the results to the buffer, so we put it in a
+               ;; temp buffer, so that we can insert it at point in `buf'. Also, this
+               ;; makes it easier since we know that the table is the only thing in the
+               ;; buffer.
+               (let ((table
+                      (with-temp-buffer
+                        (progn
+                          ;; insert the result of the query
+                          (sql-redirect sqlbuf sqlstr (buffer-name) t)
+                          ;; remove any prompts or continuation prompts
+                          (dolist (rem (list prompt cont))
+                            (goto-char (point-min))
+                            (while (re-search-forward rem nil t)
+                              (replace-match "" nil nil)))
+                          ;; put a leading '|' on each line to make an org table
+                          (string-insert-rectangle (point-min) (point-max) "|")
+                          (buffer-substring-no-properties (point-min) (point-max))))))
+                 (with-current-buffer buf
+                   (let ((pos (point)))
+                     (progn
+                       (insert table)
+                       (goto-char pos)
+                       (org-table-align))))))
+             (when arg
+               (pop-to-buffer buf)))))
      #+END_SRC
 
 ** Looks
@@ -1765,9 +1937,9 @@
    No useless stuff. I sorta like the menu though, for discovering new stuff, so I
    leave that enabled.
    #+BEGIN_SRC emacs-lisp
-  (when (display-graphic-p)
-    (toggle-scroll-bar -1)
-    (tool-bar-mode -1))
+     (when (display-graphic-p)
+       (toggle-scroll-bar -1)
+       (tool-bar-mode -1))
    #+END_SRC
 
    Fixing the mode line so that it's not too long, since I usually split windows so
@@ -1776,121 +1948,122 @@
 
    Projectiles mode-line is nice, but I know it's projectile printing it.
    #+BEGIN_SRC emacs-lisp
-  (setq projectile-mode-line '(:eval (format " P[%s]"
-                                             (projectile-project-name))))
+     (setq projectile-mode-line '(:eval (format " P[%s]"
+                                                (projectile-project-name))))
    #+END_SRC
 
    #+BEGIN_SRC emacs-lisp
-  (require 'rich-minority)
-  (setq rm-blacklist '(" Undo-Tree"
-                       " Fill"
-                       " company"
-                       " hs"
-                       " ElDoc"
-                       " GG"
-                       " yas"
-                       " Abbrev"
-                       " CWarn"
-                       " FA"
-                       ))
-  (rich-minority-mode 1)
+     (require 'rich-minority)
+     (setq rm-blacklist '(" Undo-Tree"
+                          " Fill"
+                          " company"
+                          " hs"
+                          " ElDoc"
+                          " GG"
+                          " yas"
+                          " Abbrev"
+                          " CWarn"
+                          " FA"
+                          ))
+     (rich-minority-mode 1)
    #+END_SRC
 
    Line numbers are nice, but turn the off in some buffers.
    #+BEGIN_SRC emacs-lisp
-  (global-linum-mode 1)
-  (require 'linum-off)
+     (global-linum-mode 1)
+     (require 'linum-off)
    #+END_SRC
 
    Column numbers are nice too.
    #+BEGIN_SRC emacs-lisp
-  (setq column-number-mode t)
+     (setq column-number-mode t)
    #+END_SRC
 
    Highlight the current line, but not in the terminal. This code looks like shit,
    and I can't remember why it ended up like this... but it works...
    #+BEGIN_SRC emacs-lisp
-  (global-hl-line-mode t)
-  (global-hl-line-mode)
-  (make-variable-buffer-local 'global-hl-line-mode)
-  (add-hook 'term-mode-hook (lambda () (setq global-hl-line-mode nil)))
+     (global-hl-line-mode t)
+     (global-hl-line-mode)
+     (make-variable-buffer-local 'global-hl-line-mode)
+     (add-hook 'term-mode-hook (lambda () (setq global-hl-line-mode nil)))
    #+END_SRC
 
    Show parenthesis.
    #+BEGIN_SRC emacs-lisp
-  (setq show-paren-style 'expression)
-  (show-paren-mode 1)
+     (setq show-paren-style 'expression)
+     (show-paren-mode 1)
    #+END_SRC
 
    Set theme. If we start the server in a graphical environment, load solarized
    dark. Otherwise change the face in the minibuffer, since it's bloody invisible
    with the default colors.
    #+BEGIN_SRC emacs-lisp
-  (defun jj-set-theme (&optional display)
-    (if (display-graphic-p display)
-        (progn
-          (message "%s" "Graphic display, loading solarized theme...")
-          (load-theme 'solarized-dark t))
-      (progn
-        (message "%s" "Terminal, no theme")
-        (set-face-foreground 'minibuffer-prompt "white"))))
+     (defun jj-set-theme (&optional display)
+       (if (display-graphic-p display)
+           (progn
+             (message "%s" "Graphic display, loading solarized theme...")
+             (load-theme 'solarized-dark t))
+         (progn
+           (message "%s" "Terminal, no theme")
+           (set-face-foreground 'minibuffer-prompt "white"))))
 
-  (add-hook 'after-init-hook 'jj-set-theme)
-  (add-hook 'after-make-frame-functions 'jj-set-theme)
+     (add-hook 'after-init-hook 'jj-set-theme)
+     (add-hook 'after-make-frame-functions 'jj-set-theme)
    #+END_SRC
 
 ** Music
 *** MPD stream
 
     #+BEGIN_SRC emacs-lisp
-  (require 'emms-setup)
-  (require 'emms-player-mpd)
-  (emms-standard)
-  (emms-default-players)
-  (require 'emms-mode-line)
-  (emms-mode-line 1)
+      (require 'emms-setup)
+      (require 'emms-player-mpd)
+      (require 'emms-browser)
+      (emms-standard)
+      (emms-default-players)
+      (require 'emms-mode-line)
+      (emms-mode-line 1)
 
-  (defhydra jj-emms-hydra (:color blue)
-    "Emms"
-    ("+"emms-volume-mode-plus "Vol+")
-    ("-" emms-volume-mode-minus "Vol-")
-    (">" emms-next "Next")
-    ("<" emms-previous "Prev")
-    ("p" emms-pause "Pause")
-    ("s" emms-stop "Stop")
-    ("g" emms-start "Play")
-    ("q" nil "Quit"))
+      (defhydra jj-emms-hydra (:color blue)
+        "Emms"
+        ("+"emms-volume-mode-plus "Vol+")
+        ("-" emms-volume-mode-minus "Vol-")
+        (">" emms-next "Next")
+        ("<" emms-previous "Prev")
+        ("p" emms-pause "Pause")
+        ("s" emms-stop "Stop")
+        ("g" emms-start "Play")
+        ("q" nil "Quit"))
 
-  (global-set-key (kbd "H-a e") 'jj-emms-hydra/body)
+      (global-set-key (kbd "H-a e") 'jj-emms-hydra/body)
     #+END_SRC
 
     Set stuff up for streaming from my server at home. If I'm on my internal network
     I use the internal address, otherwise my external.
     #+BEGIN_SRC emacs-lisp
-  (require 'emms-player-mpd)
-  (setq emms-player-mpd-server-name
-        (if (jj-is-home-p)
-            "192.168.2.200"
-          jj-home-host))
-  (setq emms-player-mpd-server-port "20024")
-  (add-to-list 'emms-info-functions 'emms-info-mpd)
-  (add-to-list 'emms-player-list 'emms-player-mpd)
-  (setq emms-player-mpd-music-directory "/music")
+      (require 'emms-player-mpd)
+      (setq emms-player-mpd-server-name
+            (if (jj-is-home-p)
+                "192.168.2.200"
+              jj-home-host))
+      (setq emms-player-mpd-server-port "20024")
+      (add-to-list 'emms-info-functions 'emms-info-mpd)
+      (add-to-list 'emms-player-list 'emms-player-mpd)
+      (setq emms-player-mpd-music-directory "/music")
     #+END_SRC
 
     A little function to play a stream from my server, so I don't have to leave
     Emacs just to start mplayer!
     #+BEGIN_SRC emacs-lisp
-    (defun jj-play-mpd-stream ()
-      "A function to start playing a http stream from my server"
-      (interactive)
-      (let ((mpd-host emms-player-mpd-server-name)
-            (mpd-prog (executable-find "mplayer")))
-        (if (not mpd-prog)
-            (error  "mplayer not found!")
-          (start-process "jj-mpd-stream" "*MPD-stream*" mpd-prog
-                         "-really-quiet" "-cache" "1024"
-                         (concat "http://" mpd-host ":20025")))))
+      (defun jj-play-mpd-stream ()
+        "A function to start playing a http stream from my server"
+        (interactive)
+        (let ((mpd-host emms-player-mpd-server-name)
+              (mpd-prog (executable-find "mplayer")))
+          (if (not mpd-prog)
+              (error  "mplayer not found!")
+            (start-process "jj-mpd-stream" "*MPD-stream*" mpd-prog
+                           "-really-quiet" "-cache" "1024"
+                           (concat "http://" mpd-host ":20025")))))
     #+END_SRC
 
 *** Spotify
@@ -1898,99 +2071,106 @@
     This requires dbus, so use it only when we're using a sane OS. Also, if there's
     no X there's no use in loading it obviously.
     #+BEGIN_SRC emacs-lisp
-  (when (and (not (eq system-type 'windows-nt)) (display-graphic-p))
-    (progn
-      (require 'spotify)
-      (defhydra jj-spotify-hydra (:color blue)
-        "Spotify"
-        ("n" spotify-next "Next")
-        ("p" spotify-playpause "Play/Pause")
-        ("P" spotify-previous "Previous")
-        ("Q" spotify-quit "Quit Spotify")
-        ("e" spotify-enable-song-notifications "Enable notifications")
-        ("d" spotify-disable-song-notifications "Disable notifications")
-        ("q" nil "quit"))))
+      (when (and (not (eq system-type 'windows-nt)) (display-graphic-p))
+        (progn
+          (require 'spotify)
+          (defhydra jj-spotify-hydra (:color blue)
+            "Spotify"
+            ("n" spotify-next "Next")
+            ("p" spotify-playpause "Play/Pause")
+            ("P" spotify-previous "Previous")
+            ("Q" spotify-quit "Quit Spotify")
+            ("e" spotify-enable-song-notifications "Enable notifications")
+            ("d" spotify-disable-song-notifications "Disable notifications")
+            ("q" nil "quit"))))
 
-  (global-set-key (kbd "H-a s") 'jj-spotify-hydra/body)
+      (global-set-key (kbd "H-a s") 'jj-spotify-hydra/body)
     #+END_SRC
 
 ** Org
 
    #+BEGIN_SRC emacs-lisp
-(setq org-use-speed-commands t)
+     (setq org-use-speed-commands t)
    #+END_SRC
 
    A hydra to insert templates in an org file. I should probaly do this with the
    builtins in org, but this will work for now.
    #+BEGIN_SRC emacs-lisp
-  (defun hot-expand (str)
-    "Expand org template."
-    (insert str)
-    (org-try-structure-completion))
+     (defun hot-expand (str)
+       "Expand org template."
+       (insert str)
+       (org-try-structure-completion))
 
-  (defhydra jj-hydra-org-template (:color blue :hint nil)
-    "
-  _a_scii      _e_macs-lisp  _h_tml   _s_rc
-  _A_SCII:     _E_xample     _H_TML:  _C_enter
-  _c_          _i_ndex:      _l_atex  _v_erse
-  c_p_lusplus  _I_NCLUDE:    _L_ATEX: _q_uote
-  "
-    ("s" (hot-expand "<s"))
-    ("E" (hot-expand "<e"))
-    ("q" (hot-expand "<q"))
-    ("v" (hot-expand "<v"))
-    ("C" (hot-expand "<c"))
-    ("l" (hot-expand "<l"))
-    ("h" (hot-expand "<h"))
-    ("a" (hot-expand "<a"))
-    ("L" (hot-expand "<L"))
-    ("i" (hot-expand "<i"))
-    ("e" (progn
-           (hot-expand "<s")
-           (insert "emacs-lisp")
-           (forward-line)))
-    ("p" (progn
-           (hot-expand "<s")
-           (insert "c++")
-           (forward-line)))
-    ("c" (progn
-           (hot-expand "<s")
-           (insert "c")
-           (forward-line)))
-    ("I" (hot-expand "<I"))
-    ("H" (hot-expand "<H"))
-    ("A" (hot-expand "<A"))
-    ("<" self-insert-command "ins")
-    ("o" nil "quit"))
+     (defhydra jj-hydra-org-template (:color blue :hint nil)
+       "
+     _a_scii      _e_macs-lisp  _h_tml   _s_rc
+     _A_SCII:     _E_xample     _H_TML:  _C_enter
+     _c_          _i_ndex:      _l_atex  _v_erse
+     c_p_lusplus  _I_NCLUDE:    _L_ATEX: _q_uote
+     "
+       ("s" (hot-expand "<s"))
+       ("E" (hot-expand "<e"))
+       ("q" (hot-expand "<q"))
+       ("v" (hot-expand "<v"))
+       ("C" (hot-expand "<c"))
+       ("l" (hot-expand "<l"))
+       ("h" (hot-expand "<h"))
+       ("a" (hot-expand "<a"))
+       ("L" (hot-expand "<L"))
+       ("i" (hot-expand "<i"))
+       ("e" (progn
+              (hot-expand "<s")
+              (insert "emacs-lisp")
+              (forward-line)))
+       ("p" (progn
+              (hot-expand "<s")
+              (insert "c++")
+              (forward-line)))
+       ("c" (progn
+              (hot-expand "<s")
+              (insert "c")
+              (forward-line)))
+       ("I" (hot-expand "<I"))
+       ("H" (hot-expand "<H"))
+       ("A" (hot-expand "<A"))
+       ("<" self-insert-command "ins")
+       ("o" nil "quit"))
 
-  (define-key org-mode-map "<"
-    (lambda () (interactive)
-       (if (looking-back "^")
-           (jj-hydra-org-template/body)
-         (self-insert-command 1))))
+     (define-key org-mode-map "<"
+       (lambda () (interactive)
+         (if (looking-back "^")
+             (jj-hydra-org-template/body)
+           (self-insert-command 1))))
    #+END_SRC
 
    This makes source code look beautiful in org.
    #+BEGIN_SRC emacs-lisp
-  (setq org-src-fontify-natively t
-        org-src-tab-acts-natively t)
+     (setq org-src-fontify-natively t
+           org-src-tab-acts-natively t)
    #+END_SRC
 
    #+BEGIN_SRC emacs-lisp
-(setq org-directory "~/org")
+     (setq org-directory "~/org")
    #+END_SRC
 
 *** Calendar
 
     #+BEGIN_SRC emacs-lisp
-(setq org-agenda-files '("~/org/calendars/"))
-(setq org-agenda-include-diary t)
+      (setq org-agenda-files '("~/org/calendars/"))
+      (setq org-agenda-include-diary t)
 
-(setq org-caldav-url "https://caldav.messagingengine.com/dav/calendars/user")
-(setq org-caldav-calendar-id "joakimjalap@fastmail.com")
-(setq org-caldav-inbox "~/org/calendars/fastmail.org")
-(setq org-icalendar-timezone "Europe/Stockholm")
-(setq org-caldav-files '("~/org/calendars/fastmail.org"))
+      ;; (setq org-caldav-url "https://caldav.messagingengine.com/dav/calendars/user")
+      ;; (setq org-caldav-calendar-id "joakimjalap@fastmail.com")
+      ;; (setq org-caldav-inbox "~/org/calendars/fastmail.org")
+      ;; (setq org-icalendar-timezone "Europe/Stockholm")
+      ;; (setq org-caldav-files '("~/org/calendars/fastmail.org"))
+
+      (setq org-caldav-url "http://localhost:1080/users/joakim.jalap@tritech.se"
+            org-caldav-calendar-id "calendar"
+            org-caldav-inbox "~/org/calendars/tritech.org"
+            org-icalendar-timezone "Europe/Stockholm"
+            org-caldav-files '("~/org/calendars/tritech.org")
+            org-caldav-uuid-extension ".EML")
     #+END_SRC
 
 ** Needed External Programs

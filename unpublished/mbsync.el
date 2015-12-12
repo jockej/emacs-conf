@@ -192,9 +192,12 @@ Each cell has the form (channel . timer).")
                   (new-fails (1+ old-fails)))
              (mbsync--update-alist mbsync--consecutive-fails
                                    chan new-fails)
-             (when (and mbsync-max-fail
-                        (> new-fails mbsync-max-fail))
-               (mbsync--give-up chan))))
+             (if (and mbsync-max-fail
+                      (> new-fails mbsync-max-fail))
+                 (mbsync--give-up chan)
+               (let ((inhb (assoc chan mbsync--inhibit-new)))
+                 (when (and repeat (not (cdr inhb)))
+                   (mbsync--schedule-new chan))))))
           ;; I don't know what to do about this yet, just echo
           (t (message "mbsync: %s" event)))))
 
@@ -339,7 +342,7 @@ syncs."
   (mbsync--update-alist mbsync--inhibit-new channel t)
   ;; cancel timer for job
   (let ((timer (assoc channel mbsync--timers)))
-    (when timer (cancel-timer (cdr (timer))))))
+    (when timer (cancel-timer (cdr timer)))))
 
 
 ;;;###autoload
