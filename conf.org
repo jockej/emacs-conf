@@ -307,6 +307,16 @@
         (add-hook 'focus-in-hook 'jj-move-pointer))
     #+END_SRC
 
+    I took this from a SO post, which in turn apparently took it from an answer by
+    David Kastrup on gnu.emacs.help.
+    #+BEGIN_SRC emacs-lisp
+      (defun sudo-shell-command (command)
+        (interactive "MShell command (root): ")
+        (with-temp-buffer
+          (cd "/sudo::/")
+          (async-shell-command command)))
+    #+END_SRC
+
 **** GPG
 
      So, this was a bit of a pain to get working, but now it works. For some
