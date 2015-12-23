@@ -443,7 +443,7 @@
     Actually what I do is I make the menu key send 'F9', so I can use when I ssh
     from, say, xterm.
 
-    I have written an input method for the programmers dvorak layout. MAybe one day
+    I have written an input method for the programmer dvorak layout. Maybe one day
     I'll put it on Melpa.
     #+BEGIN_SRC emacs-lisp
       (require 'programmers-dvorak)
