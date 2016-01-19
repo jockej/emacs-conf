@@ -751,14 +751,6 @@
        (global-set-key (kbd "H-t 4 e") 'jj-eshell-other-window)
      #+END_SRC
 
-     I don't know why this has to be done this way...
-     #+BEGIN_SRC emacs-lisp
-       (add-hook 'eshell-mode-hook
-                 (lambda ()
-                   (define-key eshell-mode-map (kbd "C-d")
-                     'eshell-life-is-too-much)))
-     #+END_SRC
-
      Better to use Emacs.
      #+BEGIN_SRC emacs-lisp
        (setenv "PAGER" (executable-find "cat"))
