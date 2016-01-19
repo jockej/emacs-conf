@@ -407,6 +407,15 @@
       (define-key dired-mode-map (kbd "C-j") 'jj-this-script)
     #+END_SRC
 
+*** Tramp
+
+    This lets me edit files as root on my servers. Unbelievably awesome. All you
+    have to do is type =/su:/root@host:/path/to/file=.
+
+    #+BEGIN_SRC emacs-lisp
+      (add-to-list 'tramp-default-proxies-alist '(".*" "\\`root\\'" "/ssh:%h:"))
+    #+END_SRC
+
 *** Keyboard
 
     These are just some bindings I find more comfortable than the defaults, which I
