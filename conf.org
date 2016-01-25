@@ -307,6 +307,16 @@
         (add-hook 'focus-in-hook 'jj-move-pointer))
     #+END_SRC
 
+    I took this from a SO post, which in turn apparently took it from an answer by
+    David Kastrup on gnu.emacs.help.
+    #+BEGIN_SRC emacs-lisp
+      (defun sudo-shell-command (command)
+        (interactive "MShell command (root): ")
+        (with-temp-buffer
+          (cd "/sudo::/")
+          (async-shell-command command)))
+    #+END_SRC
+
 **** GPG
 
      So, this was a bit of a pain to get working, but now it works. For some
@@ -413,8 +423,16 @@
     fast, so I figure it'll be ok. I might write a package some day to run =mv= and
     =cp= as asynchronous processes. On FreeBSD I could make use of the awesome =SIGINFO=!
     #+BEGIN_SRC emacs-lisp
-  (require 'dired-async)
-  (dired-async-mode 1)
+      (require 'dired-async)
+      (dired-async-mode 1)
+    #+END_SRC
+*** Tramp
+
+    This lets me edit files as root on my servers. Unbelievably awesome. All you
+    have to do is type =/su:/root@host:/path/to/file=.
+
+    #+BEGIN_SRC emacs-lisp
+      (add-to-list 'tramp-default-proxies-alist '(".*" "\\`root\\'" "/ssh:%h:"))
     #+END_SRC
 
 *** Keyboard
@@ -443,7 +461,7 @@
     Actually what I do is I make the menu key send 'F9', so I can use when I ssh
     from, say, xterm.
 
-    I have written an input method for the programmers dvorak layout. MAybe one day
+    I have written an input method for the programmer dvorak layout. Maybe one day
     I'll put it on Melpa.
     #+BEGIN_SRC emacs-lisp
       (require 'programmers-dvorak)
@@ -752,14 +770,6 @@
        (global-set-key (kbd "H-t 4 e") 'jj-eshell-other-window)
      #+END_SRC
 
-     I don't know why this has to be done this way...
-     #+BEGIN_SRC emacs-lisp
-       (add-hook 'eshell-mode-hook
-                 (lambda ()
-                   (define-key eshell-mode-map (kbd "C-d")
-                     'eshell-life-is-too-much)))
-     #+END_SRC
-
      Better to use Emacs.
      #+BEGIN_SRC emacs-lisp
        (setenv "PAGER" (executable-find "cat"))
@@ -967,6 +977,10 @@ Don't show pictures of people, I don't wanna see...
                                      gnus-newsrc-alist)
              gnus-sync-newsrc-groups '("nntp")
              gnus-sync-newsrc-offsets '(2 3))
+
+       (defun jj-maybe-read-sync (&rest ignored)
+         (when (y-or-n-p "Sync the gnus? ")
+           (gnus-sync-read t)))
 
        (defun jj-maybe-save-sync (&rest ignored)
          (when (y-or-n-p "Sync the gnus? ")
