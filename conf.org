@@ -76,6 +76,7 @@
                               company-irony
                               company-math
                               conkeror-minor-mode
+                              diff-hl
                               dired+
                               dsvn
                               elfeed
@@ -95,6 +96,7 @@
                               hydra
                               idomenu
                               ignoramus
+                              imenu-anywhere
                               irony
                               lice
                               linum-off
@@ -461,8 +463,8 @@
     Actually what I do is I make the menu key send 'F9', so I can use when I ssh
     from, say, xterm.
 
-    I have written an input method for the programmer dvorak layout. Maybe one day
-    I'll put it on Melpa.
+    I have written an input method for the programmer dvorak layout. It will be
+    in Emacs 25. For now I let it tag along here.
     #+BEGIN_SRC emacs-lisp
       (require 'programmers-dvorak)
     #+END_SRC
@@ -831,9 +833,11 @@
     #+END_SRC
 
     Idomenu is a way to navigate imenu using ido, which is vastly superior to the
-    default imenu in my opinion.
+    default imenu in my opinion. Imenu-anywhere allows to do imenu across many
+    buffers, I think...
     #+BEGIN_SRC emacs-lisp
       (require 'idomenu)
+      (require 'imenu-anywhere)
       (setq-default imenu-auto-rescan t)
     #+END_SRC
 
@@ -864,6 +868,10 @@
     #+BEGIN_SRC emacs-lisp
       (require 'swiper)
       (global-set-key (kbd "H-s") 'swiper)
+    #+END_SRC
+
+    #+BEGIN_SRC emacs-lisp
+      (global-set-key (kbd "C-x C-b") 'ibuffer)
     #+END_SRC
 
 *** Backups
@@ -1574,8 +1582,13 @@ Don't show pictures of people, I don't wanna see...
             ediff-split-window-function 'split-window-horizontally)
     #+END_SRC
 
+    Why the hell did I have this set to `t' before?
     #+BEGIN_SRC emacs-lisp
-      (setq ediff-make-buffers-readonly-at-startup t)
+      (setq ediff-make-buffers-readonly-at-startup nil)
+    #+END_SRC
+
+    #+BEGIN_SRC emacs-lisp
+      (require 'diff-hl)
     #+END_SRC
 
 *** Folding
