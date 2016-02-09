@@ -429,10 +429,10 @@
     I also add a Hyper modifier key, which gives the possibility for many new global
     keybindings which don't conflict with any from packages or core Emacs. For this
     I use the "Menu" key, which I otherwise don't use for anything anyway.
-    On GNU/Linux I do this via xmodmap, but on Windows you can do this instead:
     #+BEGIN_SRC emacs-lisp
-      (when (eq system-type 'windows-nt)
-        (setq w32-apps-modifier 'hyper))
+      (if (eq system-type 'windows-nt)
+          (setq w32-apps-modifier 'hyper)
+        (define-key key-translation-map (kbd "<menu>") 'event-apply-hyper-modifier))
     #+END_SRC
 
     Unfortunately I can't use the menu key in the terminal, so I also add this:
@@ -453,6 +453,11 @@
 
     General Editing settings.
 
+    Prefer utf-8. It's 2016 after all.
+    #+BEGIN_SRC emacs-lisp
+      (prefer-coding-system 'utf-8)
+    #+END_SRC    
+    
     I used to do most my programming on a 10" netbook, so I got used to these
     settings, and now I quite like them.
     #+BEGIN_SRC emacs-lisp
