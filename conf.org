@@ -914,6 +914,14 @@
       (add-hook 'LaTeX-mode-hook 'jj-latex-hook)
     #+END_SRC
 
+*** texinfo
+
+    Don't use auctex for texinfo, I prefer the original mode.
+    #+BEGIN_SRC emacs-lisp
+      (TeX-modes-set 'TeX-modes
+                     '(tex-mode plain-tex-mode latex-mode doctex-mode) t)
+    #+END_SRC
+
 *** Markdown
 
     #+BEGIN_SRC emacs-lisp
