@@ -417,6 +417,24 @@
       (define-key dired-mode-map (kbd "C-j") 'jj-this-script)
     #+END_SRC
 
+    Async mode for dired. This launches a separate =Emacs= instance as a slave to do
+    the copying or moving. Now, obviously =Emacs= is a bit... heavy compared to =cp=
+    or =mv=, but I tried starting it with =-q= and it actually starts up pretty
+    fast, so I figure it'll be ok. I might write a package some day to run =mv= and
+    =cp= as asynchronous processes. On FreeBSD I could make use of the awesome =SIGINFO=!
+    #+BEGIN_SRC emacs-lisp
+      (require 'dired-async)
+      (dired-async-mode 1)
+    #+END_SRC
+*** Tramp
+
+    This lets me edit files as root on my servers. Unbelievably awesome. All you
+    have to do is type =/su:/root@host:/path/to/file=.
+
+    #+BEGIN_SRC emacs-lisp
+      (add-to-list 'tramp-default-proxies-alist '(".*" "\\`root\\'" "/ssh:%h:"))
+    #+END_SRC
+
 *** Keyboard
 
     These are just some bindings I find more comfortable than the defaults, which I
@@ -755,14 +773,6 @@
 
        (global-set-key (kbd "H-t e") 'eshell)
        (global-set-key (kbd "H-t 4 e") 'jj-eshell-other-window)
-     #+END_SRC
-
-     I don't know why this has to be done this way...
-     #+BEGIN_SRC emacs-lisp
-       (add-hook 'eshell-mode-hook
-                 (lambda ()
-                   (define-key eshell-mode-map (kbd "C-d")
-                     'eshell-life-is-too-much)))
      #+END_SRC
 
      Better to use Emacs.
