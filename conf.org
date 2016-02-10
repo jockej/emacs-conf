@@ -1991,6 +1991,7 @@ Don't show pictures of people, I don't wanna see...
                           " Abbrev"
                           " CWarn"
                           " FA"
+                          " ARev"
                           ))
      (rich-minority-mode 1)
    #+END_SRC
