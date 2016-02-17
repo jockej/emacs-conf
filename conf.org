@@ -127,9 +127,10 @@
                               swiper
                               sx
                               undo-tree
-                              xkcd
                               w3m
                               weechat
+                              xkcd
+                              xcscope
                               ztree
                               ))
       (setq url-http-attempt-keepalives nil)
@@ -879,6 +880,19 @@
       (global-set-key (kbd "C-x C-b") 'ibuffer)
     #+END_SRC
 
+*** Reading pdfs
+
+    Use pdf-tools.
+    #+BEGIN_SRC emacs-lisp
+      (pdf-tools-install)
+    #+END_SRC
+
+    #+BEGIN_SRC emacs-lisp
+      (add-hook 'pdf-view-mode-hook
+                (lambda ()
+                  (linum-mode -1)))
+    #+END_SRC
+
 *** Backups
 
     Control the Emacs backups.
@@ -1565,19 +1579,20 @@ Don't show pictures of people, I don't wanna see...
       (require 'yasnippet)
     #+END_SRC
 
-    A little function to create a TAGS table.
+*** Navigation
+
+    These bindings have been changed in Emacs 25
     #+BEGIN_SRC emacs-lisp
-      (defun jj-create-tags (dir)
-        "Create TAGS using excuberant ctags."
-        (interactive "DDirecory: ")
-        (let ((ctags
-               (cond ((eq system-type 'gnu/linux) (executable-find "ctags"))
-                                              ; Excuberant ctags gets installed as 'exctags' on FreeBSD
-                     ((eq system-type 'berkley-unix) (executable-find "exctags"))))
-              (default-directory dir))
-          (start-process (format "ctags-%s" (directory-file-name dir))
-                         nil ctags "-R" "-e" dir)))
+      (require 'ggtags)
+      (define-key global-map (kbd "M-*") 'pop-tag-mark)
+      (define-key global-map (kbd "M-,") 'tags-loop-continue)
     #+END_SRC
+
+     #+BEGIN_SRC emacs-lisp
+       (require 'xcscope)
+       (cscope-setup)
+     #+END_SRC
+
 
 *** Debugging
 
@@ -1723,12 +1738,6 @@ Don't show pictures of people, I don't wanna see...
      #+BEGIN_SRC emacs-lisp
        (require 'function-args)
        (fa-config-default)
-     #+END_SRC
-
-     Rscope is an interface to cscope.
-     #+BEGIN_SRC emacs-lisp
-       (require 'rscope)
-       (setq rscope-keymap-prefix (kbd "H-f"))
      #+END_SRC
 
      #+BEGIN_SRC emacs-lisp
