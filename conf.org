@@ -430,7 +430,7 @@
     have to do is type =/su:/root@host:/path/to/file=.
 
     #+BEGIN_SRC emacs-lisp
-      (add-to-list 'tramp-default-proxies-alist '(".*" "\\`root\\'" "/ssh:%h:"))
+      ;(add-to-list 'tramp-default-proxies-alist '(".*" "\\`root\\'" "/ssh:%h:"))
     #+END_SRC
 
 *** Keyboard
