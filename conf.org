@@ -2085,6 +2085,14 @@ Don't show pictures of people, I don't wanna see...
                            (concat "http://" mpd-host ":20025")))))
     #+END_SRC
 
+#+BEGIN_SRC emacs-lisp
+  (defun jj-mpd-password ()
+    (interactive)
+    (setq emms-player-mpd-server-password
+          (read-passwd "MPD password: ")))
+#+END_SRC
+
+
 *** Spotify
 
     This requires dbus, so use it only when we're using a sane OS. Also, if there's
