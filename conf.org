@@ -1063,7 +1063,6 @@ Don't show pictures of people, I don't wanna see...
              gnus-secondary-select-methods)
      #+END_SRC
 
-
      This is needed to send my login info to eternal-september.
      #+BEGIN_SRC emacs-lisp
        (defun jj-nntp-send-auth ()
@@ -1226,42 +1225,6 @@ Don't show pictures of people, I don't wanna see...
      use =C-u m= to send mail with the correct parameters.
      #+BEGIN_SRC emacs-lisp
        (setq gnus-permanently-visible-groups ".*INBOX$")
-     #+END_SRC
-
-     I found this in an old mailing list post (as you always do) and I'm adapting
-     it a bit to make it work for me. Currently it DOES NOT WORK, though.
-     #+BEGIN_SRC emacs-lisp
-       (require 'notmuch)
-
-       (defun jj-notmuch-find-group (file)
-         (let ((group (file-name-directory (directory-file-name (file-name-directory
-                                                                 file)))))
-           ;; get rid of the first part of the path
-           ;; FIXME: will this work on FreeBSD where it's /usr/home?
-           (setq group (replace-regexp-in-string
-                        (concat "/home/" (user-login-name) "/mail/")
-                        ""
-                        group))
-           ;; construct the group name from the words up to the first "/"
-           (setq group (replace-regexp-in-string "^\\([^/]+\\)/" "nnmaildir+\\1:" group
-                                                 t))
-           ;; then remove the last "/"
-           (setq group (replace-regexp-in-string "/$" "" group))
-           (if (string-match ":$" group)
-               (concat group "Inbox")
-             (replace-regexp-in-string ":\\." ":" group))))
-
-       (defun th-notmuch-goto-message-in-gnus ()
-         "Open a summary buffer containing the current notmuch article."
-         (interactive)
-         (let ((group (jj-notmuch-find-group (notmuch-show-get-filename)))
-               (message-id (replace-regexp-in-string
-                            "^id:" "" (notmuch-show-get-message-id))))
-           (if (and group message-id)
-               (org-gnus-follow-link group message-id)
-             (message "Couldn't get relevant info for switching to Gnus"))))
-
-       (define-key notmuch-show-mode-map (kbd "C-c C-c") 'th-notmuch-goto-message-in-gnus)
      #+END_SRC
 
 *** BBDB
