@@ -1107,6 +1107,7 @@ Don't show pictures of people, I don't wanna see...
              smtpmail-stream-type 'ssl
              smtpmail-smtp-server "mail.messagingengine.com"
              smtpmail-smtp-service 465)
+       (setq mail-user-agent 'gnus-user-agent)
      #+END_SRC
 
      Kill the message buffer after sending.
