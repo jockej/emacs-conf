@@ -132,7 +132,6 @@
                               xcscope
                               ztree
                               ))
-      (setq url-http-attempt-keepalives nil)
     #+END_SRC
 
 *** Install all packages
