@@ -1395,7 +1395,7 @@ Don't show pictures of people, I don't wanna see...
 
     #+BEGIN_SRC emacs-lisp
       (setq erc-default-server jj-home-host
-            erc-default-port 20026
+            erc-default-port-tls 20026
             erc-nick '("jalle" "jockej")
             erc-nick-uniquifier "_"
             )
