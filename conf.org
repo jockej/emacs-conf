@@ -45,92 +45,45 @@
 
 *** Initialize
 
-    First we make sure all the packages we want are get isntalled.
+    Install =use-package=.
     #+BEGIN_SRC emacs-lisp
-      (require 'cl)
+      (require 'package)
+      (setq package-enable-at-startup nil)
       (setq package-archives
             '(("melpa" . "http://melpa.org/packages/")
               ("gnu" . "http://elpa.gnu.org/packages/")
               ;; ("marmalade" . "http://marmalade-repo.org/packages/")
               ))
+      (package-initialize)
 
-      (defvar ensure-packages
-        nil
-        "A list of packages to ensure are installed at launch.")
+      (unless (package-installed-p 'use-package)
+        (package-refresh-contents)
+        (package-install 'use-package))
 
+      (eval-when-compile
+        (require 'use-package))
+      (require 'diminish)
+      (require 'bind-key)
+    #+END_SRC
+
+    Always install all packages.
+    #+BEGIN_SRC emacs-lisp
+      (setq use-package-always-ensure t)
+    #+END_SRC
+
+#+BEGIN_SRC emacs-lisp
       (setq ensure-packages '(
-                              ace-link
-                              ace-window
-                              ada-mode
-                              anaconda-mode
-                              avy
-                              avy-zap
-                              company-anaconda
                               auctex
-                              bbdb
                               browse-url-dwim
-                              comment-dwim-2
-                              company
                               company-auctex
-                              company-c-headers
-                              company-irony
                               company-math
-                              conkeror-minor-mode
-                              diff-hl
-                              dired+
-                              dsvn
-                              elfeed
-                              emms
-                              eww-lnum
-                              expand-region
-                              flx-ido
-                              fold-dwim
-                              function-args
-                              ggtags
-                              gitconfig-mode
-                              gitignore-mode
                               gnuplot
-                              google-translate
                               helm
-                              helm-ag
-                              hydra
-                              idomenu
-                              ignoramus
-                              imenu-anywhere
-                              irony
-                              lice
-                              linum-off
-                              magit
-                              magit-gh-pulls
                               magit-svn
-                              markdown-mode
-                              mentor
-                              move-text
-                              multi-term
-                              multiple-cursors
-                              notmuch
-                              org-caldav
-                              origami
                               pandoc-mode
-                              pinentry
-                              pdf-tools
                               popup           ;required by rtags, wtf?
-                              projectile
-                              py-autopep8
-                              pyenv-mode
-                              rich-minority
-                              rtags
-                              smex
-                              solarized-theme
-                              srefactor
-                              spotify
-                              swiper
                               sx
-                              undo-tree
-                              w3m
                               xkcd
-                              xcscope
-                              ztree
                               ))
     #+END_SRC
 
@@ -197,8 +150,7 @@
     #+BEGIN_SRC emacs-lisp
       (setq inhibit-startup-message t
             inhibit-splash-screen t
-            initial-scratch-message nil
-            initial-buffer-choice "~/")
+            initial-scratch-message "Have You heard the good word of Emacs?\n\n")
     #+END_SRC
 
 *** Misc
@@ -220,8 +172,8 @@
 
     This sets up some good ignores for different modes.
     #+BEGIN_SRC emacs-lisp
-      (require 'ignoramus)
-      (ignoramus-setup)
+      (use-package ignoramus
+        :config (ignoramus-setup))
     #+END_SRC
 
     Follow symlinks.
@@ -231,9 +183,10 @@
 
     Projectile is a project framework.
     #+BEGIN_SRC emacs-lisp
-      (require 'projectile)
-      (projectile-global-mode)
-      (setq projectile-enable-caching t)
+      (use-package projectile
+        :config
+        (projectile-global-mode)
+        (setq projectile-enable-caching t))
     #+END_SRC
 
     A function to shutdown the server.
@@ -345,26 +298,20 @@
     Some tasty extras for dired.
     #+BEGIN_SRC emacs-lisp
       (require 'dired-x)
-      (require 'dired+)
-    #+END_SRC
-
-    Don't create new dired buffers all the time.
-    #+BEGIN_SRC emacs-lisp
-      (toggle-diredp-find-file-reuse-dir 1)
     #+END_SRC
 
     Dired+ does crazy amounts of font lock, too much for my taste. Turn it down a
-    notch.
+    notch. Also avoid creating new dired buffers when changing directory, and
+    hide details about the files like modification time and owner and such.
     #+BEGIN_SRC emacs-lisp
-      (setq font-lock-maximum-decoration '((dired-mode . nil)
-                                           (wdired-mode . nil)
-                                           (t . t)))
-    #+END_SRC
-
-    Hide details like owner and such.
-    #+BEGIN_SRC emacs-lisp
-      (setq diredp-hide-details-initially-flag t
-            diredp-hide-details-propagate-flag t)
+      (use-package dired+
+        :config
+        (setq font-lock-maximum-decoration '((dired-mode . nil)
+                                             (wdired-mode . nil)
+                                             (t . t)))
+        (setq diredp-hide-details-initially-flag t
+              diredp-hide-details-propagate-flag t)
+        (toggle-diredp-find-file-reuse-dir 1))
     #+END_SRC
 
     Always copy and delete recursively withour prompting.
@@ -415,19 +362,36 @@
       (define-key dired-mode-map (kbd "C-j") 'jj-this-script)
     #+END_SRC
 
-    Async mode for dired. This launches a separate =Emacs= instance as a slave to do
-    the copying or moving. Now, obviously =Emacs= is a bit... heavy compared to =cp=
-    or =mv=, but I tried starting it with =-q= and it actually starts up pretty
-    fast, so I figure it'll be ok. I might write a package some day to run =mv= and
-    =cp= as asynchronous processes. On FreeBSD I could make use of the awesome =SIGINFO=!
+    Use =h= to hide and unhide files.
     #+BEGIN_SRC emacs-lisp
-      (require 'dired-async)
-      (dired-async-mode 1)
+      (define-key dired-mode-map (kbd "h") #'dired-omit-mode)
     #+END_SRC
+
+    Async operations. The main awesome here is =dired-async-mode=, which allows
+    me to move large files or directories asynchronously.
+    #+BEGIN_SRC emacs-lisp
+      (use-package async
+        :config
+        (require 'dired-async)
+        (dired-async-mode 1)
+        (async-bytecomp-package-mode 1)
+        (setq async-bytecomp-allowed-packages '(all)))
+      #+END_SRC
+
+*** Ztree
+
+    This is a tree style directory viewer. Honestly I don't use it that much,
+    but doesn't hurt.
+
+    #+BEGIN_SRC emacs-lisp
+      (use-package ztree
+        :defer t)
+    #+END_SRC
+
 *** Tramp
 
     This lets me edit files as root on my servers. Unbelievably awesome. All you
-    have to do is type =/su:/root@host:/path/to/file=.
+    have to do is type =/su:/root@host:/path/to/file=. This doesn't work.
 
     #+BEGIN_SRC emacs-lisp
       ;(add-to-list 'tramp-default-proxies-alist '(".*" "\\`root\\'" "/ssh:%h:"))
@@ -456,9 +420,6 @@
       (define-key function-key-map (kbd "<f9>") 'event-apply-hyper-modifier)
     #+END_SRC
 
-    Actually what I do is I make the menu key send 'F9', so I can use when I ssh
-    from, say, xterm.
-
     I have written an input method for the programmer dvorak layout. It will be
     in Emacs 25. For now I let it tag along here.
     #+BEGIN_SRC emacs-lisp
@@ -472,8 +433,8 @@
     Prefer utf-8. It's 2016 after all.
     #+BEGIN_SRC emacs-lisp
       (prefer-coding-system 'utf-8)
-    #+END_SRC    
-    
+    #+END_SRC
+
     I used to do most my programming on a 10" netbook, so I got used to these
     settings, and now I quite like them.
     #+BEGIN_SRC emacs-lisp
@@ -511,15 +472,15 @@
     TODO: convert these to the new `advice-add' syntax.
     #+BEGIN_SRC emacs-lisp
       (defadvice upcase-word (before upcase-word-advice activate)
-        (unless (looking-back "\\b")
+        (unless (looking-back "\\b" nil)
           (backward-word)))
 
       (defadvice downcase-word (before downcase-word-advice activate)
-        (unless (looking-back "\\b")
+        (unless (looking-back "\\b" nil)
           (backward-word)))
 
       (defadvice capitalize-word (before capitalize-word-advice activate)
-        (unless (or (looking-back "\\b")
+        (unless (or (looking-back "\\b" nil)
                     (bound-and-true-p subword-mode))
           (backward-word)))
     #+END_SRC
@@ -622,18 +583,25 @@
      This is an awesome extension. Unfortunately "C-|" is on of them keybindings
      which won't work in a terminal, so bind it to <F8> also.
      #+BEGIN_SRC emacs-lisp
-       (global-set-key (kbd "C-|") 'er/expand-region)
-       (global-set-key (kbd "<f8>") 'er/expand-region)
+       (use-package expand-region
+         :bind (("C-|" . er/expand-region)
+                ("<f8>" . er/expand-region)))
+     #+END_SRC
+
+     #+BEGIN_SRC emacs-lisp
+       (use-package hydra)
      #+END_SRC
 
      Multiple cursors. I don't actually use this... but it's good to be able to
      counter those sublimists...
      I took this from hydra's examples.
      #+BEGIN_SRC emacs-lisp
-       (require 'multiple-cursors)
-       (defhydra jj-multiple-cursors-hydra (:hint nil)
-         "
-            ^Up^            ^Down^        ^Miscellaneous^
+       (use-package multiple-cursors
+         :config
+         (require 'hydra)
+         (defhydra jj-multiple-cursors-hydra (:hint nil)
+           "
+       ^Up^            ^Down^        ^Miscellaneous^
        ----------------------------------------------
        [_p_]   Next    [_n_]   Next    [_l_] Edit lines
        [_P_]   Skip    [_N_]   Skip    [_a_] Mark all
@@ -647,13 +615,14 @@
          ("P" mc/skip-to-previous-like-this)
          ("M-p" mc/unmark-previous-like-this)
          ("q" nil))
-       (global-set-key (kbd "H-m") 'jj-multiple-cursors-hydra/body)
+       (global-set-key (kbd "H-m") 'jj-multiple-cursors-hydra/body))
      #+END_SRC
 
      Undo-tree is awesome.
      #+BEGIN_SRC emacs-lisp
-       (require 'undo-tree)
-       (global-undo-tree-mode)
+       (use-package undo-tree
+         :config
+         (global-undo-tree-mode))
      #+END_SRC
 
      A function to clean up buffers in general.
@@ -667,14 +636,15 @@
      #+END_SRC
 
      #+BEGIN_SRC emacs-lisp
-       (require 'move-text)
-       (global-set-key (kbd "M-S-<up>") 'move-text-up)
-       (global-set-key (kbd "M-S-<down>") 'move-text-down)
+       (use-package move-text
+         :bind
+         ("M-S-<up>" . move-text-up)
+         ("M-S-<down>" . move-text-down))
      #+END_SRC
 
      #+BEGIN_SRC emacs-lisp
-       (require 'avy-zap)
-       (global-set-key (kbd "M-Z") 'avy-zap-to-char)
+       (use-package avy-zap
+         :bind ("M-Z" . avy-zap-to-char))
      #+END_SRC
 
      A couple of functions for opening temp buffers. Comes in handy sometimes.
@@ -698,26 +668,32 @@
      #+END_SRC
 
 *** Completion
+
     I use ido for most completion, I find it less intrusive than helm for things
     like switching buffers.
     #+BEGIN_SRC emacs-lisp
-      (require 'flx-ido)
+      (require 'ido)
       (ido-mode 1)
       (ido-everywhere)
-      (flx-ido-mode 1)
-      (setq ido-enable-flex-matching t
-            ido-use-faces nil)
+      (setq ido-use-faces nil)
+
+      (use-package flx-ido
+        :config
+        (flx-ido-mode 1)
+        (setq ido-enable-flex-matching t)
+        (flx-ido-mode 1))
     #+END_SRC
 
     Smex is a good replacement for M-x.
     #+BEGIN_SRC emacs-lisp
-      (global-set-key (kbd "M-x") 'smex)
-      (global-set-key (kbd "M-X") 'smex-major-mode-commands)
+      (use-package smex
+        :bind (("M-x" . smex)
+               ("M-X" . smex-major-mode-commands)))
     #+END_SRC
 
 *** Terminal
 
-    This adds Emacs' =compile= functionality to comint buffers.
+    This adds Emacs' =compile= functionality to shell-mode buffers.
     #+BEGIN_SRC emacs-lisp
       (add-hook 'shell-mode-hook 'compilation-shell-minor-mode)
     #+END_SRC
@@ -726,8 +702,17 @@
 
      Use =zsh= if available, otherwise default to a regular bourne shell.
      #+BEGIN_SRC emacs-lisp
+       (use-package multi-term
+         :config
+         (setq multi-term-program (or (executable-find "zsh") "/bin/sh"))
+         :bind (("H-t c" . multi-term)
+                ("H-t n" . multi-term-next)
+                ("H-t p" . multi-term-prev)))
+     #+END_SRC
+
+     Some functions to open a terminal in the other window.
+     #+BEGIN_SRC emacs-lisp
        (require 'multi-term)
-       (setq multi-term-program (or (executable-find "zsh") "/bin/sh"))
 
        (defun jj-do-in-other-window (func &optional arg)
          "Move to other window and apply func."
@@ -749,11 +734,8 @@
          (interactive "P")
          (jj-do-in-other-window 'multi-term-prev arg))
 
-       (global-set-key (kbd "H-t c") 'multi-term)
        (global-set-key (kbd "H-t 4 c") 'jj-open-term-other-window)
-       (global-set-key (kbd "H-t n") 'multi-term-next)
        (global-set-key (kbd "H-t 4 n") 'jj-next-term-other-window)
-       (global-set-key (kbd "H-t p") 'multi-term-prev)
        (global-set-key (kbd "H-t 4 p") 'jj-prev-term-other-window)
      #+END_SRC
 
@@ -787,7 +769,8 @@
 
 *** Help
 
-    I need somebody..
+    I need somebody... but seriously, I'm not so sure this is actually an
+    improvement.
     #+BEGIN_SRC emacs-lisp
       (require 'ehelp)
       (define-key global-map [help] 'ehelp-command)
@@ -807,39 +790,45 @@
 
     These are functions to jump around in or between windows.
     #+BEGIN_SRC emacs-lisp
-      (require 'avy)
-      (defun jj-avy-or-clear-table-cell ()
-        "If in org-mode table call `org-table-blank-field', otherwise
+      (use-package avy
+        :config
+        (defun jj-avy-or-clear-table-cell ()
+          "If in org-mode table call `org-table-blank-field', otherwise
       call `avy-goto-word-or-subword-1'."
-        (interactive)
-        (if (and (eq major-mode 'org-mode)
-                 (org-table-check-inside-data-field t))
-            (org-table-blank-field)
-          (avy-goto-word-or-subword-1)))
+          (interactive)
+          (if (and (eq major-mode 'org-mode)
+                   (org-table-check-inside-data-field t))
+              (org-table-blank-field)
+            (avy-goto-word-or-subword-1)))
 
-      (global-set-key (kbd "C-c SPC") 'jj-avy-or-clear-table-cell)
-      (define-key org-mode-map (kbd "C-c SPC") 'jj-avy-or-clear-table-cell)
+        (global-set-key (kbd "C-c SPC") 'jj-avy-or-clear-table-cell)
+        (define-key org-mode-map (kbd "C-c SPC") 'jj-avy-or-clear-table-cell))
     #+END_SRC
 
     Jump to a window.
     #+BEGIN_SRC emacs-lisp
-      (require 'ace-window)
-      (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l))
-      (define-key global-map (kbd "C-c <tab>") 'ace-window)
+      (use-package ace-window
+        :config
+        (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l))
+        :bind ("C-c <tab>" . ace-window))
     #+END_SRC
 
+    This is a package to follow links in different modes like =help=, =man= and
+    so on.
     #+BEGIN_SRC emacs-lisp
-      (require 'ace-link)
-      (ace-link-setup-default)
+      (use-package ace-link
+        :config
+        (ace-link-setup-default))
     #+END_SRC
 
     Idomenu is a way to navigate imenu using ido, which is vastly superior to the
     default imenu in my opinion. Imenu-anywhere allows to do imenu across many
     buffers, I think...
     #+BEGIN_SRC emacs-lisp
-      (require 'idomenu)
-      (require 'imenu-anywhere)
-      (setq-default imenu-auto-rescan t)
+      (use-package idomenu
+        :config
+        (setq-default imenu-auto-rescan t))
+      (use-package imenu-anywhere)
     #+END_SRC
 
     When I search for something I usually want to move to that thing. So move to the
@@ -851,6 +840,7 @@
     A little function to search the symbol at point.
     #+BEGIN_SRC emacs-lisp
       (require 'thingatpt)
+      (require 'projectile)
       (defun jj-occur-this (&optional proj)
         "Occur the symbol at point.
 
@@ -867,8 +857,8 @@
     #+END_SRC
 
     #+BEGIN_SRC emacs-lisp
-      (require 'swiper)
-      (global-set-key (kbd "H-s") 'swiper)
+      (use-package swiper
+        :bind ("H-s" . swiper))
     #+END_SRC
 
     #+BEGIN_SRC emacs-lisp
@@ -877,15 +867,13 @@
 
 *** Reading pdfs
 
-    Use pdf-tools.
+    =Pdf-tools= allows you to read pdfs in Emacs. And you can have it rendered
+    in solarized dark colors. It is so awesome I could cry...
     #+BEGIN_SRC emacs-lisp
-      (pdf-tools-install)
-    #+END_SRC
-
-    This makes pdf documents open in solarized dark colors. It is so awesome I
-    could cry...
-    #+BEGIN_SRC emacs-lisp
-      (add-hook 'pdf-view-mode-hook #'pdf-view-midnight-minor-mode)
+      (use-package pdf-tools
+        :config
+        (pdf-tools-install)
+        (add-hook 'pdf-view-mode-hook #'pdf-view-midnight-minor-mode))
     #+END_SRC
 
 *** Backups
@@ -941,10 +929,10 @@
 
 *** Markdown
 
+    A nice mode for editing markdown.
     #+BEGIN_SRC emacs-lisp
-      (autoload 'markdown-mode "markdown-mode"
-        "Major mode for editing markdown files" t)
-      (add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
+      (use-package markdown-mode
+        :mode "\\.md\\'")
     #+END_SRC
 
 ** Internet stuff
@@ -976,17 +964,17 @@
              gnus-auto-select-first nil)
      #+END_SRC
 
-Don't show pictures of people, I don't wanna see...
-#+BEGIN_SRC emacs-lisp
-  (setq gnus-treat-from-picon nil
-        gnus-treat-mail-picon nil
-        gnus-treat-from-gravatar nil
-        gnus-treat-mail-gravatar nil
-        gnus-treat-newsgroups-picon nil
-        gnus-treat-display-smileys nil
-        gnus-treat-display-face nil
-        gnus-treat-display-x-face nil)
-#+END_SRC
+     Don't show pictures of people, I don't wanna see...
+     #+BEGIN_SRC emacs-lisp
+       (setq gnus-treat-from-picon nil
+             gnus-treat-mail-picon nil
+             gnus-treat-from-gravatar nil
+             gnus-treat-mail-gravatar nil
+             gnus-treat-newsgroups-picon nil
+             gnus-treat-display-smileys nil
+             gnus-treat-display-face nil
+             gnus-treat-display-x-face nil)
+     #+END_SRC
 
      This is bound to 'read manual' in gnus. That's for losers!
      #+BEGIN_SRC emacs-lisp
@@ -1160,39 +1148,6 @@ Don't show pictures of people, I don't wanna see...
                 ))
      #+END_SRC
 
-**** mbsync
-
-     This is my own little package to sync my mail using mbsync. The main benefit
-     of doing it from within Emacs is that I can use the ~auth-source~ mechanism
-     to get the passwords.
-     #+BEGIN_SRC emacs-lisp
-       (require 'mbsync)
-       (setq mbsync-sync-objects
-             '(("fastmail" . "mail.messagingengine.com")
-               ("gmail" . "imap.gmail.com")))
-     #+END_SRC
-
-     #+BEGIN_SRC emacs-lisp
-       (setq mbsync-top-maildir (expand-file-name "~/mail"))
-     #+END_SRC
-
-     Run =notmuch new= to index mail after getting it.
-     #+BEGIN_SRC emacs-lisp
-       (add-hook 'mbsync-after-fetch-hook 'mbsync-notmuch-new)
-     #+END_SRC
-
-     A little function to show a notification when I've got mail.
-     #+BEGIN_SRC emacs-lisp
-       (when (display-graphic-p)
-         (require 'notifications)
-         (defun jj-new-mail-notification (sender)
-           "Notify me that there is new mail"
-           (notifications-notify
-            :title "You've got mail!"
-            :body sender
-            :urgency 'normal)))
-     #+END_SRC
-
 **** Reading mail
 
      Add my mail as a selection method in gnus.
@@ -1230,33 +1185,18 @@ Don't show pictures of people, I don't wanna see...
 *** BBDB
 
     #+BEGIN_SRC emacs-lisp
-  (require 'bbdb)
-  (bbdb-initialize 'gnus 'message)
-  (bbdb-mua-auto-update-init 'message)
-    #+END_SRC
-
-    I don't live in North America, but I hear Canada's pretty nice.
-    #+BEGIN_SRC emacs-lisp
-(setq bbdb-north-american-phone-numbers-p nil)
-    #+END_SRC
-
-
-    #+BEGIN_SRC emacs-lisp
-  (setq bbdb-user-mail-names
-        (regexp-opt '("joakim.jalap@fastmail.com"
-                      "joakim.jalap@gmail.com"
-                      "joakim.jalap@tritech.se")))
-    #+END_SRC
-
-
-    #+BEGIN_SRC emacs-lisp
-  (setq bbdb-complete-mail t
-        bbdb-complete-mail-allow-cycling t
-        bbdb-mua-auto-update-p 'query)
-    #+END_SRC
-
-    #+BEGIN_SRC emacs-lisp
-
+      (use-package bbdb
+        :config
+        (bbdb-initialize 'gnus 'message)
+        (bbdb-mua-auto-update-init 'message)
+        (setq bbdb-north-american-phone-numbers-p nil)
+        (setq bbdb-user-mail-names
+              (regexp-opt '("joakim.jalap@fastmail.com"
+                            "joakim.jalap@gmail.com"
+                            "joakim.jalap@tritech.se")))
+        (setq bbdb-complete-mail t
+              bbdb-complete-mail-allow-cycling t
+              bbdb-mua-auto-update-p 'query))
     #+END_SRC
 
 *** Browsing
@@ -1280,57 +1220,48 @@ Don't show pictures of people, I don't wanna see...
     This package implements =conkeror= like functionality for =eww=, and it really is
     the bees knees.
     #+BEGIN_SRC emacs-lisp
-      (require 'eww-lnum)
-      (eval-after-load "eww"
-        '(progn (define-key eww-mode-map "f" 'eww-lnum-follow)
-                (define-key eww-mode-map "F" 'eww-lnum-universal)))
+      (use-package eww-lnum
+        :bind (:map eww-mode-map
+                    ("f" . eww-lnum-follow)
+                    ("F" . eww-lnum-universal)))
     #+END_SRC
-
 
     This is an Emacs interface to =w3m=, it's maybe a little better than =eww= actually.
     #+BEGIN_SRC emacs-lisp
-      (require 'w3m)
-      (setq w3m-home-page "https://duckduckgo.com")
-      (require 'w3m-search)
-      (add-to-list 'w3m-search-engine-alist
-                   '("ddg" "https://duckduckgo.com/?q=%s"))
-      (setq w3m-search-default-engine "ddg")
+      (use-package w3m
+        :config
+        (setq w3m-home-page "https://duckduckgo.com")
+        (require 'w3m-search)
+        (add-to-list 'w3m-search-engine-alist
+                     '("ddg" "https://duckduckgo.com/?q=%s"))
+        (setq w3m-search-default-engine "ddg")
+
+        ;; For that awesome conkerorlikeness.
+        (require 'w3m-lnum)
+        (w3m-lnum-mode 1)
+
+        ;; Download to the same place as every other program.
+        (setq w3m-default-save-directory (expand-file-name "~/Downloads"))
+
+        ;; Use the page title as the buffer name.
+        (setq w3m-use-title-buffer-name t)
+
+        ;; This mode associates a =w3m= window with the frame it is in, so that a
+        ;; =w3m= window only has tabs for the buffers in the same frame.
+        (w3m-fb-mode 1)
+        :bind (:map w3m-mode-map ("C-c C-t" . w3m-view-this-url-new-session)))
     #+END_SRC
 
-    For that awesome conkerorlikeness.
+    When it comes to graphical browsers, I really like =conkeror=, it's the
+    =Emacs= of browsers. It seems to have a special place in the heart of Emacs
+    hackers, so much that there is actually a minor mode for editing its config
+    files!
     #+BEGIN_SRC emacs-lisp
-      (require 'w3m-lnum)
-      (w3m-lnum-mode 1)
-    #+END_SRC
-
-    Download to the same place as every other program.
-    #+BEGIN_SRC emacs-lisp
-      (setq w3m-default-save-directory (expand-file-name "~/Downloads"))
-    #+END_SRC
-
-    Use the page title as the buffer name.
-    #+BEGIN_SRC emacs-lisp
-      (setq w3m-use-title-buffer-name t)
-    #+END_SRC
-
-    #+BEGIN_SRC emacs-lisp
-      (define-key w3m-mode-map (kbd "C-c C-t") 'w3m-view-this-url-new-session)
-    #+END_SRC
-
-    This mode associates a =w3m= window with the frame it is in, so that a =w3m= window
-    only has tabs for the buffers in the same frame.
-    #+BEGIN_SRC emacs-lisp
-      (w3m-fb-mode 1)
-    #+END_SRC
-
-    When it comes to graphical browsers, I really like =conkeror=, it's the =Emacs=
-    of browsers. It seems to have a special place in the heart of Emacs hackers, so
-    much that there is actually a minor mode for editing its config files!
-    #+BEGIN_SRC emacs-lisp
-  (require 'conkeror-minor-mode)
-  (add-hook 'js-mode-hook (lambda ()
-                            (when (string= ".conkerorrc" (buffer-name))
-                              (conkeror-minor-mode 1))))
+      (use-package conkeror-minor-mode
+        :config
+        (add-hook 'js-mode-hook (lambda ()
+                                  (when (string= ".conkerorrc" (buffer-name))
+                                    (conkeror-minor-mode 1)))))
     #+END_SRC
 
 *** Downloading
@@ -1347,6 +1278,8 @@ Don't show pictures of people, I don't wanna see...
 
 *** IRC
 
+    Sometimes I have to kill all IRC buffers, when I've been disconnected form
+    some reason.
     #+BEGIN_SRC emacs-lisp
       (defun jj-kill-irc ()
         "Kill all IRC buffers"
@@ -1354,7 +1287,6 @@ Don't show pictures of people, I don't wanna see...
         (kill-matching-buffers "#[[:word:]-]*")
         (kill-matching-buffers (concat jj-home-host ":[0-9]+.*")))
     #+END_SRC
-
 
     #+BEGIN_SRC emacs-lisp
       (require 'erc)
@@ -1408,34 +1340,18 @@ Don't show pictures of people, I don't wanna see...
       (setq erc-prompt-for-password t)
     #+END_SRC
 
-*** RSS
-
-    I've got all of these from gwene as well, so this might be gone soon.
-    #+BEGIN_SRC emacs-lisp
-      (require 'elfeed)
-      (setq elfeed-feeds
-            '("wingolog.org/feed/atom"
-              "http://feeds.feedburner.com/codinghorror"
-              "http://www.devttys0.com/feed/"
-              "http://syndication.thedailywtf.com/TheDailyWtf"
-              "http://git.hcoop.net/?p=bpt/emacs.git;a=rss"
-              "http://emacshorrors.com/feed"
-              "http://endlessparentheses.com/atom.xml"
-              "http://oremacs.com/atom.xml"
-              ))
-    #+END_SRC
-
 *** Google translate
 
     Why would I leave Emacs just to transate something?
     #+BEGIN_SRC emacs-lisp
-      (require 'google-translate)
-      (require 'google-translate-smooth-ui)
-      (setq google-translate-translation-directions-alist
-            '(("en" . "sv")
-              ("sv" . "en")))
-      (defalias 'jj-translate 'google-translate-smooth-translate
-        "Translate using google translate.")
+      (use-package google-translate
+        :config
+        (require 'google-translate-smooth-ui)
+        (setq google-translate-translation-directions-alist
+              '(("en" . "sv")
+                ("sv" . "en")))
+        (defalias 'jj-translate 'google-translate-smooth-translate
+          "Translate using google translate."))
     #+END_SRC
 
 *** Torrents
@@ -1443,12 +1359,15 @@ Don't show pictures of people, I don't wanna see...
     This lets me control =rtorrent= via =xmlrpc= from =Emacs=. I have the matching
     =.rtorrent.rc= file in my dotfiles repo.
     #+BEGIN_SRC emacs-lisp
-      (require 'mentor)
-      (setq mentor-rtorrent-url "scgi://localhost:5000")
+      (use-package mentor
+        :config
+        (setq mentor-rtorrent-url "scgi://localhost:5000"))
     #+END_SRC
 
     This lets me browse and start torrents on my headless server with ease!
     #+BEGIN_SRC emacs-lisp
+      (require 'mentor)
+      (require 'w3m)
       (defun jj-queue-torrent (&optional no-start)
         "A little hack to load a torrent into rtorrent directly from w3m, provided
         there is a mentor buffer active. Point must be on a magnet link in w3m.
@@ -1468,7 +1387,6 @@ Don't show pictures of people, I don't wanna see...
             (mentor-call-command (concat cmd " " url)))))
 
       (define-key w3m-mode-map (kbd "H-w") 'jj-queue-torrent)
-
     #+END_SRC
 
 ** Programming
@@ -1476,23 +1394,28 @@ Don't show pictures of people, I don't wanna see...
 
     This package allows us to insert license headers, real nifty.
     #+BEGIN_SRC emacs-lisp
-      (require 'lice)
+      (use-package lice)
     #+END_SRC
 
 *** Code helpers
 
     Autocomplete, which sometimes works.
     #+BEGIN_SRC emacs-lisp
-      (require 'company)
+      (use-package company
+        :config
+        (global-company-mode)
+        :bind (:map company-active-map ("C-d" . company-show-doc-buffer)))
+    #+END_SRC
+
+    The Emacs semantic framework.
+    #+BEGIN_SRC emacs-lisp
       (require 'semantic)
-      (add-hook 'after-init-hook 'global-company-mode)
       (global-semanticdb-minor-mode 1)
       (semanticdb-enable-gnu-global-databases 'c-mode)
       (semanticdb-enable-gnu-global-databases 'c++-mode)
       (global-semantic-idle-scheduler-mode)
       (semantic-mode 1)
       (eval-after-load 'company '(add-to-list 'company-backends 'company-semantic))
-      (define-key company-active-map (kbd "C-d") 'company-show-doc-buffer)
     #+END_SRC
 
     Eldoc shows documentation in the minibuffer.
@@ -1511,16 +1434,26 @@ Don't show pictures of people, I don't wanna see...
 
     These bindings have been changed in Emacs 25
     #+BEGIN_SRC emacs-lisp
-      (require 'ggtags)
       (define-key global-map (kbd "M-*") 'pop-tag-mark)
       (define-key global-map (kbd "M-,") 'tags-loop-continue)
     #+END_SRC
 
+    #+BEGIN_SRC emacs-lisp
+      (use-package ggtags
+        :config
+        (add-hook 'c-mode-hook 'ggtags-mode)
+        (add-hook 'c++-mode-hook 'ggtags-mode))
+    #+END_SRC
+
      #+BEGIN_SRC emacs-lisp
-       (require 'xcscope)
-       (cscope-setup)
+       (use-package xcscope
+         :config
+         (cscope-setup))
      #+END_SRC
 
+     #+BEGIN_SRC emacs-lisp
+       (use-package helm-ag)
+     #+END_SRC
 
 *** Debugging
 
@@ -1547,15 +1480,24 @@ Don't show pictures of people, I don't wanna see...
     because it lets you easily revert hunks in a buffer, even in svn. But I
     don't want it on all of the time.
     #+BEGIN_SRC emacs-lisp
-      (require 'diff-hl)
-      (global-set-key (kbd "H-d") 'diff-hl-mode)
+      (use-package diff-hl
+        :bind
+        ("H-d" . diff-hl-mode))
     #+END_SRC
 
 *** Folding
 
     I use origami for folding
     #+BEGIN_SRC emacs-lisp
-      (require 'origami)
+      (use-package origami
+        :config
+        (add-hook 'prog-mode-hook #'origami-mode)
+        :bind
+        ("M-o" . origami-toggle-node))
+    #+END_SRC
+
+    #+BEGIN_SRC emacs-lisp
+      (require 'hydra)
       (defhydra jj-fold-hydra (:color blue)
         "
       _t_oggle node  hide _a_ll   show _A_ll   _r_ecursively toggle
@@ -1573,18 +1515,16 @@ Don't show pictures of people, I don't wanna see...
         ("C" origami-close-node-recursively)
         ("q" nil "quit"))
 
-      (add-hook 'prog-mode-hook #'origami-mode)
-
       (global-set-key (kbd "H-a f") 'jj-fold-hydra/body)
-      (global-set-key (kbd "M-o") 'origami-toggle-node)
     #+END_SRC
 
 *** Commenting
 
     This cycles between comment states.
     #+BEGIN_SRC emacs-lisp
-      (require 'comment-dwim-2)
-      (global-set-key (kbd "M-;") 'comment-dwim-2)
+      (use-package comment-dwim-2
+        :bind
+        ("M-;" . comment-dwim-2))
     #+END_SRC
 
 *** Compilation
@@ -1611,25 +1551,47 @@ Don't show pictures of people, I don't wanna see...
 
 *** Version control
 
-    Use magit for git, with support for github pull requests.
-    #+BEGIN_SRC emacs-lisp
-      (require 'magit)
-      (setq magit-last-seen-setup-instructions "1.4.0"
-            magit-push-always-verify nil
-            magit-revert-buffers 'silent)
-      ;; (require 'magit-gh-pulls)
-      ;; (add-hook 'magit-mode-hook 'turn-on-magit-gh-pulls)
-      (global-set-key (kbd "H-g") 'magit-status)
-    #+END_SRC
+**** Git
 
-    Usually when I look at a diff from the =svn= buffer I want to look at it, then
-    kill it immediately, so move point there at once.
-    #+BEGIN_SRC emacs-lisp
-      (require 'dsvn)
-      (advice-add 'svn-diff-file :after 'jj-other-window)
-    #+END_SRC
+     Use magit for git, with support for github pull requests.
+     #+BEGIN_SRC emacs-lisp
+       (use-package magit
+         :config
+         (setq magit-last-seen-setup-instructions "1.4.0"
+               magit-push-always-verify nil
+               magit-revert-buffers 'silent)
+         :bind
+         ("H-g" . magit-status))
+     #+END_SRC
+
+     Modes for editing git config files.
+#+BEGIN_SRC emacs-lisp
+  (use-package gitconfig-mode
+    :defer t)
+
+  (use-package gitignore-mode
+    :defer t)
+#+END_SRC
+
+
+**** SVN
+
+     Usually when I look at a diff from the =svn= buffer I want to look at it, then
+     kill it immediately, so move point there at once.
+     #+BEGIN_SRC emacs-lisp
+       (use-package dsvn
+         :config
+         (advice-add 'svn-diff-file :after 'jj-other-window))
+     #+END_SRC
 
 *** Language specifics
+
+**** Ada
+
+     #+BEGIN_SRC emacs-lisp
+       (use-package ada-mode)
+     #+END_SRC
+
 **** C/C++
 
      A little function to insert an include guard.
@@ -1660,27 +1622,31 @@ Don't show pictures of people, I don't wanna see...
        (add-to-list 'c++-font-lock-extra-types "auto")
      #+END_SRC
 
-     Srefactor is a refactoring framework.
      #+BEGIN_SRC emacs-lisp
-       (require 'srefactor)
-       (define-key c-mode-map (kbd "M-RET") 'srefactor-refactor-at-point)
-       (define-key c++-mode-map (kbd "M-RET") 'srefactor-refactor-at-point)
+       (use-package function-args
+         :config
+         (fa-config-default))
      #+END_SRC
 
      #+BEGIN_SRC emacs-lisp
-       (require 'function-args)
-       (fa-config-default)
+       (use-package rtags
+         :config
+         (require 'company)
+         (require 'company-rtags)
+         (add-to-list 'company-backends 'company-rtags)
+         (rtags-enable-standard-keybindings))
      #+END_SRC
 
      #+BEGIN_SRC emacs-lisp
-       (require 'rtags)
-       (require 'company-rtags)
-       (rtags-enable-standard-keybindings)
-     #+END_SRC
+       (use-package irony
+         :config
+         (add-hook 'c-mode-hook 'irony-mode)
+         (add-hook 'c++-mode-hook 'irony-mode))
 
-     #+BEGIN_SRC emacs-lisp
-       (require 'irony)
-       (require 'company-irony)
+       (use-package company-irony
+         :config
+         (require 'company)
+         (add-to-list 'company-backends 'company-irony))
      #+END_SRC
 
      This warns for suspicious constructs.
@@ -1690,10 +1656,9 @@ Don't show pictures of people, I don't wanna see...
 
      Irony is a completion engine powered by libclang.
      #+BEGIN_SRC emacs-lisp
-       (defun jj-add-c/c++-company-backends ()
-         (add-to-list 'company-backends 'company-irony)
-         (add-to-list 'company-backends 'company-c-headers)
-         (add-to-list 'company-backends 'company-rtags))
+       (use-package company-c-headers
+         :config
+         (add-to-list 'company-backends 'company-c-headers))
      #+END_SRC
 
      Seriously, who indents ~namespace~ or ~extern~ declarations? That's retarded.
@@ -1720,20 +1685,9 @@ Don't show pictures of people, I don't wanna see...
 
      #+END_SRC
 
-     Add all the hooks.
      #+BEGIN_SRC emacs-lisp
-       (defvar jj-c-mode-common-hook nil
-         "common hooks for c and c++")
-
-       (add-hook 'jj-c-mode-common-hook 'irony-mode)
-       (add-hook 'jj-c-mode-common-hook 'ggtags-mode)
-       (add-hook 'jj-c-mode-common-hook 'jj-add-c/c++-company-backends)
-       (add-hook 'jj-c-mode-common-hook 'yas-minor-mode)
-
-       (add-hook 'c++-mode-hook 'jj-my-cpp-style)
-       (dolist (hook jj-c-mode-common-hook)
-         (add-hook 'c-mode-hook hook)
-         (add-hook 'c++-mode-hook hook))
+       (add-hook 'c-mode-hook 'yas-minor-mode)
+       (add-hook 'c++-mode-hook 'yas-minor-mode)
      #+END_SRC
 
 **** COBOL
@@ -1767,35 +1721,35 @@ Don't show pictures of people, I don't wanna see...
 **** Python
      Anaconda-mode seems to pretty much work for me, so use it
      #+BEGIN_SRC emacs-lisp
-       (require 'anaconda-mode)
-       (require 'company-anaconda)
-       (defun jj-python-hook ()
-         (progn
-           (anaconda-mode)
-           (add-to-list 'company-backends 'company-anaconda)))
-       (add-hook 'python-mode-hook 'jj-python-hook)
+       (use-package anaconda-mode
+         :config
+         (add-hook 'python-mode-hook 'anaconda-mode))
+
+       (use-package company-anaconda
+         :config
+         (add-to-list 'company-backends 'company-anaconda))
      #+END_SRC
 
      For sticking to the coding standards.
      #+BEGIN_SRC emacs-lisp
-       (require 'py-autopep8)
-     #+END_SRC
-
-     I have to deal with some python at work where the standards have not been followed.
-     #+BEGIN_SRC emacs-lisp
-       (when (jj-is-work-comp-p)
-         (setq py-autopep8-options
-               '("--max-line-length=200")))
-       (when (jj-is-work-comp-p)
-         (add-hook 'python-mode-hook 'turn-off-auto-fill))
+       (use-package py-autopep8
+         :config
+         ;; I have to deal with some python at work where the standards have not been
+         ;; followed.
+         (when (jj-is-work-comp-p)
+           (setq py-autopep8-options
+                 '("--max-line-length=200")))
+         (when (jj-is-work-comp-p)
+           (add-hook 'python-mode-hook 'turn-off-auto-fill)))
      #+END_SRC
 
      This gives support for multiple python versions. I use it at work since we have
      to support some ancient version.
      #+BEGIN_SRC emacs-lisp
        (when (jj-is-work-comp-p)
-         (require 'pyenv-mode)
-         (add-hook 'python-mode-hook 'pyenv-mode))
+         (use-package pyenv-mode
+           :config
+           (add-hook 'python-mode-hook 'pyenv-mode)))
      #+END_SRC
 
 **** Shell
@@ -1814,15 +1768,17 @@ Don't show pictures of people, I don't wanna see...
        (require 'fortran)
        (require 'f90)
        (setq fortran-blink-matching-if t)
-       (add-hook 'f90-mode-hook
-                 (lambda () (setq f90-do-indent 2
-                                  f90-if-indent 2
-                                  f90-type-indent 2
-                                  f90-program-indent 2
-                                  f90-critical-indent 2
-                                  )
-                   (abbrev-mode 1)
-                   (f90-add-imenu-menu)))
+
+       (defun jj-fortran-hook ()
+         (setq f90-do-indent 2
+               f90-if-indent 2
+               f90-type-indent 2
+               f90-program-indent 2
+               f90-critical-indent 2)
+         (abbrev-mode 1)
+         (f90-add-imenu-menu))
+
+       (add-hook 'f90-mode-hook 'jj-fortran-hook)
      #+END_SRC
 
 **** SQL
@@ -1934,26 +1890,27 @@ Don't show pictures of people, I don't wanna see...
    #+END_SRC
 
    #+BEGIN_SRC emacs-lisp
-     (require 'rich-minority)
-     (setq rm-blacklist '(" Undo-Tree"
-                          " Fill"
-                          " company"
-                          " hs"
-                          " ElDoc"
-                          " GG"
-                          " yas"
-                          " Abbrev"
-                          " CWarn"
-                          " FA"
-                          " ARev"
-                          ))
-     (rich-minority-mode 1)
+     (use-package rich-minority
+       :config
+       (setq rm-blacklist '(" Undo-Tree"
+                            " Fill"
+                            " company"
+                            " hs"
+                            " ElDoc"
+                            " GG"
+                            " yas"
+                            " Abbrev"
+                            " CWarn"
+                            " FA"
+                            " ARev"
+                            ))
+       (rich-minority-mode 1))
    #+END_SRC
 
    Line numbers are nice, but turn the off in some buffers.
    #+BEGIN_SRC emacs-lisp
      (global-linum-mode 1)
-     (require 'linum-off)
+     (use-package linum-off)
    #+END_SRC
 
    Column numbers are nice too.
@@ -1980,6 +1937,9 @@ Don't show pictures of people, I don't wanna see...
    dark. Otherwise change the face in the minibuffer, since it's bloody invisible
    with the default colors.
    #+BEGIN_SRC emacs-lisp
+     (use-package solarized-theme)
+
+     (require 'solarized-theme)
      (defun jj-set-theme (&optional display)
        (if (display-graphic-p display)
            (progn
@@ -1997,31 +1957,34 @@ Don't show pictures of people, I don't wanna see...
 *** MPD stream
 
     #+BEGIN_SRC emacs-lisp
-      (require 'emms-setup)
-      (require 'emms-player-mpd)
-      (require 'emms-browser)
-      (emms-standard)
-      (emms-default-players)
-      (require 'emms-mode-line)
-      (emms-mode-line 1)
+      (use-package emms
+        :config
+        (require 'emms-setup)
+        (require 'emms-player-mpd)
+        (require 'emms-browser)
+        (emms-standard)
+        (emms-default-players)
+        (require 'emms-mode-line)
+        (emms-mode-line 1)
+        (require 'emms)
+        (defhydra jj-emms-hydra (:color blue)
+          "Emms"
+          ("+"emms-volume-mode-plus "Vol+")
+          ("-" emms-volume-mode-minus "Vol-")
+          (">" emms-next "Next")
+          ("<" emms-previous "Prev")
+          ("p" emms-pause "Pause")
+          ("s" emms-stop "Stop")
+          ("g" emms-start "Play")
+          ("q" nil "Quit"))
 
-      (defhydra jj-emms-hydra (:color blue)
-        "Emms"
-        ("+"emms-volume-mode-plus "Vol+")
-        ("-" emms-volume-mode-minus "Vol-")
-        (">" emms-next "Next")
-        ("<" emms-previous "Prev")
-        ("p" emms-pause "Pause")
-        ("s" emms-stop "Stop")
-        ("g" emms-start "Play")
-        ("q" nil "Quit"))
-
-      (global-set-key (kbd "H-a e") 'jj-emms-hydra/body)
+        (global-set-key (kbd "H-a e") 'jj-emms-hydra/body))
     #+END_SRC
 
     Set stuff up for streaming from my server at home. If I'm on my internal network
     I use the internal address, otherwise my external.
     #+BEGIN_SRC emacs-lisp
+      (require 'emms)
       (require 'emms-player-mpd)
       (setq emms-player-mpd-server-name
             (if (jj-is-home-p)
@@ -2055,26 +2018,25 @@ Don't show pictures of people, I don't wanna see...
           (read-passwd "MPD password: ")))
 #+END_SRC
 
-
 *** Spotify
 
     This requires dbus, so use it only when we're using a sane OS. Also, if there's
     no X there's no use in loading it obviously.
     #+BEGIN_SRC emacs-lisp
-      (when (and (not (eq system-type 'windows-nt)) (display-graphic-p))
-        (progn
-          (require 'spotify)
-          (defhydra jj-spotify-hydra (:color blue)
-            "Spotify"
-            ("n" spotify-next "Next")
-            ("p" spotify-playpause "Play/Pause")
-            ("P" spotify-previous "Previous")
-            ("Q" spotify-quit "Quit Spotify")
-            ("e" spotify-enable-song-notifications "Enable notifications")
-            ("d" spotify-disable-song-notifications "Disable notifications")
-            ("q" nil "quit"))))
+      (use-package spotify
+        :if (and (not (eq system-type 'windows-nt)) (display-graphic-p))
+        :config
+        (defhydra jj-spotify-hydra (:color blue)
+          "Spotify"
+          ("n" spotify-next "Next")
+          ("p" spotify-playpause "Play/Pause")
+          ("P" spotify-previous "Previous")
+          ("Q" spotify-quit "Quit Spotify")
+          ("e" spotify-enable-song-notifications "Enable notifications")
+          ("d" spotify-disable-song-notifications "Disable notifications")
+          ("q" nil "quit"))
 
-      (global-set-key (kbd "H-a s") 'jj-spotify-hydra/body)
+        (global-set-key (kbd "H-a s") 'jj-spotify-hydra/body))
     #+END_SRC
 
 ** Org
@@ -2155,12 +2117,14 @@ Don't show pictures of people, I don't wanna see...
       ;; (setq org-icalendar-timezone "Europe/Stockholm")
       ;; (setq org-caldav-files '("~/org/calendars/fastmail.org"))
 
-      (setq org-caldav-url "http://localhost:1080/users/joakim.jalap@tritech.se"
-            org-caldav-calendar-id "calendar"
-            org-caldav-inbox "~/org/calendars/tritech.org"
-            org-icalendar-timezone "Europe/Stockholm"
-            org-caldav-files '("~/org/calendars/tritech.org")
-            org-caldav-uuid-extension ".EML")
+      (use-package org-caldav
+        :config
+        (setq org-caldav-url "http://localhost:1080/users/joakim.jalap@tritech.se"
+              org-caldav-calendar-id "calendar"
+              org-caldav-inbox "~/org/calendars/tritech.org"
+              org-icalendar-timezone "Europe/Stockholm"
+              org-caldav-files '("~/org/calendars/tritech.org")
+              org-caldav-uuid-extension ".EML"))
     #+END_SRC
 
 ** Needed External Programs
@@ -2174,18 +2138,15 @@ Don't show pictures of people, I don't wanna see...
     - cscope
     - ag, a.k.a. the silver searcher
     - zsh
-    - mu :: I use =mu-git= from AUR.
-    - pyenv :: I only use this at work...
     - w3m
     - subversion
     - git
     - rtags
-    - pdflatex
-
+    - LaTeX, with pdflatex
 
 **** Only on graphical systems
      - mplayer
-     - spotify
+     - spotify, only on GNU/Linux
      - conkeror
      - gnuplot
 
