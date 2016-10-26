@@ -871,6 +871,7 @@
     in solarized dark colors. It is so awesome I could cry...
     #+BEGIN_SRC emacs-lisp
       (use-package pdf-tools
+        :if (and (not (eq system-type 'windows-nt)) (display-graphic-p))
         :config
         (pdf-tools-install)
         (add-hook 'pdf-view-mode-hook #'pdf-view-midnight-minor-mode))
