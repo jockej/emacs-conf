@@ -146,11 +146,18 @@
 
 *** Startup
 
-    Start in my home directory by default, why not?
+    Nice minimalistic startup
     #+BEGIN_SRC emacs-lisp
       (setq inhibit-startup-message t
             inhibit-splash-screen t
             initial-scratch-message "Have You heard the good word of Emacs?\n\n")
+    #+END_SRC
+
+*** Custom
+
+    #+BEGIN_SRC emacs-lisp
+      (setq custom-file "~/.emacs.d/custom.el")
+      (load custom-file 'noerror)
     #+END_SRC
 
 *** Misc
