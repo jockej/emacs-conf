@@ -433,6 +433,12 @@
       (require 'programmers-dvorak)
     #+END_SRC
 
+    If I don't have this, some keybindings in Gnus (B-DEL to delete a message) break
+    when running through putty.
+    #+BEGIN_SRC emacs-lisp
+      (define-key key-translation-map (kbd "<deletechar>") (kbd "<delete>"))
+    #+END_SRC
+
 *** Editing
 
     General Editing settings.
@@ -995,8 +1001,11 @@
      #+BEGIN_SRC emacs-lisp
        (require 'gnus)
        (require 'gnus-sync)
-       (setq gnus-sync-backend (concat "/ssh:" jj-home-host-ssh-name
-                                       ":gnus-sync/gnus")
+       (setq gnus-sync-backend
+             (if (string= system-name "genserv")
+                 "~/gnus-sync/gnus"
+               (concat "/ssh:" jj-home-host-ssh-name
+                       ":gnus-sync/gnus"))
              gnus-sync-global-vars '(gnus-newsrc-last-checked-date
                                      gnus-topic-topology
                                      gnus-topic-alist
@@ -1176,12 +1185,14 @@
              gnus-secondary-select-methods)
      #+END_SRC
 
-     And my work mail, which I access through =davmail=.
+     And my work mail, which I access through =davmail=. =davmail= only works
+     with graphics (written in java), so only add it there.
      #+BEGIN_SRC emacs-lisp
-       (push '(nnimap "tritech" (nnimap-address "localhost")
-                      (nnimap-server-port 1143)
-                      (nnimap-stream network))
-             gnus-secondary-select-methods)
+       (when (display-graphic-p)
+         (push '(nnimap "tritech" (nnimap-address "localhost")
+                        (nnimap-server-port 1143)
+                        (nnimap-stream network))
+               gnus-secondary-select-methods))
      #+END_SRC
 
      I want to see my mail inboxes even when they are empty, mainly so that I can
