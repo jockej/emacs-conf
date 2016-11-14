@@ -1000,29 +1000,31 @@
      written to the server.
      #+BEGIN_SRC emacs-lisp
        (require 'gnus)
-       (require 'gnus-sync)
-       (setq gnus-sync-backend
-             (if (string= system-name "genserv")
-                 "~/gnus-sync/gnus"
-               (concat "/ssh:" jj-home-host-ssh-name
-                       ":gnus-sync/gnus"))
-             gnus-sync-global-vars '(gnus-newsrc-last-checked-date
-                                     gnus-topic-topology
-                                     gnus-topic-alist
-                                     gnus-newsrc-alist)
-             gnus-sync-newsrc-groups '("nntp")
-             gnus-sync-newsrc-offsets '(2 3))
+       (when (< (string-to-number emacs-version) 26.0)
+         (require 'gnus-sync)
+         (setq gnus-sync-backend
+               (if (string= system-name "genserv")
+                   "~/gnus-sync/gnus"
+                 (concat "/ssh:" jj-home-host-ssh-name
+                         ":gnus-sync/gnus"))
+               gnus-sync-global-vars '(gnus-newsrc-last-checked-date
+                                       gnus-topic-topology
+                                       gnus-topic-alist
+                                       gnus-newsrc-alist)
+               gnus-sync-newsrc-groups '("nntp")
+               gnus-sync-newsrc-offsets '(2 3))
 
-       (defun jj-maybe-read-sync (&rest ignored)
-         (when (y-or-n-p "Sync the gnus? ")
-           (gnus-sync-read t)))
+         (defun jj-maybe-read-sync (&rest ignored)
+           (when (y-or-n-p "Sync the gnus? ")
+             (gnus-sync-read t)))
 
-       (defun jj-maybe-save-sync (&rest ignored)
-         (when (y-or-n-p "Sync the gnus? ")
-           (gnus-sync-save)))
+         (defun jj-maybe-save-sync (&rest ignored)
+           (when (y-or-n-p "Sync the gnus? ")
+             (gnus-sync-save)))
 
-       (remove-hook 'gnus-save-newsrc-hook 'gnus-sync-save)
-       (add-hook 'gnus-save-newsrc-hook 'jj-maybe-save-sync)
+         (remove-hook 'gnus-save-newsrc-hook 'gnus-sync-save)
+         (add-hook 'gnus-save-newsrc-hook 'jj-maybe-save-sync))
+
      #+END_SRC
 
      Use topics, but don't display empty topics.
