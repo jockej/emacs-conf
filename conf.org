@@ -52,6 +52,7 @@
       (setq package-archives
             '(("melpa" . "http://melpa.org/packages/")
               ("gnu" . "http://elpa.gnu.org/packages/")
+              ("org" . "http://orgmode.org/elpa/")
               ;; ("marmalade" . "http://marmalade-repo.org/packages/")
               ))
       (package-initialize)
@@ -1592,6 +1593,12 @@
        (use-package ada-mode)
      #+END_SRC
 
+     #+BEGIN_SRC emacs-lisp
+       (setq ada-indent 2
+             ada-broken-decl-indent 3
+             ada-broken-indent 0)
+     #+END_SRC
+
 **** C/C++
 
      A little function to insert an include guard.
@@ -2041,6 +2048,12 @@
 
 ** Org
 
+First thing's first. I like my org files non-indented.
+#+BEGIN_SRC emacs-lisp
+  (setq org-adapt-indentation nil)
+#+END_SRC
+
+Some speed commands used in the hydra below.
    #+BEGIN_SRC emacs-lisp
      (setq org-use-speed-commands t)
    #+END_SRC
@@ -2126,6 +2139,61 @@
               org-caldav-files '("~/org/calendars/tritech.org")
               org-caldav-uuid-extension ".EML"))
     #+END_SRC
+
+
+*** Blog
+
+Setup for a blog, completely written in org!
+#+BEGIN_SRC emacs-lisp
+  (setq org-publish-project-alist
+        '(("blog"
+           :components ("posts"
+                        "assets"
+                        "feed"))
+          ("posts"
+           :base-extension "org"
+           :html-extension "html"
+           :publishing-function org-html-publish-to-html
+           ;; :html-doctype "html5"
+           ;; :html-html5-fancy t
+           :base-directory "~/test/orgblog"
+           :publishing-directory "~/test/orgpub"
+           :recursive t
+           :with-toc nil
+           :html-head-extra ""
+           :html-preamble ""
+           :html-postamble ""
+           :with-latex t
+           :section-numbers nil
+           :exclude-tags ("nopublish" "todo")
+           :todo-keywords nil
+           :auto-sitemap t
+           :sitemap-filename "archive.org"
+           :sitemap-title "Archive"
+           :sitemap-sort-files anti-chronologically
+           :sitemap-style list
+           :makeindex t
+           )
+
+          ("assets"
+           :base-extension "css\\|jpeg\\|png\\|jpg\\|gif"
+           :base-directory "~/test/orgblog/static"
+           :publishing-directory "~/test/orgpub/static"
+           :recursive t
+           :publishing-function org-publish-attachment)
+
+          ("feed"
+           :base-extension "org"
+           :base-directory "~/test/orgblog"
+           :publishing-directory "~/test/orgpub/rss"
+           :publishing-function (org-rss-publish-to-rss)
+           :exclude ".*"
+           :include ("rss.org")
+           :with-toc nil
+           :section-numbers nil
+           :title "Jockej's blog"
+          )))
+#+END_SRC
 
 ** Needed External Programs
    These are the programs needed to run this setup. This doesn't include the usual
