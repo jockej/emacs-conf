@@ -147,11 +147,18 @@
 
 *** Startup
 
-    Start in my home directory by default, why not?
+    Nice minimalistic startup
     #+BEGIN_SRC emacs-lisp
       (setq inhibit-startup-message t
             inhibit-splash-screen t
             initial-scratch-message "Have You heard the good word of Emacs?\n\n")
+    #+END_SRC
+
+*** Custom
+
+    #+BEGIN_SRC emacs-lisp
+      (setq custom-file "~/.emacs.d/custom.el")
+      (load custom-file 'noerror)
     #+END_SRC
 
 *** Misc
@@ -425,6 +432,12 @@
     in Emacs 25. For now I let it tag along here.
     #+BEGIN_SRC emacs-lisp
       (require 'programmers-dvorak)
+    #+END_SRC
+
+    If I don't have this, some keybindings in Gnus (B-DEL to delete a message) break
+    when running through putty.
+    #+BEGIN_SRC emacs-lisp
+      (define-key key-translation-map (kbd "<deletechar>") (kbd "<delete>"))
     #+END_SRC
 
 *** Editing
@@ -872,6 +885,7 @@
     in solarized dark colors. It is so awesome I could cry...
     #+BEGIN_SRC emacs-lisp
       (use-package pdf-tools
+        :if (and (not (eq system-type 'windows-nt)) (display-graphic-p))
         :config
         (pdf-tools-install)
         (add-hook 'pdf-view-mode-hook #'pdf-view-midnight-minor-mode))
@@ -987,26 +1001,31 @@
      written to the server.
      #+BEGIN_SRC emacs-lisp
        (require 'gnus)
-       (require 'gnus-sync)
-       (setq gnus-sync-backend (concat "/ssh:" jj-home-host-ssh-name
-                                       ":gnus-sync/gnus")
-             gnus-sync-global-vars '(gnus-newsrc-last-checked-date
-                                     gnus-topic-topology
-                                     gnus-topic-alist
-                                     gnus-newsrc-alist)
-             gnus-sync-newsrc-groups '("nntp")
-             gnus-sync-newsrc-offsets '(2 3))
+       (when (< (string-to-number emacs-version) 26.0)
+         (require 'gnus-sync)
+         (setq gnus-sync-backend
+               (if (string= system-name "genserv")
+                   "~/gnus-sync/gnus"
+                 (concat "/ssh:" jj-home-host-ssh-name
+                         ":gnus-sync/gnus"))
+               gnus-sync-global-vars '(gnus-newsrc-last-checked-date
+                                       gnus-topic-topology
+                                       gnus-topic-alist
+                                       gnus-newsrc-alist)
+               gnus-sync-newsrc-groups '("nntp")
+               gnus-sync-newsrc-offsets '(2 3))
 
-       (defun jj-maybe-read-sync (&rest ignored)
-         (when (y-or-n-p "Sync the gnus? ")
-           (gnus-sync-read t)))
+         (defun jj-maybe-read-sync (&rest ignored)
+           (when (y-or-n-p "Sync the gnus? ")
+             (gnus-sync-read t)))
 
-       (defun jj-maybe-save-sync (&rest ignored)
-         (when (y-or-n-p "Sync the gnus? ")
-           (gnus-sync-save)))
+         (defun jj-maybe-save-sync (&rest ignored)
+           (when (y-or-n-p "Sync the gnus? ")
+             (gnus-sync-save)))
 
-       (remove-hook 'gnus-save-newsrc-hook 'gnus-sync-save)
-       (add-hook 'gnus-save-newsrc-hook 'jj-maybe-save-sync)
+         (remove-hook 'gnus-save-newsrc-hook 'gnus-sync-save)
+         (add-hook 'gnus-save-newsrc-hook 'jj-maybe-save-sync))
+
      #+END_SRC
 
      Use topics, but don't display empty topics.
@@ -1169,12 +1188,14 @@
              gnus-secondary-select-methods)
      #+END_SRC
 
-     And my work mail, which I access through =davmail=.
+     And my work mail, which I access through =davmail=. =davmail= only works
+     with graphics (written in java), so only add it there.
      #+BEGIN_SRC emacs-lisp
-       (push '(nnimap "tritech" (nnimap-address "localhost")
-                      (nnimap-server-port 1143)
-                      (nnimap-stream network))
-             gnus-secondary-select-methods)
+       (when (display-graphic-p)
+         (push '(nnimap "tritech" (nnimap-address "localhost")
+                        (nnimap-server-port 1143)
+                        (nnimap-stream network))
+               gnus-secondary-select-methods))
      #+END_SRC
 
      I want to see my mail inboxes even when they are empty, mainly so that I can
