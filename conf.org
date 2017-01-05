@@ -950,6 +950,13 @@
         :mode "\\.md\\'")
     #+END_SRC
 
+*** HTML and CSS
+
+Two spaces indentation, just like everywhere.
+#+BEGIN_SRC emacs-lisp
+  (setq-default css-indent-offset 2)
+#+END_SRC
+
 ** Internet stuff
 
 *** Mail and NNTP
