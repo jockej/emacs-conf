@@ -2172,9 +2172,16 @@ Some speed commands used in the hydra below.
 *** Blog
 
 Setup for a blog, completely written in org!
+
+#+BEGIN_SRC emacs-lisp
+  (defconst jj-blog-head
+    "<link rel='stylesheet' href='static/blog.css' type='text/css'/>")
+#+END_SRC
+
+
 #+BEGIN_SRC emacs-lisp
   (setq org-publish-project-alist
-        '(("blog"
+        `(("blog"
            :components ("posts"
                         "assets"
                         "feed"))
@@ -2184,11 +2191,13 @@ Setup for a blog, completely written in org!
            :publishing-function org-html-publish-to-html
            ;; :html-doctype "html5"
            ;; :html-html5-fancy t
-           :base-directory "~/test/orgblog"
-           :publishing-directory "~/test/orgpub"
+           :base-directory "~/orgblog"
+           :publishing-directory ,(if (string= (system-name) "www2")
+                                      "/usr/local/www/website/blog"
+                                    "~/test/orgpub")
            :recursive t
            :with-toc nil
-           :html-head-extra ""
+           :html-head ,jj-blog-head
            :html-preamble ""
            :html-postamble ""
            :with-latex t
@@ -2205,21 +2214,27 @@ Setup for a blog, completely written in org!
 
           ("assets"
            :base-extension "css\\|jpeg\\|png\\|jpg\\|gif"
-           :base-directory "~/test/orgblog/static"
-           :publishing-directory "~/test/orgpub/static"
+           :base-directory "~/orgblog/static"
+           :publishing-directory ,(if (string= (system-name) "www2")
+                                      "/usr/local/www/website/blog/static"
+                                    "~/test/orgpub/static")
            :recursive t
            :publishing-function org-publish-attachment)
 
           ("feed"
            :base-extension "org"
-           :base-directory "~/test/orgblog"
-           :publishing-directory "~/test/orgpub/rss"
+           :base-directory "~/orgblog"
+           :publishing-directory ,(if (string= (system-name) "www2")
+                                      "/usr/local/www/website/blog/rss"
+                                    "~/test/orgpub/rss")
            :publishing-function (org-rss-publish-to-rss)
            :exclude ".*"
            :include ("rss.org")
            :with-toc nil
            :section-numbers nil
            :title "Jockej's blog"
+           :html-link-home "https://jockej.com/blog"
+           :html-link-use-abs-url t
           )))
 #+END_SRC
 
