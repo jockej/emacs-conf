@@ -2052,7 +2052,7 @@
     no X there's no use in loading it obviously.
     #+BEGIN_SRC emacs-lisp
       (use-package spotify
-        :if (and (not (eq system-type 'windows-nt)) (display-graphic-p))
+        :if (and (eq system-type 'gnu/linux) (display-graphic-p))
         :config
         (defhydra jj-spotify-hydra (:color blue)
           "Spotify"
