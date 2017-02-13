@@ -1618,13 +1618,11 @@ Two spaces indentation, just like everywhere.
 **** Ada
 
      #+BEGIN_SRC emacs-lisp
-       (use-package ada-mode)
-     #+END_SRC
-
-     #+BEGIN_SRC emacs-lisp
-       (setq ada-indent 2
-             ada-broken-decl-indent 3
-             ada-broken-indent 0)
+       (use-package ada-mode
+         :config
+         (setq ada-indent 2
+               ada-broken-decl-indent 3
+               ada-broken-indent 0))
      #+END_SRC
 
 **** C/C++
