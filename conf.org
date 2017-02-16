@@ -1709,7 +1709,7 @@ Two spaces indentation, just like everywhere.
 Use cobol-mode from Elpa.
 
 #+BEGIN_SRC emacs-lisp
-  (use-package 'cobol-mode
+  (use-package cobol-mode
     :config
     (setq cobol-source-format 'free
           cobol-tab-width 2
