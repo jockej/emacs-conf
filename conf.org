@@ -1710,12 +1710,12 @@ Use cobol-mode from Elpa.
 
 #+BEGIN_SRC emacs-lisp
   (use-package cobol-mode
-    :config
-    (setq cobol-source-format 'free
+    :init
+      (setq cobol-source-format 'free
           cobol-tab-width 2
-          cobol-format-style 'lowercase
-
-          auto-mode-alist
+          cobol-format-style 'lowercase)
+    :config
+    (setq auto-mode-alist
           (append
            '(("\\.cob\\'" . cobol-mode)
              ("\\.cbl\\'" . cobol-mode)
