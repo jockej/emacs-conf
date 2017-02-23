@@ -239,7 +239,7 @@ FIXME: move to a pure =use-package= based solution.
     corner, but it's really not that annoying, and I don't really use the mouse much
     anyways.
     #+BEGIN_SRC emacs-lisp
-      (when (display-graphic-p)
+      (when (and (display-graphic-p) (not (eq 'system-type 'windows-nt)))
         (defun jj-move-pointer ()
           "Move pointer to the top left corner"
           (set-mouse-position (car (mouse-position)) 0 0))
