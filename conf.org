@@ -1442,28 +1442,35 @@ Two spaces indentation, just like everywhere.
 
 *** Navigation
 
-    These bindings have been changed in Emacs 25
-    #+BEGIN_SRC emacs-lisp
-      (define-key global-map (kbd "M-*") 'pop-tag-mark)
-      (define-key global-map (kbd "M-,") 'tags-loop-continue)
-    #+END_SRC
+These bindings have been changed in Emacs 25
+#+BEGIN_SRC emacs-lisp
+  ;; (define-key global-map (kbd "M-*") 'pop-tag-mark)
+  ;; (define-key global-map (kbd "M-,") 'tags-loop-continue)
+#+END_SRC
 
-    #+BEGIN_SRC emacs-lisp
-      (use-package ggtags
-        :config
-        (add-hook 'c-mode-hook 'ggtags-mode)
-        (add-hook 'c++-mode-hook 'ggtags-mode))
-    #+END_SRC
+#+BEGIN_SRC emacs-lisp
+  (use-package ggtags
+    :disabled
+    :config
+    (add-hook 'c-mode-hook 'ggtags-mode)
+    (add-hook 'c++-mode-hook 'ggtags-mode))
+#+END_SRC
 
-     #+BEGIN_SRC emacs-lisp
-       (use-package xcscope
-         :config
-         (cscope-setup))
-     #+END_SRC
+#+BEGIN_SRC emacs-lisp
+  (use-package gxref
+    :config
+    (add-to-list 'xref-backend-functions 'gxref-xref-backend))
+#+END_SRC
 
-     #+BEGIN_SRC emacs-lisp
-       (use-package helm-ag)
-     #+END_SRC
+#+BEGIN_SRC emacs-lisp
+  (use-package xcscope
+    :config
+    (cscope-setup))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+  (use-package helm-ag)
+#+END_SRC
 
 *** Debugging
 
