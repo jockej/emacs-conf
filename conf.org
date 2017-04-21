@@ -1039,158 +1039,157 @@ Two spaces indentation, just like everywhere.
 
 **** Reading NNTP
 
-     These are the settings I use to read mailing lists via nntp.
-     #+BEGIN_SRC emacs-lisp
-       (setq gnus-select-method `(nntp "gmane"
-                                       (nntp-open-connection-function
-                                        nntp-open-tls-stream)
-                                       (nntp-port-number
-                                        ,(if (jj-is-work-comp-p) 20027 563))
-                                       (nntp-address
-                                        ,(if (jj-is-work-comp-p) "localhost" "news.gmane.org"))))
-     #+END_SRC
+These are the settings I use to read mailing lists via nntp.
+#+BEGIN_SRC emacs-lisp
+  (setq gnus-select-method `(nntp "gmane"
+                                  (nntp-open-connection-function
+                                   nntp-open-tls-stream)
+                                  (nntp-port-number
+                                   ,(if (jj-is-work-comp-p) 20027 563))
+                                  (nntp-address
+                                   ,(if (jj-is-work-comp-p) "localhost" "news.gmane.org"))))
+#+END_SRC
 
-     Also read news from eternal september.
-     #+BEGIN_SRC emacs-lisp
-       (push '(nntp "eternal-september"
-                    (nntp-open-connection-function nntp-open-tls-stream)
-                    (nntp-port-number 443)
-                    (nntp-address "news.eternal-september.org"))
-             gnus-secondary-select-methods)
-     #+END_SRC
+Also read news from eternal september.
+#+BEGIN_SRC emacs-lisp
+  (push '(nntp "eternal-september"
+               (nntp-open-connection-function nntp-open-tls-stream)
+               (nntp-port-number 443)
+               (nntp-address "news.eternal-september.org"))
+        gnus-secondary-select-methods)
+#+END_SRC
 
-     This is needed to send my login info to eternal-september.
-     #+BEGIN_SRC emacs-lisp
-       (defun jj-nntp-send-auth ()
-         (nntp-send-authinfo t))
-       (add-hook 'nntp-server-opened-hook 'jj-nntp-send-auth)
-     #+END_SRC
+This is needed to send my login info to eternal-september.
+EDIT: Doesn't seem to be needed after all.
+#+BEGIN_SRC emacs-lisp
+  ;; (defun jj-nntp-send-auth ()
+  ;; (nntp-send-authinfo t))
+  ;; (add-hook 'nntp-server-opened-hook 'jj-nntp-send-auth)
+#+END_SRC
 
-     At my work there is a big corporate firewall, so to read nntp I have to ssh
-     tunnel via my home server.
-     #+BEGIN_SRC emacs-lisp
-       (defvar jj-gmane-tunnel-running nil
-         "A closure to check if the ssh tunnel I need to access gmane from work is
-         running.")
+At my work there is a big corporate firewall, so to read nntp I have to ssh
+tunnel via my home server.
+#+BEGIN_SRC emacs-lisp
+  (defvar jj-gmane-tunnel-running nil
+    "A closure to check if the ssh tunnel I need to access gmane from work is
+    running.")
 
-       (when (jj-is-work-comp-p)
-         (unless (and jj-gmane-tunnel-running (funcall jj-gmane-tunnel-running))
-           (let ((proc (start-process "gmane-tunnel"
-                                      nil
-                                      (executable-find "ssh")
-                                      "-f" "-N" "-L" "20027:news.gmane.org:563"
-                                      jj-home-host-ssh-name)))
-             (setq jj-gmane-tunnel-running
-                   (lambda ()
-                     (eq (process-status proc) 'run))))))
+  (when (jj-is-work-comp-p)
+    (unless (and jj-gmane-tunnel-running (funcall jj-gmane-tunnel-running))
+      (let ((proc (start-process "gmane-tunnel"
+                                 nil
+                                 (executable-find "ssh")
+                                 "-f" "-N" "-L" "20027:news.gmane.org:563"
+                                 jj-home-host-ssh-name)))
+        (setq jj-gmane-tunnel-running
+              (lambda ()
+                (eq (process-status proc) 'run))))))
 
-       (defun jj-can-connect-to-gmane ()
-         "Is it ok to connect to gmane?"
-         (when (jj-is-work-comp-p)
-           (unless (and jj-gmane-tunnel-running (funcall jj-gmane-tunnel-running))
-             (user-error "No ssh tunnel to gmane"))))
-     #+END_SRC
-
-**** Sending mail
-
-     Basic settings for sending mail.
-     #+BEGIN_SRC emacs-lisp
-       (require 'smtpmail)
-       (setq smtpmail-default-smtp-server "mail.messagingengine.com")
-       (setq send-mail-function 'smtpmail-send-it
-             message-send-mail-function 'smtpmail-send-it
-             smtpmail-stream-type 'ssl
-             smtpmail-smtp-server "mail.messagingengine.com"
-             smtpmail-smtp-service 465)
-       (setq mail-user-agent 'gnus-user-agent)
-     #+END_SRC
-
-     Kill the message buffer after sending.
-     #+BEGIN_SRC emacs-lisp
-       (setq message-kill-buffer-on-exit t)
-     #+END_SRC
-
-     This sets up the stream type for connecting to smtp servers. On locahost
-     (davmail) it has to be plain, otherwise let it be ssl. There is probably a
-     better way to do this, but what the hell.
-     #+BEGIN_SRC emacs-lisp
-   (defun jj-setup-smtp-stream-type (orig-fun &rest args)
-     (let ((smtpmail-stream-type
-            (if (string= smtpmail-smtp-server "localhost")
-                'plain
-              'ssl)))
-       (apply orig-fun args)))
-
-   (advice-add 'smtpmail-via-smtp :around 'jj-setup-smtp-stream-type)
-     #+END_SRC
-
-     Store sent mail here.
-     #+BEGIN_SRC emacs-lisp
-    (setq gnus-message-archive-group
-          '(("^nnmaildir.*fastmail.*" . "nnmaildir+fastmail:Sent")))
-     #+END_SRC
-
-     Setup the different posting styles.
-     #+BEGIN_SRC emacs-lisp
-        (setq gnus-parameters
-              '(("^nnmaildir.*fastmail*"
-                 (posting-style
-                  (name "Joakim Jalap")
-                  (address "joakim.jalap@fastmail.com")
-                  (gcc "nnmaildir+fastmail:Sent")
-                  ("X-Message-SMTP-Method" "smtp mail.messagingengine.com 465")
-                  ))
-                ("^nnmaildir.*gmail:.*"
-                 (posting-style
-                  (name "Joakim Jalap")
-                  (address "joakim.jalap@gmail.com")
-                  (gcc "nnmaildir+gmail:Sent")
-                  ("X-Message-SMTP-Method" "smtp smtp.gmail.com 465")
-                  ))
-                ("^nnimap.*tritech:.*"
-                 (posting-style
-                  (name "Joakim Jalap")
-                  (address "joakim.jalap@tritech.se")
-                  ("X-Message-SMTP-Method" "smtp localhost 1025")
-                  ))
-                ))
-     #+END_SRC
+  (defun jj-can-connect-to-gmane ()
+    "Is it ok to connect to gmane?"
+    (when (jj-is-work-comp-p)
+      (unless (and jj-gmane-tunnel-running (funcall jj-gmane-tunnel-running))
+        (user-error "No ssh tunnel to gmane"))))
+#+END_SRC
 
 **** Reading mail
 
-     Add my mail as a selection method in gnus.
-     #+BEGIN_SRC emacs-lisp
-       (require 'nnir)
-       (push '(nnimap "fastmail" (nnimap-address "mail.messagingengine.com")
-                         (nnimap-server-port 993)
-                         (nnimap-stream ssl))
-             gnus-secondary-select-methods)
-       (setq mail-sources nil)
-     #+END_SRC
+Add my mail as a selection method in gnus.
+#+BEGIN_SRC emacs-lisp
+  (require 'nnir)
+  (push '(nnimap "fastmail" (nnimap-address "mail.messagingengine.com")
+                 (nnimap-server-port 993)
+                 (nnimap-stream ssl))
+        gnus-secondary-select-methods)
+  (setq mail-sources nil)
+#+END_SRC
 
-     And my old gmail.
-     #+BEGIN_SRC emacs-lisp
-       (push '(nnimap "gmail" (nnimap-address "imap.gmail.com")
-                         (nnimap-server-port 993)
-                         (nnimap-stream ssl))
-             gnus-secondary-select-methods)
-     #+END_SRC
+And my old gmail.
+#+BEGIN_SRC emacs-lisp
+  (push '(nnimap "gmail" (nnimap-address "imap.gmail.com")
+                 (nnimap-server-port 993)
+                 (nnimap-stream ssl))
+        gnus-secondary-select-methods)
+#+END_SRC
 
-     And my work mail, which I access through =davmail=. =davmail= only works
-     with graphics (written in java), so only add it there.
-     #+BEGIN_SRC emacs-lisp
-       (when (display-graphic-p)
-         (push '(nnimap "tritech" (nnimap-address "localhost")
-                        (nnimap-server-port 1143)
-                        (nnimap-stream network))
-               gnus-secondary-select-methods))
-     #+END_SRC
+And my work mail, which I access through =davmail=. =davmail= only works
+with graphics (written in java), so only add it there.
+#+BEGIN_SRC emacs-lisp
+  (when (display-graphic-p)
+    (push '(nnimap "tritech" (nnimap-address "localhost")
+                   (nnimap-server-port 1143)
+                   (nnimap-stream network))
+          gnus-secondary-select-methods))
+#+END_SRC
 
-     I want to see my mail inboxes even when they are empty, mainly so that I can
-     use =C-u m= to send mail with the correct parameters.
-     #+BEGIN_SRC emacs-lisp
-       (setq gnus-permanently-visible-groups ".*INBOX$")
-     #+END_SRC
+I want to see my mail inboxes even when they are empty, mainly so that I can
+use =C-u m= to send mail with the correct parameters.
+#+BEGIN_SRC emacs-lisp
+  (setq gnus-permanently-visible-groups ".*INBOX$")
+#+END_SRC
+
+**** Sending mail
+
+Basic settings for sending mail.
+#+BEGIN_SRC emacs-lisp
+  (require 'smtpmail)
+  (setq smtpmail-default-smtp-server "mail.messagingengine.com")
+  (setq send-mail-function 'smtpmail-send-it
+        message-send-mail-function 'smtpmail-send-it
+        smtpmail-stream-type 'ssl
+        smtpmail-smtp-server "mail.messagingengine.com"
+        smtpmail-smtp-service 465)
+  (setq mail-user-agent 'gnus-user-agent)
+#+END_SRC
+
+Kill the message buffer after sending.
+#+BEGIN_SRC emacs-lisp
+  (setq message-kill-buffer-on-exit t)
+#+END_SRC
+
+Mark copies of sent mails as read.
+#+BEGIN_SRC emacs-lisp
+  (setq gnus-gcc-mark-as-read t)
+#+END_SRC
+
+This sets up the stream type for connecting to smtp servers. On locahost
+(davmail) it has to be plain, otherwise let it be ssl. There is probably a
+better way to do this, but what the hell.
+#+BEGIN_SRC emacs-lisp
+  (defun jj-setup-smtp-stream-type (orig-fun &rest args)
+    (let ((smtpmail-stream-type
+           (if (string= smtpmail-smtp-server "localhost")
+               'plain
+             'ssl)))
+      (apply orig-fun args)))
+
+  (advice-add 'smtpmail-via-smtp :around 'jj-setup-smtp-stream-type)
+#+END_SRC
+
+Setup the different posting styles. This sets up the correct from addresses and
+so on. The =gcc-self= means save a copy of the sent message to here.
+#+BEGIN_SRC emacs-lisp
+  (setq gnus-parameters
+        '(("^nnimap\\+fastmail.*"
+           (posting-style
+            (name "Joakim Jalap")
+            (address "joakim.jalap@fastmail.com")
+            ("X-Message-SMTP-Method" "smtp mail.messagingengine.com 465"))
+           (gcc-self . "nnimap+fastmail:INBOX.Sent"))
+          ("^nnimap\\+gmail:.*"
+           (posting-style
+            (name "Joakim Jalap")
+            (address "joakim.jalap@gmail.com")
+            ("X-Message-SMTP-Method" "smtp smtp.gmail.com 465"))
+            (gcc-self . "nnimap+gmail:[Gmail]/Sent Mail"))
+          ("^nnimap.*tritech:.*"
+           (posting-style
+            (name "Joakim Jalap")
+            (address "joakim.jalap@tritech.se")
+            ("X-Message-SMTP-Method" "smtp localhost 1025")
+            ))
+          ))
+#+END_SRC
 
 *** BBDB
 
