@@ -1930,11 +1930,22 @@ Use cobol-mode from Elpa.
        (rich-minority-mode 1))
    #+END_SRC
 
-   Line numbers are nice, but turn the off in some buffers.
-   #+BEGIN_SRC emacs-lisp
-     (global-linum-mode 1)
-     (use-package linum-off)
-   #+END_SRC
+Line numbers are nice, but not in all buffers. In the most recent Emacs we can
+use the built in version.
+#+BEGIN_SRC emacs-lisp
+  (if (< emacs-major-version 26)
+      (progn
+        (global-linum-mode 1)
+        (use-package linum-off))
+    (progn
+      (defvar jj-line-number-hooks
+        '(prog-mode-hook text-mode-hook c-mode-common-hook ada-mode-hook)
+        "Hooks where we should turn on line numbers.")
+      (defun jj-line-numbers-on ()
+        (setq display-line-numbers t))
+      (mapc (lambda (hook) (add-hook hook #'jj-line-numbers-on))
+            jj-line-number-hooks)))
+#+END_SRC
 
    Column numbers are nice too.
    #+BEGIN_SRC emacs-lisp
