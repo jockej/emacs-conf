@@ -1604,13 +1604,15 @@ These bindings have been changed in Emacs 25
 
 **** Ada
 
-     #+BEGIN_SRC emacs-lisp
-       (use-package ada-mode
-         :config
-         (setq ada-indent 2
-               ada-broken-decl-indent 3
-               ada-broken-indent 0))
-     #+END_SRC
+#+BEGIN_SRC emacs-lisp
+  ;; (use-package ada-mode
+  ;;   :config
+
+  (require 'ada-mode)
+  (setq-default ada-indent 2
+                ada-indent-broken 1
+                ada-indent-label 0)
+#+END_SRC
 
 **** C/C++
 
