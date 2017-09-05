@@ -1643,12 +1643,6 @@ These bindings have been changed in Emacs 25
      #+END_SRC
 
      #+BEGIN_SRC emacs-lisp
-       (use-package function-args
-         :config
-         (fa-config-default))
-     #+END_SRC
-
-     #+BEGIN_SRC emacs-lisp
        (use-package rtags
          :config
          (require 'company)
