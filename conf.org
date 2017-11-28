@@ -876,15 +876,17 @@ Use =electric-pair=-mode, but only for quotes.
 
 *** Reading pdfs
 
-    =Pdf-tools= allows you to read pdfs in Emacs. And you can have it rendered
-    in solarized dark colors. It is so awesome I could cry...
-    #+BEGIN_SRC emacs-lisp
-      (use-package pdf-tools
-        :if (and (not (eq system-type 'windows-nt)) (display-graphic-p))
-        :config
-        (pdf-tools-install)
-        (add-hook 'pdf-view-mode-hook #'pdf-view-midnight-minor-mode))
-    #+END_SRC
+=Pdf-tools= allows you to read pdfs in Emacs. And you can have it rendered
+in solarized dark colors. It is so awesome I could cry...
+#+BEGIN_SRC emacs-lisp
+  (use-package pdf-tools
+    :if (and (not (eq system-type 'windows-nt)) (display-graphic-p))
+    :init
+    (add-hook 'after-init-hook #'pdf-tools-install t)
+    (defun jj-solarize-pdf ()
+      (add-hook 'pdf-view-mode-hook #'pdf-view-midnight-minor-mode))
+    (add-hook 'after-init-hook #'jj-solarize-pdf t))
+#+END_SRC
 
 *** Backups
 
