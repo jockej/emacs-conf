@@ -1488,9 +1488,33 @@ These bindings have been changed in Emacs 25
     (cscope-setup))
 #+END_SRC
 
+
 #+BEGIN_SRC emacs-lisp
   (use-package helm-ag)
 #+END_SRC
+
+=dumb-jump= is a zero configuration package for jumping to
+definitions/references. I use it as a backup for when =gxref= doesn't work for
+some reason.
+#+BEGIN_SRC emacs-lisp
+  (use-package dumb-jump
+    :config
+    (with-eval-after-load 'hydra
+      (defhydra jj-djump (:hint nil)
+        "
+  [_._] Find                 [_o_] Find other window
+  [_x_] Find prefer external [_z_] Find prefer external other window
+  [_p_] Prompt               [_q_] quit"
+        ("." dumb-jump-go :exit t)
+        ("o" dumb-jump-go-other-window :exit t)
+        ("x" dumb-jump-go-prefer-external :exit t)
+        ("z" dumb-jump-go-prefer-external-other-window :exit t)
+        ("p" dump-jump-go-prompt :exit t)
+        ("q" nil))
+      (global-set-key (kbd "C-x .") 'jj-djump/body)))
+
+#+END_SRC
+
 
 *** Debugging
 
