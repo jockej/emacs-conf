@@ -1207,6 +1207,11 @@ so on. The =gcc-self= means save a copy of the sent message to here.
           ))
 #+END_SRC
 
+=gnus-dired-mode= lets you attach files to a message from a =dired= buffer.
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'dired-mode-hook #'turn-on-gnus-dired-mode t)
+#+END_SRC
+
 *** BBDB
 
     #+BEGIN_SRC emacs-lisp
