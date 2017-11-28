@@ -480,6 +480,20 @@ FIXME: move to a pure =use-package= based solution.
           (backward-word)))
     #+END_SRC
 
+Don't leave trailing whitespace in files.
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'before-save-hook #'delete-trailing-whitespace)
+#+END_SRC
+
+Use =electric-pair=-mode, but only for quotes.
+#+BEGIN_SRC emacs-lisp
+  (defun jj-electric-pair-inhibit (char)
+    (not (char-equal char ?\")))
+
+  (setq electric-pair-inhibit-predicate #'jj-electric-pair-inhibit)
+  (add-hook 'prog-mode-hook 'electric-pair-mode)
+#+END_SRC
+
 **** Custom commands
 
      I think this is more useful than the default =newline-and-indent=, =open-line=
