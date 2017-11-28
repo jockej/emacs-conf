@@ -1429,53 +1429,43 @@ so on. The =gcc-self= means save a copy of the sent message to here.
 
 *** Code helpers
 
-    Autocomplete, which sometimes works.
-    #+BEGIN_SRC emacs-lisp
-      (use-package company
-        :config
-        (global-company-mode)
-        :bind (:map company-active-map ("C-d" . company-show-doc-buffer)))
-    #+END_SRC
+Autocomplete, which sometimes works.
+#+BEGIN_SRC emacs-lisp
+  (use-package company
+    :config
+    (global-company-mode)
+    (add-to-list 'company-backends #'company-gtags)
+    :bind (:map company-active-map ("C-d" . company-show-doc-buffer)))
+#+END_SRC
 
-    The Emacs semantic framework.
-    #+BEGIN_SRC emacs-lisp
-      (require 'semantic)
-      (global-semanticdb-minor-mode 1)
-      (semanticdb-enable-gnu-global-databases 'c-mode)
-      (semanticdb-enable-gnu-global-databases 'c++-mode)
-      (global-semantic-idle-scheduler-mode)
-      (semantic-mode 1)
-      (eval-after-load 'company '(add-to-list 'company-backends 'company-semantic))
-    #+END_SRC
+The Emacs semantic framework.
+#+BEGIN_SRC emacs-lisp
+  ;; (require 'semantic)
+  ;; (global-semanticdb-minor-mode 1)
+  ;; (semanticdb-enable-gnu-global-databases 'c-mode)
+  ;; (semanticdb-enable-gnu-global-databases 'c++-mode)
+  ;; (global-semantic-idle-scheduler-mode)
+  ;; (semantic-mode 1)
+  ;; (eval-after-load 'company '(add-to-list 'company-backends 'company-semantic))
+#+END_SRC
 
-    Eldoc shows documentation in the minibuffer.
-    #+BEGIN_SRC emacs-lisp
-      (require 'eldoc)
-      (add-hook 'prog-mode-hook 'turn-on-eldoc-mode)
-    #+END_SRC
+Eldoc shows documentation in the minibuffer.
+#+BEGIN_SRC emacs-lisp
+  (require 'eldoc)
+  (add-hook 'prog-mode-hook 'turn-on-eldoc-mode)
+#+END_SRC
 
-    Yasnippet is a snippet framework. Currently I only use it with irony-mode, but I
-    figure I might want it for more stuff soon.
-    #+BEGIN_SRC emacs-lisp
-      (require 'yasnippet)
-    #+END_SRC
+Yasnippet is a snippet framework. Currently I only use it with irony-mode, but I
+figure I might want it for more stuff soon.
+#+BEGIN_SRC emacs-lisp
+  (require 'yasnippet)
+#+END_SRC
 
 *** Navigation
 
-These bindings have been changed in Emacs 25
-#+BEGIN_SRC emacs-lisp
-  ;; (define-key global-map (kbd "M-*") 'pop-tag-mark)
-  ;; (define-key global-map (kbd "M-,") 'tags-loop-continue)
-#+END_SRC
-
-#+BEGIN_SRC emacs-lisp
-  (use-package ggtags
-    :disabled
-    :config
-    (add-hook 'c-mode-hook 'ggtags-mode)
-    (add-hook 'c++-mode-hook 'ggtags-mode))
-#+END_SRC
-
+=gxref= is a xref-backend which utilizes =GNU global=. I use it for most modes
+together with my own configuration for =global=, which can be found in my
+dotfiles repository.
 #+BEGIN_SRC emacs-lisp
   (use-package gxref
     :config
@@ -1634,7 +1624,6 @@ some reason.
     :defer t)
 #+END_SRC
 
-
 **** SVN
 
      Usually when I look at a diff from the =svn= buffer I want to look at it, then
@@ -1699,15 +1688,15 @@ some reason.
      #+END_SRC
 
      #+BEGIN_SRC emacs-lisp
-       (use-package irony
-         :config
-         (add-hook 'c-mode-hook 'irony-mode)
-         (add-hook 'c++-mode-hook 'irony-mode))
+       ;; (use-package irony
+       ;;   :config
+       ;;   (add-hook 'c-mode-hook 'irony-mode)
+       ;;   (add-hook 'c++-mode-hook 'irony-mode))
 
-       (use-package company-irony
-         :config
-         (require 'company)
-         (add-to-list 'company-backends 'company-irony))
+       ;; (use-package company-irony
+       ;;   :config
+       ;;   (require 'company)
+       ;;   (add-to-list 'company-backends 'company-irony))
      #+END_SRC
 
      This warns for suspicious constructs.
@@ -1768,6 +1757,23 @@ Use cobol-mode from Elpa.
              ("\\.cbl\\'" . cobol-mode)
              ("\\.cpy\\'" . cobol-mode))
            auto-mode-alist)))
+#+END_SRC
+
+**** Java
+
+#+BEGIN_SRC emacs-lisp
+  (use-package meghanada
+    :disabled t
+    :config
+    (add-hook 'java-mode-hook 'meghanada-mode))
+#+END_SRC
+
+Fix indentation of inner classes in Java.
+#+BEGIN_SRC emacs-lisp
+  (defun jj-set-java-indentation ()
+    (c-set-offset 'inexpr-class 0))
+
+  (add-hook 'java-mode-hook #'jj-set-java-indentation)
 #+END_SRC
 
 **** m4
