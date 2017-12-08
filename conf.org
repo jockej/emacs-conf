@@ -705,6 +705,7 @@ Use =electric-pair=-mode, but only for quotes.
     This adds Emacs' =compile= functionality to shell-mode buffers.
     #+BEGIN_SRC emacs-lisp
       (add-hook 'shell-mode-hook 'compilation-shell-minor-mode)
+      (add-hook 'eshell-mode-hook 'compilation-shell-minor-mode)
     #+END_SRC
 
 **** Ansi-term
