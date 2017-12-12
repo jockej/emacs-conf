@@ -1769,10 +1769,11 @@ Use cobol-mode from Elpa.
     (add-hook 'java-mode-hook 'meghanada-mode))
 #+END_SRC
 
-Fix indentation of inner classes in Java.
+Fix indentation in Java.
 #+BEGIN_SRC emacs-lisp
   (defun jj-set-java-indentation ()
-    (c-set-offset 'inexpr-class 0))
+    (c-set-offset 'inexpr-class 0)
+    (c-set-offset 'case-label '+))
 
   (add-hook 'java-mode-hook #'jj-set-java-indentation)
 #+END_SRC
