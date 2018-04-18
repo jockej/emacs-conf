@@ -444,6 +444,12 @@ FIXME: move to a pure =use-package= based solution.
                     indent-tabs-mode nil)
     #+END_SRC
 
+A function to turn of auto fill. For use in hooks.
+#+BEGIN_SRC emacs-lisp
+  (defun jj-turn-off-auto-fill ()
+    (auto-fill-mode -1))
+#+END_SRC
+
     Require a newline at the end of files.
     #+BEGIN_SRC emacs-lisp
       (setq-default require-final-newline t)
