@@ -1776,20 +1776,22 @@ Use cobol-mode from Elpa.
 
 **** Java
 
+I use [[https://github.com//mopemope/meghanada-emacs][meghanada-mode]] for java code.
 #+BEGIN_SRC emacs-lisp
   (use-package meghanada
-    :disabled t
+    ;; :disabled t
     :config
     (add-hook 'java-mode-hook 'meghanada-mode))
 #+END_SRC
 
 Fix indentation in Java.
 #+BEGIN_SRC emacs-lisp
-  (defun jj-set-java-indentation ()
+  (defun jj-java-mode-setup ()
     (c-set-offset 'inexpr-class 0)
-    (c-set-offset 'case-label '+))
+    (c-set-offset 'case-label '+)
+    (setq fill-column 120))
 
-  (add-hook 'java-mode-hook #'jj-set-java-indentation)
+  (add-hook 'java-mode-hook #'jj-java-mode-setup)
 #+END_SRC
 
 **** m4
