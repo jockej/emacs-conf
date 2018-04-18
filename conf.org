@@ -266,10 +266,14 @@ FIXME: move to a pure =use-package= based solution.
      =~/.gnupg/gpg-agent.conf=.
      Then one simply does:
      #+BEGIN_SRC emacs-lisp
-       (require 'pinentry)
-       (pinentry-start)
-       (setenv "INSIDE_EMACS" "YES")
+       ;; (require 'pinentry)
+       ;; (pinentry-start)
+       ;; (setenv "INSIDE_EMACS" "YES")
      #+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+  (setq epa-pinentry-mode 'loopback)
+#+END_SRC
 
 **** Helper fuctions
 
