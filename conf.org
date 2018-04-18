@@ -1319,40 +1319,70 @@ so on. The =gcc-self= means save a copy of the sent message to here.
 
 *** IRC
 
-    Sometimes I have to kill all IRC buffers, when I've been disconnected form
-    some reason.
-    #+BEGIN_SRC emacs-lisp
-      (defun jj-kill-irc ()
-        "Kill all IRC buffers"
-        (interactive)
-        (kill-matching-buffers "#[[:word:]-]*")
-        (kill-matching-buffers (concat jj-home-host ":[0-9]+.*")))
-    #+END_SRC
+I use ERC for IRC.
+#+BEGIN_SRC emacs-lisp
+  (require 'erc)
+#+END_SRC
 
-    #+BEGIN_SRC emacs-lisp
-      (require 'erc)
-      (require 'erc-track)
+Sometimes I have to kill all IRC buffers, when I've been disconnected form
+some reason.
+#+BEGIN_SRC emacs-lisp
+  (defun jj-kill-irc ()
+    "Kill all IRC buffers"
+    (interactive)
+    (kill-matching-buffers "#[[:word:]-]*")
+    (kill-matching-buffers (concat jj-home-host ":[0-9]+.*")))
+#+END_SRC
 
-      (erc-track-mode t)
-      (setq-default erc-track-exclude-types '("JOIN" "NICK" "PART" "QUIT" "MODE"
-                                              "324" "329" "332" "333" "353" "477"))
-      (setq-default erc-hide-list '("JOIN" "PART" "QUIT" "NICK" "MODE" "AWAY"))
-      (setq erc-format-query-as-channel-p t
-            erc-track-priority-faces-only 'all
-            erc-track-faces-priority-list '(erc-error-face
-                                            erc-current-nick-face
-                                            erc-keyword-face
-                                            erc-nick-msg-face
-                                            erc-direct-msg-face
-                                            erc-dangerous-host-face
-                                            erc-notice-face
-                                            erc-prompt-face))
-    #+END_SRC
+Track activity in channels. This gives an indiciation in the modeline when there
+are unread messages.
+#+BEGIN_SRC emacs-lisp
+  (require 'erc-track)
+  (erc-track-mode t)
+  (setq erc-format-query-as-channel-p t
+        ;; erc-track-priority-faces-only 'all
+        erc-track-faces-priority-list '(erc-error-face
+                                        erc-current-nick-face
+                                        erc-keyword-face
+                                        erc-nick-msg-face
+                                        erc-direct-msg-face
+                                        erc-dangerous-host-face
+                                        erc-notice-face
+                                        erc-prompt-face))
+  (setq erc-track-priority-faces-only nil)
+#+END_SRC
 
-    I wan't notifications when somebody messages me.
-    #+BEGIN_SRC emacs-lisp
-      (push 'notifications erc-modules)
-    #+END_SRC
+We don't need to see these boring messages.
+#+BEGIN_SRC emacs-lisp
+  (setq-default erc-track-exclude-types '("JOIN" "NICK" "PART" "QUIT" "MODE"
+                                          "324" "329" "332" "333" "353" "477"))
+  (setq-default erc-hide-list '("JOIN" "PART" "QUIT" "NICK" "MODE" "AWAY"))
+#+END_SRC
+
+I wan't notifications when somebody messages me.
+#+BEGIN_SRC emacs-lisp
+  (push 'notifications erc-modules)
+#+END_SRC
+
+Don't autofill in ERC mode.
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'erc-mode-hook 'jj-turn-off-auto-fill)
+#+END_SRC
+
+I use ERC to connect to Mattermost at work, via [[https://github.com/42wim/matterircd][matterircd]]. In Mattermost nicks
+should be prefixed by '@' (which is stupid). This snippet taken from [[http://puntoblogspot.blogspot.se/2017/01/autocomplete-erc-nicks-with-sign-for.html][here]] takes
+care of that.
+#+BEGIN_SRC emacs-lisp
+  ;; http://puntoblogspot.blogspot.com.es/2017/01/autocomplete-erc-nicks-with-sign-for.html
+  (defun rgc-add-@-to-nicks (old-function &rest arguments)
+    "Add @nick alternatives to erc completion function."
+    (apply 'append
+           (mapcar (lambda (x) (list (concat "@" x) x))
+                   (apply old-function arguments))))
+
+  (advice-add #'pcomplete-erc-nicks :around #'rgc-add-@-to-nicks)
+#+END_SRC
+
 
     The ERC filling splits long messages over several messages, which I think
     looks a little strange. It gets wrapped anyway, so remove that module. This
@@ -1366,13 +1396,12 @@ so on. The =gcc-self= means save a copy of the sent message to here.
       (erc-update-modules)
     #+END_SRC
 
-    #+BEGIN_SRC emacs-lisp
-      (setq erc-default-server jj-home-host
-            erc-default-port-tls 20026
-            erc-nick '("jalle" "jockej")
-            erc-nick-uniquifier "_"
-            )
-    #+END_SRC
+#+BEGIN_SRC emacs-lisp
+  (setq erc-default-server "localhost"
+        erc-default-port-tls 6667
+        erc-nick '("jalle" "jockej")
+        erc-nick-uniquifier "_")
+#+END_SRC
 
     I am connected to two different servers via weechat, so I have two
     different passwords on the same machine and port. Unfortunately this means
