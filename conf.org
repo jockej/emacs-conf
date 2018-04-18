@@ -1578,36 +1578,11 @@ some reason.
 
 *** Folding
 
-    I use origami for folding
-    #+BEGIN_SRC emacs-lisp
-      (use-package origami
-        :config
-        (add-hook 'prog-mode-hook #'origami-mode)
-        :bind
-        ("M-o" . origami-toggle-node))
-    #+END_SRC
-
-    #+BEGIN_SRC emacs-lisp
-      (require 'hydra)
-      (defhydra jj-fold-hydra (:color blue)
-        "
-      _t_oggle node  hide _a_ll   show _A_ll   _r_ecursively toggle
-      _o_pen node   _O_pen recursively  _s_how only  _c_close node
-      _C_lose recursively  _q_uit
-      "
-        ("t" origami-toggle-node)
-        ("a" origami-close-all-nodes)
-        ("A" origami-open-all-nodes)
-        ("s" origami-open-show-only-node)
-        ("r" origami-recursively-toggle-node)
-        ("o" origami-open-node)
-        ("O" origami-open-node-recursively)
-        ("c" origami-close-node)
-        ("C" origami-close-node-recursively)
-        ("q" nil "quit"))
-
-      (global-set-key (kbd "H-a f") 'jj-fold-hydra/body)
-    #+END_SRC
+I could never get [[https://github.com/gregsexton/origami.el][origami]] to work, so now I use plain old hideshow. At least
+it's something.
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'prog-mode-hook #'hs-minor-mode)
+#+END_SRC
 
 *** Commenting
 
