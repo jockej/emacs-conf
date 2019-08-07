@@ -632,11 +632,11 @@ Use =electric-pair=-mode, but only for quotes.
      #+END_SRC
 
      Undo-tree is awesome.
-     #+BEGIN_SRC emacs-lisp
-       (use-package undo-tree
-         :config
-         (global-undo-tree-mode))
-     #+END_SRC
+     # #+BEGIN_SRC emacs-lisp
+     #   (use-package undo-tree
+     #     :config
+     #     (global-undo-tree-mode))
+     # #+END_SRC
 
      A function to clean up buffers in general.
      #+BEGIN_SRC emacs-lisp
