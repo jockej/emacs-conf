@@ -74,13 +74,8 @@
 #+BEGIN_SRC emacs-lisp
       (setq ensure-packages '(
                               auctex
-                              browse-url-dwim
                               company-auctex
-                              company-math
-                              gnuplot
                               helm
-                              magit-svn
-                              pandoc-mode
                               popup           ;required by rtags, wtf?
                               sx
                               xkcd
