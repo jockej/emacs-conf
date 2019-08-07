@@ -287,19 +287,19 @@ FIXME: move to a pure =use-package= based solution.
       (require 'dired-x)
     #+END_SRC
 
-    Dired+ does crazy amounts of font lock, too much for my taste. Turn it down a
-    notch. Also avoid creating new dired buffers when changing directory, and
-    hide details about the files like modification time and owner and such.
-    #+BEGIN_SRC emacs-lisp
-      (use-package dired+
-        :config
-        (setq font-lock-maximum-decoration '((dired-mode . nil)
-                                             (wdired-mode . nil)
-                                             (t . t)))
-        (setq diredp-hide-details-initially-flag t
-              diredp-hide-details-propagate-flag t)
-        (toggle-diredp-find-file-reuse-dir 1))
-    #+END_SRC
+    # Dired+ does crazy amounts of font lock, too much for my taste. Turn it down a
+    # notch. Also avoid creating new dired buffers when changing directory, and
+    # hide details about the files like modification time and owner and such.
+    # #+BEGIN_SRC emacs-lisp
+    #   (use-package dired+
+    #     :config
+    #     (setq font-lock-maximum-decoration '((dired-mode . nil)
+    #                                          (wdired-mode . nil)
+    #                                          (t . t)))
+    #     (setq diredp-hide-details-initially-flag t
+    #           diredp-hide-details-propagate-flag t)
+    #     (toggle-diredp-find-file-reuse-dir 1))
+    # #+END_SRC
 
     Always copy and delete recursively withour prompting.
     #+BEGIN_SRC emacs-lisp
