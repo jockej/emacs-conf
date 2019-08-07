@@ -50,20 +50,19 @@
       (require 'package)
       (setq package-enable-at-startup nil)
       (setq package-archives
-            '(("melpa" . "http://melpa.org/packages/")
-              ("gnu" . "http://elpa.gnu.org/packages/")
-              ("org" . "http://orgmode.org/elpa/")
-              ;; ("marmalade" . "http://marmalade-repo.org/packages/")
-              ))
-      (package-initialize)
+	    '(("melpa" . "http://melpa.org/packages/")
+	      ("gnu" . "http://elpa.gnu.org/packages/")
+	      ("org" . "http://orgmode.org/elpa/")
+	      ;; ("marmalade" . "http://marmalade-repo.org/packages/")
+	      ))
 
       (unless (package-installed-p 'use-package)
-        (package-refresh-contents)
-        (package-install 'use-package))
+	(package-refresh-contents)
+	(package-install 'use-package))
 
       (eval-when-compile
-        (require 'use-package))
-      (require 'diminish)
+	(require 'use-package))
+      ;(require 'diminish)
       (require 'bind-key)
     #+END_SRC
 
