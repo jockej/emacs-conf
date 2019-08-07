@@ -92,35 +92,35 @@
 This make sure all the packages listed in the above list get installed upon
 startup.
 FIXME: move to a pure =use-package= based solution.
-    #+BEGIN_SRC emacs-lisp
-      (defun ensure-packages-package-installed-p (p)
-        (cond ((package-installed-p p) t)
-              (t nil)))
+    # #+BEGIN_SRC emacs-lisp
+    #   (defun ensure-packages-package-installed-p (p)
+    #     (cond ((package-installed-p p) t)
+    #           (t nil)))
 
-      (defun ensure-packages-installed-p ()
-        (mapcar 'ensure-packages-package-installed-p ensure-packages))
+    #   (defun ensure-packages-installed-p ()
+    #     (mapcar 'ensure-packages-package-installed-p ensure-packages))
 
-      (defun ensure-packages-install-missing ()
-        (interactive)
-        (unless (every 'identity (ensure-packages-installed-p))
-                                              ; check for new packages (package versions)
-          (message "%s" "Emacs is now refreshing its package database...")
-          (package-refresh-contents)
-          (message "%s" " done.")
-                                              ; install the missing packages
-          (dolist (p ensure-packages)
-            (when (not (package-installed-p p))
-              (package-install p)))))
-    #+END_SRC
+    #   (defun ensure-packages-install-missing ()
+    #     (interactive)
+    #     (unless (every 'identity (ensure-packages-installed-p))
+    #                                           ; check for new packages (package versions)
+    #       (message "%s" "Emacs is now refreshing its package database...")
+    #       (package-refresh-contents)
+    #       (message "%s" " done.")
+    #                                           ; install the missing packages
+    #       (dolist (p ensure-packages)
+    #         (when (not (package-installed-p p))
+    #           (package-install p)))))
+    # #+END_SRC
 
-    I have to do this this way it seems, I'm not sure why but just setting
-    =url-proxy-services= to nil doens't work. I know now. Emacs is broken with
-    proxies, but this will be fixed in Emacs 26. I run from master, and
-    everthing works now!
-    #+BEGIN_SRC emacs-lisp
-      (let ((url-proxy-services))
-        (ensure-packages-install-missing))
-    #+END_SRC
+    # I have to do this this way it seems, I'm not sure why but just setting
+    # =url-proxy-services= to nil doens't work. I know now. Emacs is broken with
+    # proxies, but this will be fixed in Emacs 26. I run from master, and
+    # everthing works now!
+    # #+BEGIN_SRC emacs-lisp
+    #   (let ((url-proxy-services))
+    #     (ensure-packages-install-missing))
+    # #+END_SRC
 
 ** General
    This is stuff that is relatively general and applies to no particular modes.
