@@ -1687,14 +1687,14 @@ it's something.
        (add-to-list 'c++-font-lock-extra-types "auto")
      #+END_SRC
 
-     #+BEGIN_SRC emacs-lisp
-       (use-package rtags
-         :config
-         (require 'company)
-         (require 'company-rtags)
-         (add-to-list 'company-backends 'company-rtags)
-         (rtags-enable-standard-keybindings))
-     #+END_SRC
+     # #+BEGIN_SRC emacs-lisp
+     #   (use-package rtags
+     #     :config
+     #     (require 'company)
+     #     (require 'company-rtags)
+     #     (add-to-list 'company-backends 'company-rtags)
+     #     (rtags-enable-standard-keybindings))
+     # #+END_SRC
 
      #+BEGIN_SRC emacs-lisp
        ;; (use-package irony
