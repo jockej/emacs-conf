@@ -923,7 +923,6 @@ in solarized dark colors. It is so awesome I could cry...
       (setq reftex-plug-into-AUCTeX t)
       (setq TeX-view-program-selection '((output-pdf "zathura")))
       (require 'company-auctex)
-      (require 'company-math)
 
       (defun jj-latex-hook ()
         "My hook for latex mode"
