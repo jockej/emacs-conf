@@ -2126,61 +2126,6 @@ First thing's first. I like my org files non-indented.
   (setq org-adapt-indentation nil)
 #+END_SRC
 
-Some speed commands used in the hydra below.
-   #+BEGIN_SRC emacs-lisp
-     (setq org-use-speed-commands t)
-   #+END_SRC
-
-   A hydra to insert templates in an org file. I should probaly do this with the
-   builtins in org, but this will work for now.
-   #+BEGIN_SRC emacs-lisp
-     (defun hot-expand (str)
-       "Expand org template."
-       (insert str)
-       (org-try-structure-completion))
-
-     (defhydra jj-hydra-org-template (:color blue :hint nil)
-       "
-     _a_scii      _e_macs-lisp  _h_tml   _s_rc
-     _A_SCII:     _E_xample     _H_TML:  _C_enter
-     _c_          _i_ndex:      _l_atex  _v_erse
-     c_p_lusplus  _I_NCLUDE:    _L_ATEX: _q_uote
-     "
-       ("s" (hot-expand "<s"))
-       ("E" (hot-expand "<e"))
-       ("q" (hot-expand "<q"))
-       ("v" (hot-expand "<v"))
-       ("C" (hot-expand "<c"))
-       ("l" (hot-expand "<l"))
-       ("h" (hot-expand "<h"))
-       ("a" (hot-expand "<a"))
-       ("L" (hot-expand "<L"))
-       ("i" (hot-expand "<i"))
-       ("e" (progn
-              (hot-expand "<s")
-              (insert "emacs-lisp")
-              (forward-line)))
-       ("p" (progn
-              (hot-expand "<s")
-              (insert "c++")
-              (forward-line)))
-       ("c" (progn
-              (hot-expand "<s")
-              (insert "c")
-              (forward-line)))
-       ("I" (hot-expand "<I"))
-       ("H" (hot-expand "<H"))
-       ("A" (hot-expand "<A"))
-       ("<" self-insert-command "ins")
-       ("o" nil "quit"))
-
-     (define-key org-mode-map "<"
-       (lambda () (interactive)
-         (if (looking-back "^")
-             (jj-hydra-org-template/body)
-           (self-insert-command 1))))
-   #+END_SRC
-
    This makes source code look beautiful in org.
    #+BEGIN_SRC emacs-lisp
      (setq org-src-fontify-natively t
