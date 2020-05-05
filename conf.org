@@ -1471,17 +1471,6 @@ Autocomplete, which sometimes works.
     :bind (:map company-active-map ("C-d" . company-show-doc-buffer)))
 #+END_SRC
 
-The Emacs semantic framework.
-#+BEGIN_SRC emacs-lisp
-  ;; (require 'semantic)
-  ;; (global-semanticdb-minor-mode 1)
-  ;; (semanticdb-enable-gnu-global-databases 'c-mode)
-  ;; (semanticdb-enable-gnu-global-databases 'c++-mode)
-  ;; (global-semantic-idle-scheduler-mode)
-  ;; (semantic-mode 1)
-  ;; (eval-after-load 'company '(add-to-list 'company-backends 'company-semantic))
-#+END_SRC
-
 Eldoc shows documentation in the minibuffer.
 #+BEGIN_SRC emacs-lisp
   (require 'eldoc)
