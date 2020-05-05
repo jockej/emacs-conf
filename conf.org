@@ -1619,6 +1619,7 @@ it's something.
          (setq magit-last-seen-setup-instructions "1.4.0"
                magit-push-always-verify nil
                magit-revert-buffers 'silent)
+         (add-hook 'git-commit-mode-hook (lambda () (setq fill-column 72)))
          :bind
          ("H-g" . magit-status))
      #+END_SRC
@@ -1649,11 +1650,9 @@ it's something.
 #+BEGIN_SRC emacs-lisp
   ;; (use-package ada-mode
   ;;   :config
-
-  (require 'ada-mode)
-  (setq-default ada-indent 2
-                ada-indent-broken 1
-                ada-indent-label 0)
+  ;;   (setq-default ada-indent 2
+  ;;                 ada-indent-broken 1
+  ;;                 ada-indent-label 0))
 #+END_SRC
 
 **** C/C++
