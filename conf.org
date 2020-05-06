@@ -1483,6 +1483,14 @@ figure I might want it for more stuff soon.
   (require 'yasnippet)
 #+END_SRC
 
+=eglot= is a LSP client.
+#+BEGIN_SRC emacs-lisp
+  (use-package eglot
+    :hook
+    (c-mode . eglot-ensure)
+    (c++-mode . eglot-ensure))
+#+END_SRC
+
 *** Navigation
 
 =gxref= is a xref-backend which utilizes =GNU global=. I use it for most modes
