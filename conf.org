@@ -1471,17 +1471,6 @@ Autocomplete, which sometimes works.
     :bind (:map company-active-map ("C-d" . company-show-doc-buffer)))
 #+END_SRC
 
-The Emacs semantic framework.
-#+BEGIN_SRC emacs-lisp
-  ;; (require 'semantic)
-  ;; (global-semanticdb-minor-mode 1)
-  ;; (semanticdb-enable-gnu-global-databases 'c-mode)
-  ;; (semanticdb-enable-gnu-global-databases 'c++-mode)
-  ;; (global-semantic-idle-scheduler-mode)
-  ;; (semantic-mode 1)
-  ;; (eval-after-load 'company '(add-to-list 'company-backends 'company-semantic))
-#+END_SRC
-
 Eldoc shows documentation in the minibuffer.
 #+BEGIN_SRC emacs-lisp
   (require 'eldoc)
@@ -1492,6 +1481,14 @@ Yasnippet is a snippet framework. Currently I only use it with irony-mode, but I
 figure I might want it for more stuff soon.
 #+BEGIN_SRC emacs-lisp
   (require 'yasnippet)
+#+END_SRC
+
+=eglot= is a LSP client.
+#+BEGIN_SRC emacs-lisp
+  (use-package eglot
+    :hook
+    (c-mode . eglot-ensure)
+    (c++-mode . eglot-ensure))
 #+END_SRC
 
 *** Navigation
@@ -1619,6 +1616,7 @@ it's something.
          (setq magit-last-seen-setup-instructions "1.4.0"
                magit-push-always-verify nil
                magit-revert-buffers 'silent)
+         (add-hook 'git-commit-mode-hook (lambda () (setq fill-column 72)))
          :bind
          ("H-g" . magit-status))
      #+END_SRC
@@ -1686,37 +1684,9 @@ it's something.
        (add-to-list 'c++-font-lock-extra-types "auto")
      #+END_SRC
 
-     # #+BEGIN_SRC emacs-lisp
-     #   (use-package rtags
-     #     :config
-     #     (require 'company)
-     #     (require 'company-rtags)
-     #     (add-to-list 'company-backends 'company-rtags)
-     #     (rtags-enable-standard-keybindings))
-     # #+END_SRC
-
-     #+BEGIN_SRC emacs-lisp
-       ;; (use-package irony
-       ;;   :config
-       ;;   (add-hook 'c-mode-hook 'irony-mode)
-       ;;   (add-hook 'c++-mode-hook 'irony-mode))
-
-       ;; (use-package company-irony
-       ;;   :config
-       ;;   (require 'company)
-       ;;   (add-to-list 'company-backends 'company-irony))
-     #+END_SRC
-
      This warns for suspicious constructs.
      #+BEGIN_SRC emacs-lisp
        (global-cwarn-mode)
-     #+END_SRC
-
-     Irony is a completion engine powered by libclang.
-     #+BEGIN_SRC emacs-lisp
-       (use-package company-c-headers
-         :config
-         (add-to-list 'company-backends 'company-c-headers))
      #+END_SRC
 
      Seriously, who indents ~namespace~ or ~extern~ declarations? That's retarded.
@@ -2137,61 +2107,6 @@ First thing's first. I like my org files non-indented.
 #+BEGIN_SRC emacs-lisp
   (setq org-adapt-indentation nil)
 #+END_SRC
-
-Some speed commands used in the hydra below.
-   #+BEGIN_SRC emacs-lisp
-     (setq org-use-speed-commands t)
-   #+END_SRC
-
-   A hydra to insert templates in an org file. I should probaly do this with the
-   builtins in org, but this will work for now.
-   #+BEGIN_SRC emacs-lisp
-     (defun hot-expand (str)
-       "Expand org template."
-       (insert str)
-       (org-try-structure-completion))
-
-     (defhydra jj-hydra-org-template (:color blue :hint nil)
-       "
-     _a_scii      _e_macs-lisp  _h_tml   _s_rc
-     _A_SCII:     _E_xample     _H_TML:  _C_enter
-     _c_          _i_ndex:      _l_atex  _v_erse
-     c_p_lusplus  _I_NCLUDE:    _L_ATEX: _q_uote
-     "
-       ("s" (hot-expand "<s"))
-       ("E" (hot-expand "<e"))
-       ("q" (hot-expand "<q"))
-       ("v" (hot-expand "<v"))
-       ("C" (hot-expand "<c"))
-       ("l" (hot-expand "<l"))
-       ("h" (hot-expand "<h"))
-       ("a" (hot-expand "<a"))
-       ("L" (hot-expand "<L"))
-       ("i" (hot-expand "<i"))
-       ("e" (progn
-              (hot-expand "<s")
-              (insert "emacs-lisp")
-              (forward-line)))
-       ("p" (progn
-              (hot-expand "<s")
-              (insert "c++")
-              (forward-line)))
-       ("c" (progn
-              (hot-expand "<s")
-              (insert "c")
-              (forward-line)))
-       ("I" (hot-expand "<I"))
-       ("H" (hot-expand "<H"))
-       ("A" (hot-expand "<A"))
-       ("<" self-insert-command "ins")
-       ("o" nil "quit"))
-
-     (define-key org-mode-map "<"
-       (lambda () (interactive)
-         (if (looking-back "^")
-             (jj-hydra-org-template/body)
-           (self-insert-command 1))))
-   #+END_SRC
 
    This makes source code look beautiful in org.
    #+BEGIN_SRC emacs-lisp
