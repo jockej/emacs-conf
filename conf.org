@@ -912,7 +912,7 @@ in solarized dark colors. It is so awesome I could cry...
 *** Latex
 
     #+BEGIN_SRC emacs-lisp
-      (require 'tex-site)
+      ;(require 'tex-site)
       (setq TeX-auto-save t)
       (setq TeX-parse-self t)
       (setq TeX-PDF-mode t)
@@ -1650,10 +1650,10 @@ it's something.
   ;; (use-package ada-mode
   ;;   :config
 
-  (require 'ada-mode)
-  (setq-default ada-indent 2
-                ada-indent-broken 1
-                ada-indent-label 0)
+  ;; (require 'ada-mode)
+  ;; (setq-default ada-indent 2
+  ;;               ada-indent-broken 1
+  ;;               ada-indent-label 0)
 #+END_SRC
 
 **** C/C++
