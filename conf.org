@@ -1682,37 +1682,9 @@ it's something.
        (add-to-list 'c++-font-lock-extra-types "auto")
      #+END_SRC
 
-     # #+BEGIN_SRC emacs-lisp
-     #   (use-package rtags
-     #     :config
-     #     (require 'company)
-     #     (require 'company-rtags)
-     #     (add-to-list 'company-backends 'company-rtags)
-     #     (rtags-enable-standard-keybindings))
-     # #+END_SRC
-
-     #+BEGIN_SRC emacs-lisp
-       ;; (use-package irony
-       ;;   :config
-       ;;   (add-hook 'c-mode-hook 'irony-mode)
-       ;;   (add-hook 'c++-mode-hook 'irony-mode))
-
-       ;; (use-package company-irony
-       ;;   :config
-       ;;   (require 'company)
-       ;;   (add-to-list 'company-backends 'company-irony))
-     #+END_SRC
-
      This warns for suspicious constructs.
      #+BEGIN_SRC emacs-lisp
        (global-cwarn-mode)
-     #+END_SRC
-
-     Irony is a completion engine powered by libclang.
-     #+BEGIN_SRC emacs-lisp
-       (use-package company-c-headers
-         :config
-         (add-to-list 'company-backends 'company-c-headers))
      #+END_SRC
 
      Seriously, who indents ~namespace~ or ~extern~ declarations? That's retarded.
