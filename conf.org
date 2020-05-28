@@ -1486,7 +1486,9 @@ Eldoc shows documentation in the minibuffer.
 Yasnippet is a snippet framework. Currently I only use it with irony-mode, but I
 figure I might want it for more stuff soon.
 #+BEGIN_SRC emacs-lisp
-  (require 'yasnippet)
+  (use-package yasnippet
+    :config
+    (setq yas-snippet-dirs '("~/.emacsconf/snippets"))
 #+END_SRC
 
 =eglot= is a LSP client.
