@@ -169,7 +169,8 @@ FIXME: move to a pure =use-package= based solution.
       (use-package projectile
         :config
         (projectile-global-mode)
-        (setq projectile-enable-caching t))
+        (setq projectile-enable-caching t)
+        (setq projectile-mode-line-prefix "P"))
     #+END_SRC
 
     A function to shutdown the server.
