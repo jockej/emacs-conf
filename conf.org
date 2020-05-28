@@ -1488,7 +1488,7 @@ figure I might want it for more stuff soon.
 #+BEGIN_SRC emacs-lisp
   (use-package yasnippet
     :config
-    (setq yas-snippet-dirs '("~/.emacsconf/snippets"))
+    (setq yas-snippet-dirs '("~/.emacsconf/snippets")))
 #+END_SRC
 
 =eglot= is a LSP client.
