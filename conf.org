@@ -1461,6 +1461,11 @@ care of that.
       (use-package lice)
     #+END_SRC
 
+Add this so that files like ~Makefile.include~ is opened in the right mode.
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'auto-mode-alist '("[Mm]akefile\\." . makefile-mode))
+#+END_SRC
+
 *** Code helpers
 
 Autocomplete, which sometimes works.
