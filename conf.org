@@ -1991,10 +1991,13 @@ use the built in version.
    Highlight the current line, but not in the terminal. This code looks like shit,
    and I can't remember why it ended up like this... but it works...
    #+BEGIN_SRC emacs-lisp
+     (defun jj-turn-off-global-hl-line-mode ()
+       (setq-local global-hl-line-mode nil))
+
      (global-hl-line-mode t)
-     (global-hl-line-mode)
      (make-variable-buffer-local 'global-hl-line-mode)
-     (add-hook 'term-mode-hook (lambda () (setq global-hl-line-mode nil)))
+     (add-hook 'term-mode-hook 'jj-turn-off-global-hl-line-mode)
+     (add-hook 'vterm-mode-hook 'jj-turn-off-global-hl-line-mode)
    #+END_SRC
 
    Show parenthesis.
